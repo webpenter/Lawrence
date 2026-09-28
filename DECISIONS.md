@@ -162,3 +162,38 @@ listings, requirements, activity or enquiries; ownership cannot be spoofed; a me
 promote their own status; MemberActivity is server-write-only; members-only media returns nothing
 to anonymous queries; MEMBER_REQUIRE_APPROVAL routes to pending. Bundle budgets green;
 /api/health ok; /en and /en/markets render 200.
+
+## 2026-09-28 — Phase 5: the access layer (§8.1–8.3)
+
+**Decision**: Visibility is now decided in exactly three places, all in `/src/lib/access`:
+`viewer.ts` (the §8.1 Viewer union — anonymous/member/staff/agency — with `viewerFromUser` mapping
+Payload sessions onto it), `can-see.ts` (§8.2 verbatim, plus the published-version and
+negative-moderation guards), and `projections.ts` (the §8.3 allowlist table). Every
+listing-returning function in `/src/lib/db` now takes an explicit `Viewer` as its first argument —
+forgetting it is a compile error — and runs `projectProperty` before anything leaves the data
+layer. Public pages pass the `ANONYMOUS` constant (they are SSG); member surfaces resolve a real
+viewer in Prompt 9.
+
+Interpretations logged (the §8.3 table rows that needed one):
+- **Member-only assets on PUBLIC listings**: granted to active members (the §11.3 "12 further
+  images are available to members" line is the anonymous teaser, replaced by the real gallery for
+  members). Documents/floor plans, running costs, ownership structure likewise member+staff.
+- **A pending/suspended member is the anonymous audience** for projections, matching §8.2 where
+  only active members open anything.
+- **publicGeography granularity** omits finer levels for anonymous visitors (region → no
+  locality/province) while members always get the locality line; exact pins appear publicly only
+  when coordinatePrecision=exact (§4.8), approximate_500m jitters deterministically,
+  locality_only ships no point.
+- **The allowlist is generative**: unknown fields are invisible even to staff until added to the
+  table — the test suite asserts this.
+
+**audit:exposure** (`src/scripts/audit-exposure.ts`): plants canary content (a published
+off-market listing plus a public on-request listing, both carrying unique marker strings for
+addressLine, internalValueEur, commissionTerms and the hidden price), crawls every public route +
+the sitemap tree as an anonymous visitor, and fails on any marker hit. It boots `pnpm dev` itself
+when BASE_URL is not reachable, and cleans its canaries up. Wired into `audit:all` and the CI e2e
+job — required before every merge.
+
+**Gate evidence**: audit:exposure passes against the live stack (zero leaks). 300/300 tests green,
+including 27 table-driven canSee cases and 13 projection tests covering every §8.3 row. Bundle
+budgets unchanged and green.

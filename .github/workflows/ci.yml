@@ -136,6 +136,9 @@ jobs:
         env:
           WL_DB_E2E: '1'
 
+      - name: Exposure audit (§8.2 — required before every merge)
+        run: pnpm audit:exposure
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

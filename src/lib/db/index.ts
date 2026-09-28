@@ -5,11 +5,21 @@ import type { Property } from '@/payload-types';
 import { isTypesenseHealthy, searchWithTypesense, type SearchResult } from '@/lib/search/client';
 import { toSearchDocument } from '@/lib/search/document';
 
+import { projectProperty } from '@/lib/access/projections';
+import type { Viewer } from '@/lib/access/viewer';
+
 import { filtersToWhere, publicPredicate, sortToPayload, type PropertyFilters } from './filters';
-import { sanitizePropertyForPublic } from './sanitize';
 
 // The ONLY place that touches the database (CLAUDE.md rule 2).
-// Every public read applies publicPredicate() and §6.6 privacy sanitization.
+// Every listing-returning function takes an EXPLICIT Viewer (§8.1) and runs
+// the §8.3 allowlist projection before anything leaves the data layer.
+// The projected shape is a strict subset of Property, typed as Property for
+// the render layer's convenience — fields outside the viewer's audience
+// column simply do not exist on the returned object.
+
+function projected(viewer: Viewer, doc: Property): Property {
+  return projectProperty(viewer, doc as unknown as Record<string, unknown>) as unknown as Property;
+}
 
 export type Locale = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ru';
 
@@ -46,6 +56,7 @@ export async function getPayloadClient(): Promise<Payload> {
 }
 
 export async function getPropertyBySlug(
+  viewer: Viewer,
   slug: string,
   locale: Locale = 'en',
 ): Promise<Property | null> {
@@ -58,7 +69,7 @@ export async function getPropertyBySlug(
     limit: 1,
   });
   const doc = res.docs[0];
-  return doc ? sanitizePropertyForPublic(doc) : null;
+  return doc ? projected(viewer, doc) : null;
 }
 
 /**
@@ -67,6 +78,7 @@ export async function getPropertyBySlug(
  * listings have no slug and can never match; unpublished docs stay invisible.
  */
 export async function getPropertyForDetail(
+  viewer: Viewer,
   slug: string,
   locale: Locale = 'en',
 ): Promise<Property | null> {
@@ -87,7 +99,7 @@ export async function getPropertyForDetail(
     limit: 1,
   });
   const doc = res.docs[0];
-  return doc ? sanitizePropertyForPublic(doc) : null;
+  return doc ? projected(viewer, doc) : null;
 }
 
 /** All public slugs, for generateStaticParams. Safe: empty when the DB is unreachable. */
@@ -107,7 +119,11 @@ export async function getPublicSlugs(limit = 500): Promise<string[]> {
   }
 }
 
-export async function getFeatured(limit = 6, locale: Locale = 'en'): Promise<Property[]> {
+export async function getFeatured(
+  viewer: Viewer,
+  limit = 6,
+  locale: Locale = 'en',
+): Promise<Property[]> {
   const payload = await getPayloadClient();
   const res = await payload.find({
     collection: 'properties',
@@ -117,10 +133,11 @@ export async function getFeatured(limit = 6, locale: Locale = 'en'): Promise<Pro
     limit,
     sort: '-publishedAt',
   });
-  return res.docs.map(sanitizePropertyForPublic);
+  return res.docs.map((doc) => projected(viewer, doc));
 }
 
 export async function getSimilar(
+  viewer: Viewer,
   property: Property,
   limit = 3,
   locale: Locale = 'en',
@@ -148,7 +165,7 @@ export async function getSimilar(
     limit,
     sort: '-publishedAt',
   });
-  return res.docs.map(sanitizePropertyForPublic);
+  return res.docs.map((doc) => projected(viewer, doc));
 }
 
 export interface SearchDeps {
@@ -162,6 +179,15 @@ export interface SearchDeps {
  * not (spec Prompt 5 acceptance: killing Typesense still returns results).
  */
 export async function searchProperties(
+  viewer: Viewer,
+  filters: PropertyFilters,
+  deps: SearchDeps = {},
+): Promise<SearchResult> {
+  void viewer; // public search serves the anonymous projection by design (§7.1)
+  return searchPropertiesWithDeps(filters, deps);
+}
+
+async function searchPropertiesWithDeps(
   filters: PropertyFilters,
   deps: SearchDeps = {},
 ): Promise<SearchResult> {
@@ -195,7 +221,6 @@ export async function searchPropertiesPostgres(
   });
   return {
     hits: res.docs
-      .map(sanitizePropertyForPublic)
       .map((doc) => toSearchDocument(doc) as SearchResult['hits'][number]),
     total: res.totalDocs,
     page,

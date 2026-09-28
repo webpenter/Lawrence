@@ -1,3 +1,4 @@
+import { ANONYMOUS } from '@/lib/access/viewer';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
@@ -40,7 +41,7 @@ export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
 async function loadProperty(slug: string, locale: string): Promise<Property | null> {
   try {
     // Database answered: its verdict is final — unknown slugs 404.
-    return await getPropertyForDetail(slug, locale as Locale);
+    return await getPropertyForDetail(ANONYMOUS, slug, locale as Locale);
   } catch (err) {
     console.warn('[property-page] load failed:', err);
     // DB-error path only, demo mode only, exact slug only (§13.12).

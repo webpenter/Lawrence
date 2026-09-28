@@ -1,3 +1,4 @@
+import { ANONYMOUS } from '@/lib/access/viewer';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { SiteFooter } from '@/components/layout/SiteFooter';
@@ -21,7 +22,7 @@ import {
 async function safeFeatured(locale: Locale): Promise<Property[]> {
   try {
     // The database answered — an empty featured list is a legitimate state.
-    return await getFeatured(6, locale);
+    return await getFeatured(ANONYMOUS, 6, locale);
   } catch {
     return sampleFallbackEnabled() ? FALLBACK_FEATURED : [];
   }

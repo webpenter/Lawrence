@@ -1,3 +1,4 @@
+import { ANONYMOUS } from '@/lib/access/viewer';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { getPropertyForDetail, type Locale } from '@/lib/db';
@@ -30,7 +31,7 @@ export async function GET(
 
   let property: Property | null;
   try {
-    property = await getPropertyForDetail(slug, locale as Locale);
+    property = await getPropertyForDetail(ANONYMOUS, slug, locale as Locale);
   } catch (err) {
     console.warn('[brochure] load failed:', err);
     property = sampleFallbackEnabled() ? findFallbackProperty(slug) : null;

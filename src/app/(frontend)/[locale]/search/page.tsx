@@ -1,3 +1,4 @@
+import { ANONYMOUS } from '@/lib/access/viewer';
 import type { Metadata } from 'next';
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
 
@@ -44,7 +45,7 @@ async function safeSearch(filters: PropertyFilters): Promise<SearchResult> {
   try {
     // The engine answered: its result is final — a legitimate zero keeps the
     // computed empty state working (§11.3).
-    return await searchProperties(filters);
+    return await searchProperties(ANONYMOUS, filters);
   } catch (err) {
     console.warn('[search-page] search unavailable:', err);
     // DB-error path only, demo mode only — and the demo honours the filters.

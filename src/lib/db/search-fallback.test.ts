@@ -1,3 +1,4 @@
+import { ANONYMOUS } from '@/lib/access/viewer';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { SearchResult } from '@/lib/search/client';
@@ -18,6 +19,7 @@ const typesenseResult: SearchResult = { ...postgresResult, engine: 'typesense' }
 describe('searchProperties engine selection', () => {
   it('uses Typesense when healthy', async () => {
     const result = await searchProperties(
+      ANONYMOUS,
       {},
       {
         healthy: async () => true,
@@ -31,6 +33,7 @@ describe('searchProperties engine selection', () => {
   it('falls back to Postgres when Typesense is unreachable', async () => {
     const typesense = vi.fn();
     const result = await searchProperties(
+      ANONYMOUS,
       {},
       {
         healthy: async () => false,
@@ -44,6 +47,7 @@ describe('searchProperties engine selection', () => {
 
   it('falls back to Postgres when Typesense dies mid-query', async () => {
     const result = await searchProperties(
+      ANONYMOUS,
       {},
       {
         healthy: async () => true,

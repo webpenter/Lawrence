@@ -1,3 +1,4 @@
+import { ANONYMOUS } from '@/lib/access/viewer';
 import { ImageResponse } from 'next/og';
 
 import { brand } from '@/config/brand';
@@ -21,7 +22,7 @@ export async function GET(
   let subtitle = brand.domain;
   let credential = '';
   try {
-    const property = await getPropertyBySlug(slug);
+    const property = await getPropertyBySlug(ANONYMOUS, slug);
     if (property) {
       title = property.title;
       subtitle = [property.location?.locality, property.location?.region]
