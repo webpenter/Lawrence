@@ -33,48 +33,22 @@ async function buildPills(params: SearchParams): Promise<Pill[]> {
       case 'water':
       case 'access':
       case 'type':
-      case 'orientation':
-      case 'beach':
+      case 'tier':
+      case 'features':
       case 'tenure':
         pills.push({
           label: value.split(',').map(humanizeEnum).join(' · '),
           removes: [param],
         });
         break;
-      case 'boatLoa': {
-        const draft = firstValue(params, 'draft');
-        pills.push({
-          label: draft
-            ? t('filterFitsBoatDraft', { loa: value, draft })
-            : t('filterFitsBoat', { loa: value }),
-          removes: ['boatLoa', 'draft', 'beam'],
-          key: true,
-        });
-        seen.add('draft');
-        seen.add('beam');
-        break;
-      }
-      case 'draft':
-      case 'beam':
+      case 'waterfront':
         if (!seen.has(param)) {
-          pills.push({
-            label: t('filterFitsBoatDraft', { loa: '—', draft: value }),
-            removes: ['boatLoa', 'draft', 'beam'],
-            key: true,
-          });
-          seen.add('boatLoa');
-          seen.add('draft');
-          seen.add('beam');
+          pills.push({ label: t('fieldWater'), removes: [param] });
+          seen.add(param);
         }
         break;
       case 'minFrontage':
         pills.push({ label: t('filterMinFrontage', { m: value }), removes: [param], key: true });
-        break;
-      case 'openSea':
-        pills.push({ label: t('filterOpenSea'), removes: [param] });
-        break;
-      case 'noBridges':
-        pills.push({ label: t('filterNoBridges'), removes: [param] });
         break;
       case 'beds':
         pills.push({ label: t('filterBedsMin', { n: value }), removes: [param] });

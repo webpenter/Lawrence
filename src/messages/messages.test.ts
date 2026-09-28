@@ -26,11 +26,18 @@ describe('message files (Prompt 6)', () => {
     }
   });
 
-  it('en.json carries the §11 copy deck anchors verbatim', () => {
-    expect(en.home.heroTitle).toBe('Property where the water begins.');
-    expect(en.home.boatStripTitle).toBe('Will it fit?');
-    expect(en.listing.waterCredentialsTitle).toBe('Water credentials');
-    expect(en.listing.nauticalTitle).toBe('Berth & navigation');
+  it('en.json carries the §12 copy deck anchors verbatim', () => {
+    expect(en.home.heroTitle).toBe('Exceptional property, openly and otherwise.');
+    expect(en.home.offMarketLabel).toBe('Held off-market');
+    expect(en.home.offMarketCta).toBe('Create an account');
+    expect(en.listing.offMarketNotice).toBe(
+      'This property is not publicly marketed. Please treat the details as confidential.',
+    );
+    expect(en.join.title).toBe('Create an account');
+    expect(en.join.confirmSubject).toBe('Confirm your email to open the off-market collection');
+    expect(en.listing.disclaimer).toBe(
+      'Details are provided by the listing agent. Measurements, boundaries, structures and availability are indicative and must be verified independently before any transaction.',
+    );
     expect(en.common.priceOnRequest).toBe('Price on request');
   });
 

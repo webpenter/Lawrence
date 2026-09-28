@@ -35,7 +35,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     meta: {
-      titleSuffix: '- WATERLINE Backoffice',
+      titleSuffix: '- Lawrence Backoffice',
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -79,7 +79,7 @@ export default buildConfig({
     pool: {
       connectionString:
         process.env['DATABASE_URL'] ||
-        'postgresql://postgres:waterline_dev_password@localhost:5432/waterline',
+        'postgresql://postgres:lawrence_dev_password@localhost:5432/lawrence',
       // Generous connect timeout: a cold Vercel serverless function dialing a
       // cross-region Supabase pooler can take several seconds. 3s (a sandbox
       // fail-fast value) was exceeded on cold connects, so getPropertyForDetail

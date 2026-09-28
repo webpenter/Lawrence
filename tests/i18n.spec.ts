@@ -30,18 +30,18 @@ test('every page emits hreflang for all locales plus x-default', async ({ page }
 });
 
 test('locale switcher preserves path and query', async ({ page }) => {
-  await page.goto('/en?boatLoa=24');
+  await page.goto('/en?tier=trophy');
   await page.getByLabel('Language').selectOption('it');
-  await page.waitForURL('**/it?boatLoa=24');
+  await page.waitForURL('**/it?tier=trophy');
   expect(new URL(page.url()).pathname).toBe('/it');
-  expect(new URL(page.url()).search).toBe('?boatLoa=24');
+  expect(new URL(page.url()).search).toBe('?tier=trophy');
 });
 
 test('a locale page renders the copy-deck hero and sets the html lang', async ({ page }) => {
   await page.goto('/en');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Property where the water begins.',
+    'Exceptional property, openly and otherwise.',
   );
   await page.goto('/it');
   await expect(page.locator('html')).toHaveAttribute('lang', 'it');

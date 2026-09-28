@@ -64,7 +64,7 @@ test('pages carry OG/Twitter cards from the metadata helper', async ({ page }) =
   await page.goto('/en');
   await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute(
     'content',
-    'WATERLINE',
+    'Lawrence Private Collection',
   );
   await expect(page.locator('meta[name="twitter:card"]').first()).toHaveCount(1);
 });

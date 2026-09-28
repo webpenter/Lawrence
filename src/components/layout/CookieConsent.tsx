@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-export const CONSENT_COOKIE = 'wl_consent';
+export const CONSENT_COOKIE = 'lpc_consent';
 
 interface CookieConsentLabels {
   title: string;

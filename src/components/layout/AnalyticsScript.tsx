@@ -13,7 +13,7 @@ export function AnalyticsScript() {
   const domain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
   if (!domain) return null;
 
-  const loader = `(function(){try{var m=document.cookie.match(/(?:^|; )wl_consent=([^;]*)/);if(!m)return;var c=JSON.parse(decodeURIComponent(m[1]));if(!c.analytics)return;var s=document.createElement('script');s.defer=true;s.dataset.domain=${JSON.stringify(domain)};s.src='https://plausible.io/js/script.tagged-events.js';document.head.appendChild(s);}catch(e){}})();`;
+  const loader = `(function(){try{var m=document.cookie.match(/(?:^|; )lpc_consent=([^;]*)/);if(!m)return;var c=JSON.parse(decodeURIComponent(m[1]));if(!c.analytics)return;var s=document.createElement('script');s.defer=true;s.dataset.domain=${JSON.stringify(domain)};s.src='https://plausible.io/js/script.tagged-events.js';document.head.appendChild(s);}catch(e){}})();`;
 
   return <script dangerouslySetInnerHTML={{ __html: loader }} />;
 }

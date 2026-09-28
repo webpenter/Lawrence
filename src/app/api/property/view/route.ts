@@ -8,7 +8,7 @@ import { getPayloadClient } from '@/lib/db';
 // short-circuiting every heavy Property hook via context.viewBeacon.
 
 const schema = z.object({ id: z.number().int().positive() });
-const COOKIE = 'wl_seen';
+const COOKIE = 'lpc_seen';
 const MAX_TRACKED = 50;
 
 export async function POST(request: NextRequest): Promise<NextResponse> {

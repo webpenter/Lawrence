@@ -32,7 +32,6 @@ export interface BrochureLabels {
   labelAccess: string;
   labelFrontage: string;
   labelDistanceToWater: string;
-  labelOrientation: string;
   labelMooring: string;
   labelMaxBoatLength: string;
   labelDepthAtBerth: string;
@@ -66,7 +65,6 @@ export function brochureLabels(locale: string): BrochureLabels {
     labelAccess: l('labelAccess'),
     labelFrontage: l('labelFrontage'),
     labelDistanceToWater: l('labelDistanceToWater'),
-    labelOrientation: l('labelOrientation'),
     labelMooring: l('labelMooring'),
     labelMaxBoatLength: l('labelMaxBoatLength'),
     labelDepthAtBerth: l('labelDepthAtBerth'),

@@ -122,7 +122,6 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     { value: 'newest', label: t('sortNewest') },
     { value: 'price_asc', label: t('sortPriceAsc') },
     { value: 'price_desc', label: t('sortPriceDesc') },
-    { value: 'frontage_desc', label: t('sortFrontageDesc') },
   ];
 
   return (

@@ -224,3 +224,28 @@ jitters deterministically 100–1100 m, locality_only ships no point, exact only
 permitted), integration (the indexed member_listings document and the Postgres fallback hit both
 carry jittered points and no addressLine/internalValueEur), and the Phase 5 audit:exposure crawl.
 313/313 tests green; budgets green.
+
+## 2026-09-28 — Phase 7: localization — the §12 copy deck in six locales
+
+**Decision**: The §12 copy deck is in `src/messages/en.json` verbatim (hero H1/sub/actions,
+off-market panel, how-it-works, listing notices and member-extras teaser, the §12.3 account
+creation strings, the §12.6 legal disclaimer), with new `offMarket`, `join` and `account`
+namespaces ready for Prompts 8–9 to consume. The five translations (it/fr/de/es/ru) were
+re-written in full to the Lawrence register (formal address — Lei/vous/Sie/usted/вы; "the desk"
+rendered as il desk/le desk/der Desk/el desk/деск). A conformance test enforces exact key-shape
+parity across all six files and pins the §12 anchor strings, so a drifting translation or a
+deleted key fails the suite.
+
+- 30 dead Waterline keys removed (boat strip, water credential labels, frontage sort) together
+  with their last code references (FilterPills boat branches, the frontage sort option, the
+  brochure orientation label).
+- Cookie prefix `wl_` → `lpc_` (consent, currency, units, view-dedupe) — a rename is free before
+  launch and wrong after it.
+- The switchers already derive from the §6.2 currency enum, so HKD arrived with Phase 3; the
+  infrastructure (next-intl routing, `/` uncached 302 detect, hreflang helper with x-default,
+  Payload field localization) was inherited and verified rather than rebuilt.
+
+**Gate evidence**: the six-test i18n Playwright suite passes live (302 detect honouring
+Accept-Language, hreflang set on every page, the switcher preserving path and query, the §12 hero
+rendering under the right html lang, unknown locales 404). ESLint's no-literal-strings rule plus
+a clean lint run covers "no hardcoded user-facing strings". 313/313 unit/int tests; budgets green.

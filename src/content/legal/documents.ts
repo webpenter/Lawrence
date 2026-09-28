@@ -75,8 +75,8 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
       {
         heading: 'Cookies we set',
         paragraphs: [
-          'wl_consent — records your cookie decision itself (necessary; kept for one year).',
-          'wl_currency and wl_units — remember your display currency and measurement units (necessary for the preference you chose; kept for one year).',
+          'lpc_consent — records your cookie decision itself (necessary; kept for one year).',
+          'lpc_currency and lpc_units — remember your display currency and measurement units (necessary for the preference you chose; kept for one year).',
           'Payload session cookies — set only when an agency or editor signs in to the backoffice; never set for visitors.',
         ],
       },

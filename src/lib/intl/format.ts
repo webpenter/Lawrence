@@ -8,8 +8,8 @@ export type UnitSystem = 'metric' | 'imperial';
 export const DEFAULT_CURRENCY: Currency = 'EUR';
 export const DEFAULT_UNITS: UnitSystem = 'metric';
 
-export const CURRENCY_COOKIE = 'wl_currency';
-export const UNITS_COOKIE = 'wl_units';
+export const CURRENCY_COOKIE = 'lpc_currency';
+export const UNITS_COOKIE = 'lpc_units';
 
 export function isCurrency(value: unknown): value is Currency {
   return CURRENCIES.includes(value as Currency);
