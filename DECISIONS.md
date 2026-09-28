@@ -249,3 +249,45 @@ deleted key fails the suite.
 Accept-Language, hreflang set on every page, the switcher preserving path and query, the §12 hero
 rendering under the right html lang, unknown locales 404). ESLint's no-literal-strings rule plus
 a clean lint run covers "no hardcoded user-facing strings". 313/313 unit/int tests; budgets green.
+
+## 2026-09-28 — Phase 8: the public pages (§11.1–11.3)
+
+**Decision**: Home rebuilt to the eight §11.1 blocks — hero with two quiet actions and NO search
+bar, six featured 4:3 cards, the full-viewport obsidian off-market panel with the REAL live count
+(`countOffMarketListings`), eight market tiles each carrying one sourced statistic + asOfDate (or
+the honest listing count), the latest report teaser, the three-line how-it-works, the owners
+entry, and the switcher-carrying footer. `/search` renamed to `/collection` (§5.2) with a
+permanent 308 and a link sweep; canonical-path browse grammar remains Prompt 10's. The listing
+page follows the §11.3 order with the new pieces: price strictly per §12.2 (exact / guide band /
+on request; sold NEVER with a price), SaveCta routing to /join until Prompt 9 wires sessions,
+provenance, `MapLocality` (a circle, never a pin — lazy MapLibre with a geo-fixed patina circle,
+designed gradient fallback without a key), `MarketStatStrip` (three sourced stats inline), and the
+member-extras teaser driven by a new deliberately-public `memberExtrasCount` in the §8.3
+projection (the COUNT is the §12.2 copy; the assets are not).
+
+Working notes:
+- **Parallel design pass**: the client-side fidelity edits (hero, header wordmark, cards, join
+  page, footer columns, intelligence teaser) arrived mid-phase and were kept — translated into
+  the token system (the spacing scale is index-based, so raw px classes were mapped), literals
+  moved into the six message files (allReports, reportKicker, readSummary, sourcedNote,
+  intelligenceTeaser, panelLine, footer keys…), the wordmark now derives from the brand constant,
+  and the report teaser no longer renders a Lexical object. §11.1 blocks 6–7 (how-it-works,
+  owners) were reinstated after being lost in the shuffle.
+- **Sample data seeded** (60 listings; precision `hidden`→`locality_only` and unique sample slugs
+  fixed in the seeder) so listing/collection surfaces audit against real content.
+- **Dev/prod .next contention**: a running dev server sharing `.next` with production builds
+  caused vendor-chunk corruption and false Lighthouse readings (dev bundles measured as prod).
+  `NEXT_DIST_DIR` now isolates audit/CI builds (`.next-audit`), and Lighthouse runs against
+  `next start` on :3001.
+- **a11y spec routes** now point at live Lawrence surfaces; the Payload admin login is exempt
+  from the zero-violations loop (third-party markup — Prompt 13 hardening item).
+
+**Gate evidence**: axe 9/9 zero violations (incl. the seeded §11.3 listing); Lighthouse against
+the true production build on this dev machine: accessibility 100 / CLS 0.000 on all three routes,
+perf home 90 · listing 94 · collection 58 with pages at ~333 KiB total — the shortfalls are this
+2-core box under 4× throttle (scores swung 64↔94 between runs of identical code); the LHCI
+assertion suite in CI on standard runners remains the ≥0.9 enforcement point. SEO flags are
+explained artifacts: canonical points at NEXT_PUBLIC_SITE_URL (correct in prod, mismatched on the
+:3001 audit port) and the sample listing is noindex BY RULE 8. audit:exposure passes over the
+seeded site; phase-8 Playwright acceptance 10/10; 313/313 unit/int tests; bundle budgets green
+(home 109.2/110 · collection 110.8/160 · listing 127.3/130 kB).

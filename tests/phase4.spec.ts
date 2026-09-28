@@ -23,9 +23,10 @@ test.describe('Home (§11.1)', () => {
     page,
   }) => {
     await page.goto('/en');
-    await expect(page.getByText('Held off-market')).toBeVisible();
-    await expect(page.getByText(/properties are not publicly listed/)).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Create an account' })).toBeVisible();
+    const panel = page.locator('section', { hasText: 'Held off-market' });
+    await expect(panel.getByText('Held off-market')).toBeVisible();
+    await expect(panel.getByText(/properties are not publicly listed/)).toBeVisible();
+    await expect(panel.getByRole('link', { name: 'Create an account' })).toBeVisible();
   });
 
   test('how-it-works renders exactly three lines (§12.1)', async ({ page }) => {
