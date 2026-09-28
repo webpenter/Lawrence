@@ -197,3 +197,30 @@ job — required before every merge.
 **Gate evidence**: audit:exposure passes against the live stack (zero leaks). 300/300 tests green,
 including 27 table-driven canSee cases and 13 projection tests covering every §8.3 row. Bundle
 budgets unchanged and green.
+
+## 2026-09-28 — Phase 6: data layer, geo and search complete
+
+**Decision**: The member search path is now real. `offMarketPredicate()` mirrors the public
+predicate with only the channel flipped; `filtersToWhere` takes a scope so Typesense and the
+Postgres fallback stay predicate-identical. New data-layer surface:
+`getOffMarketListing(viewer, id)` (off-market is addressed by id — no slug exists; anything the
+viewer may not see is null → 404, never 403) and `searchOffMarketListings(viewer, filters)`
+(anyone but an active member or staff receives an empty result, indistinguishable from an empty
+market). Both run the §8.3 projection/search-document discipline.
+
+- `search:reindex` rebuilds BOTH §7.1 collections atomically (public_listings from the public
+  predicate, member_listings from the off-market predicate).
+- `search:keys` provisions the two scoped search-only Typesense keys
+  (TYPESENSE_PUBLIC_SEARCH_KEY browser-safe, TYPESENSE_MEMBER_SEARCH_KEY server-side only) —
+  §7.1's "the browser only ever receives the public search-only key" as tooling, not convention.
+- The geo module already carried the Prompt 6 deliverables (ST_DWithin/bbox SQL helpers,
+  Payload near/within clauses, deterministic ≥40%-out jitter, haversine) — unchanged.
+- Naming: the db functions keep getProperty*/searchProperties names (the plan says
+  "getListingBySlug etc."); renaming would churn every caller for zero behaviour.
+
+**Gate evidence**: filter translation covered by unit tests on both scopes and engines; the
+"exact coordinates never in the public API" rule proven three ways — unit (toSearchDocument
+jitters deterministically 100–1100 m, locality_only ships no point, exact only when the seller
+permitted), integration (the indexed member_listings document and the Postgres fallback hit both
+carry jittered points and no addressLine/internalValueEur), and the Phase 5 audit:exposure crawl.
+313/313 tests green; budgets green.

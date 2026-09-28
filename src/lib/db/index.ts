@@ -5,10 +5,18 @@ import type { Property } from '@/payload-types';
 import { isTypesenseHealthy, searchWithTypesense, type SearchResult } from '@/lib/search/client';
 import { toSearchDocument } from '@/lib/search/document';
 
+import { canSee } from '@/lib/access/can-see';
 import { projectProperty } from '@/lib/access/projections';
-import type { Viewer } from '@/lib/access/viewer';
+import { isActiveMember, type Viewer } from '@/lib/access/viewer';
 
-import { filtersToWhere, publicPredicate, sortToPayload, type PropertyFilters } from './filters';
+import {
+  filtersToWhere,
+  offMarketPredicate,
+  publicPredicate,
+  sortToPayload,
+  type PropertyFilters,
+  type SearchScope,
+} from './filters';
 
 // The ONLY place that touches the database (CLAUDE.md rule 2).
 // Every listing-returning function takes an EXPLICIT Viewer (§8.1) and runs
@@ -175,6 +183,49 @@ export interface SearchDeps {
 }
 
 /**
+ * §5.3/§11.4 — the off-market detail fetch. Addressed by id (off-market
+ * listings have no slug, by design); anything the viewer may not see is null,
+ * which the route renders as 404 — never 403, never a hint (§8.6).
+ */
+export async function getOffMarketListing(
+  viewer: Viewer,
+  id: number | string,
+  locale: Locale = 'en',
+): Promise<Property | null> {
+  const payload = await getPayloadClient();
+  const res = await payload.find({
+    collection: 'properties',
+    where: { and: [offMarketPredicate(), { id: { equals: id } }] },
+    locale,
+    depth: 2,
+    limit: 1,
+  });
+  const doc = res.docs[0];
+  if (!doc) return null;
+  if (!canSee(viewer, doc as unknown as Parameters<typeof canSee>[1])) return null;
+  return projected(viewer, doc);
+}
+
+/**
+ * §11.4 — the Off-Market index search. Server-side only, member Typesense
+ * collection (the member key never reaches a browser); Postgres fallback
+ * mirrors it. Anyone but an active member or staff gets an empty result —
+ * indistinguishable from an empty market.
+ */
+export async function searchOffMarketListings(
+  viewer: Viewer,
+  filters: PropertyFilters,
+  deps: SearchDeps = {},
+): Promise<SearchResult> {
+  if (viewer.kind !== 'staff' && !isActiveMember(viewer)) {
+    return { hits: [], total: 0, page: filters.page ?? 1, facets: {}, engine: 'postgres' };
+  }
+  const engine = deps.typesense ?? ((f: PropertyFilters) => searchWithTypesense(f, 'member'));
+  const fallback = deps.postgres ?? ((f: PropertyFilters) => searchListingsPostgres(f, 'off_market'));
+  return searchWithFallback(filters, { ...deps, typesense: engine, postgres: fallback });
+}
+
+/**
  * Faceted search: Typesense when reachable, automatic Postgres fallback when
  * not (spec Prompt 5 acceptance: killing Typesense still returns results).
  */
@@ -184,10 +235,10 @@ export async function searchProperties(
   deps: SearchDeps = {},
 ): Promise<SearchResult> {
   void viewer; // public search serves the anonymous projection by design (§7.1)
-  return searchPropertiesWithDeps(filters, deps);
+  return searchWithFallback(filters, deps);
 }
 
-async function searchPropertiesWithDeps(
+async function searchWithFallback(
   filters: PropertyFilters,
   deps: SearchDeps = {},
 ): Promise<SearchResult> {
@@ -208,12 +259,20 @@ async function searchPropertiesWithDeps(
 export async function searchPropertiesPostgres(
   filters: PropertyFilters,
 ): Promise<SearchResult> {
+  return searchListingsPostgres(filters, 'public');
+}
+
+/** The Postgres path behind both audiences — same predicate discipline as Typesense. */
+async function searchListingsPostgres(
+  filters: PropertyFilters,
+  scope: SearchScope,
+): Promise<SearchResult> {
   const payload = await getPayloadClient();
   const page = filters.page ?? 1;
   const limit = Math.min(filters.limit ?? 24, 100);
   const res = await payload.find({
     collection: 'properties',
-    where: filtersToWhere(filters),
+    where: filtersToWhere(filters, scope),
     sort: sortToPayload(filters.sort),
     page,
     limit,

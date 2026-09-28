@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Where } from 'payload';
 
-import { filtersToWhere, publicPredicate, sortToPayload } from './filters';
+import { filtersToWhere, offMarketPredicate, publicPredicate, sortToPayload } from './filters';
 
 function clauses(where: Where): Where[] {
   return (where.and ?? []) as Where[];
@@ -30,6 +30,22 @@ describe('publicPredicate (§8.2)', () => {
     process.env.SAMPLE_DATA_ENABLED = 'true';
     expect(clauses(publicPredicate())).not.toContainEqual({ isSample: { not_equals: true } });
     process.env.SAMPLE_DATA_ENABLED = prev;
+  });
+});
+
+describe('offMarketPredicate (§11.4)', () => {
+  it('mirrors the public predicate with only the channel flipped', () => {
+    const and = clauses(offMarketPredicate());
+    expect(and).toContainEqual({ channel: { equals: 'off_market' } });
+    expect(and).toContainEqual({ status: { in: ['available', 'reserved', 'under_offer'] } });
+    expect(and).toContainEqual({ moderation: { not_in: ['rejected', 'changes_requested'] } });
+    expect(and).toContainEqual({ _status: { equals: 'published' } });
+  });
+
+  it('filtersToWhere scoped off_market starts from the off-market predicate', () => {
+    const and = clauses(filtersToWhere({ bedsMin: 6 }, 'off_market'));
+    expect(and[0]).toEqual(offMarketPredicate());
+    expect(and).toContainEqual({ bedrooms: { greater_than_equal: 6 } });
   });
 });
 

@@ -10,6 +10,8 @@ const envSchema = z.object({
   TYPESENSE_PROTOCOL: z.string().default('http'),
   TYPESENSE_API_KEY: z.string().default('devkey'),
   TYPESENSE_SEARCH_ONLY_KEY: z.string().default('devkey_search'),
+  TYPESENSE_PUBLIC_SEARCH_KEY: z.string().optional(),
+  TYPESENSE_MEMBER_SEARCH_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional().default('re_dev_key'),
   LEAD_NOTIFY_TO: z.string().email().default('leads@lawrenceprivatecollection.com'),
   AGENCY_NOTIFY_FROM: z.string().default('noreply@lawrenceprivatecollection.com'),

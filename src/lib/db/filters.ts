@@ -54,9 +54,30 @@ export function publicPredicate(): Where {
   return { and: clauses };
 }
 
+/**
+ * The member off-market predicate (§8.2, §11.4): live off-market listings for
+ * ACTIVE members. Same lifecycle guards as the public predicate — only the
+ * channel differs. Callers are responsible for having verified the viewer
+ * (searchOffMarketListings does); this function only shapes the query.
+ */
+export function offMarketPredicate(): Where {
+  const clauses: Where[] = [
+    { channel: { equals: 'off_market' } },
+    { status: { in: [...PUBLICLY_VISIBLE_STATUSES] } },
+    { moderation: { not_in: ['rejected', 'changes_requested'] } },
+    { _status: { equals: 'published' } },
+  ];
+  if (process.env.SAMPLE_DATA_ENABLED !== 'true') {
+    clauses.push({ isSample: { not_equals: true } });
+  }
+  return { and: clauses };
+}
+
+export type SearchScope = 'public' | 'off_market';
+
 /** PropertyFilters → Payload Where. The canonical Postgres query path. */
-export function filtersToWhere(filters: PropertyFilters): Where {
-  const and: Where[] = [publicPredicate()];
+export function filtersToWhere(filters: PropertyFilters, scope: SearchScope = 'public'): Where {
+  const and: Where[] = [scope === 'off_market' ? offMarketPredicate() : publicPredicate()];
 
   if (filters.priceMinEur != null) and.push({ priceEur: { greater_than_equal: filters.priceMinEur } });
   if (filters.priceMaxEur != null) and.push({ priceEur: { less_than_equal: filters.priceMaxEur } });

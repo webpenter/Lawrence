@@ -28,7 +28,8 @@
     "payload:migrate": "payload migrate",
     "payload:migrate:create": "payload migrate:create",
     "build:deploy": "payload migrate && pnpm build",
-    "audit:exposure": "tsx src/scripts/audit-exposure.ts"
+    "audit:exposure": "tsx src/scripts/audit-exposure.ts",
+    "search:keys": "tsx src/scripts/search-keys.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
