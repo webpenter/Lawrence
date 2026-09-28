@@ -2,7 +2,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 
 import { brand } from '@/config/brand';
 import { Link } from '@/i18n/navigation';
-import { getDestinationCounts, type Locale } from '@/lib/db';
+import { getMarketCounts, type Locale } from '@/lib/db';
 import { FALLBACK_DESTINATIONS, sampleFallbackEnabled } from '@/lib/sample/fallback';
 
 import { PreferenceBar } from './PreferenceBar';
@@ -14,7 +14,7 @@ interface FooterDestination {
 
 async function topDestinations(locale: string): Promise<FooterDestination[]> {
   try {
-    const counts = await getDestinationCounts(locale as Locale);
+    const counts = await getMarketCounts(locale as Locale);
     return counts
       .sort((a, b) => b.count - a.count)
       .slice(0, 4)
@@ -62,14 +62,14 @@ export async function SiteFooter() {
           {destinations.length > 0 ? (
             destinations.map((destination) => (
               <p key={destination.slug} className="mb-1">
-                <Link href={`/destinations/${destination.slug}`} className="hover:text-vellum">
+                <Link href={`/markets/${destination.slug}`} className="hover:text-vellum">
                   {destination.name}
                 </Link>
               </p>
             ))
           ) : (
             <p className="mb-1">
-              <Link href="/destinations" className="hover:text-vellum">
+              <Link href="/markets" className="hover:text-vellum">
                 {nav('destinations')}
               </Link>
             </p>

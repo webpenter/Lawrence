@@ -25,7 +25,7 @@ bridge clearance and whether open water is reachable.
 ## Key sections
 
 - [Search](${base}/en/search): the full inventory with water and boat filters.
-- [Destinations](${base}/en/destinations): waterfront markets we cover.
+- [Destinations](${base}/en/markets): waterfront markets we cover.
 - [Waterfront searches](${base}/sitemaps/landing.xml): curated landing pages, the indexable views of filtered inventory.
 - [Journal](${base}/en/journal): editorial on mooring rules, tenure and waterfront ownership.
 - [List with us](${base}/en/list-with-us): for agencies with qualifying inventory.

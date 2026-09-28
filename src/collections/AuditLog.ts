@@ -23,7 +23,7 @@ export const AuditLog: CollectionConfig = {
       type: 'select',
       required: true,
       index: true,
-      options: ['create', 'update', 'delete', 'publish', 'lead_view', 'lead_anonymized', 'status_change'],
+      options: ['create', 'update', 'delete', 'publish', 'enquiry_view', 'enquiry_anonymized', 'lead_view', 'lead_anonymized', 'status_change'],
     },
     { name: 'targetCollection', type: 'text', required: true, index: true },
     { name: 'targetId', type: 'text', required: true, index: true },

@@ -27,7 +27,7 @@ export async function GET(
         country: filters.country,
         waterBodyType: filters.waterBodyTypes?.[0],
         propertyType: filters.propertyTypes?.[0],
-        destinationId: filters.destinationId,
+        marketId: filters.marketId,
       });
       count = aggregates.count;
     }

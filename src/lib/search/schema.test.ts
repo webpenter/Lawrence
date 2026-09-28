@@ -23,7 +23,7 @@ describe('filtersToTypesense — mirrors the Postgres path (Prompt 6 acceptance)
       propertyTypes: ['villa'],
       features: ['helipad', 'private_dock'],
       country: 'IT',
-      destinationId: 7,
+      marketId: 7,
       status: 'available',
       bedsMin: 6,
       bbox: { west: 8, south: 43, east: 10, north: 45 },
@@ -35,7 +35,7 @@ describe('filtersToTypesense — mirrors the Postgres path (Prompt 6 acceptance)
     expect(filterBy).toContain('propertyType:=[`villa`]');
     expect(filterBy).toContain('features:=[`helipad`,`private_dock`]');
     expect(filterBy).toContain('country:=`IT`');
-    expect(filterBy).toContain('destinationId:=7');
+    expect(filterBy).toContain('marketId:=7');
     expect(filterBy).toContain('status:=`available`');
     expect(filterBy).toContain('bedrooms:>=6');
     expect(filterBy).toContain('location:(43,8,43,10,45,10,45,8)');

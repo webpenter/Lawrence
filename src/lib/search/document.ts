@@ -52,7 +52,7 @@ export function toSearchDocument(property: unknown): Record<string, unknown> {
     country: (location.country as string | null) ?? undefined,
     locality: (location.locality as string | null) ?? undefined,
     region: (location.region as string | null) ?? undefined,
-    destinationId: relId(location.destination),
+    marketId: relId(location.market),
     // Typesense geopoint is [lat, lng]. Already jittered/nulled by the
     // sanitizer above; `approximate` lets the map draw a circle, never a pin.
     location: Array.isArray(coords) ? [coords[1], coords[0]] : undefined,

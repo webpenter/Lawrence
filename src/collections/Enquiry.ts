@@ -1,31 +1,42 @@
-import type { CollectionConfig } from 'payload';
+import type { Access, CollectionConfig } from 'payload';
 
 import { logAudit } from '@/lib/audit';
 import { adminOnly, adminOrEditor, tenant } from '@/payload/access/tenant';
+import { isMember } from '@/payload/access/member';
 
-const LEAD_SOURCES = [
+const ENQUIRY_SOURCES = [
+  'listing',
+  'off_market',
+  'market_page',
+  'report',
   'contact',
-  'property',
-  'landing',
-  'boat_filter',
-  'whatsapp',
-  'list_with_us',
+  'sell',
+  'desk_call',
 ] as const;
 
-const LEAD_STATUSES = ['new', 'sent', 'viewed', 'qualified', 'spam'] as const;
+const ENQUIRY_STATUSES = ['new', 'sent', 'viewed', 'qualified', 'spam'] as const;
 const LOCALES = ['en', 'it', 'fr', 'de', 'es', 'ru'] as const;
 
-// Spec §6.8 Lead. §8.1 "See leads": admin/editor all, agency_admin own agency,
-// agency_agent own listings. Site-side creation goes through our rate-limited
-// route handler using the local API — the REST surface never accepts anonymous writes.
-export const Lead: CollectionConfig = {
-  slug: 'leads',
+// Staff/agency scoping via tenant(); a member may additionally read the
+// enquiries they submitted while signed in (§11.7 "their own activity").
+const readEnquiries: Access = (args) => {
+  const user = args.req.user as unknown as { id: number; collection?: string } | null;
+  if (isMember(user)) return { member: { equals: user?.id } };
+  return tenant({ agentField: 'agent' })(args);
+};
+
+/**
+ * §6.6 Enquiry. Site-side creation goes through the rate-limited route handler
+ * using the local API — the REST surface never accepts anonymous writes.
+ */
+export const Enquiry: CollectionConfig = {
+  slug: 'enquiries',
   admin: {
     useAsTitle: 'email',
-    defaultColumns: ['email', 'property', 'agency', 'status', 'createdAt'],
+    defaultColumns: ['email', 'property', 'source', 'status', 'createdAt'],
   },
   access: {
-    read: tenant({ agentField: 'agent' }),
+    read: readEnquiries,
     create: adminOrEditor,
     update: tenant({ agentField: 'agent' }),
     delete: adminOnly,
@@ -34,8 +45,8 @@ export const Lead: CollectionConfig = {
     afterChange: [
       async ({ doc, previousDoc, req, operation }) => {
         if (operation === 'update' && previousDoc?.status !== doc.status) {
-          const action = doc.status === 'viewed' ? 'lead_view' : 'status_change';
-          await logAudit(req, action, 'leads', doc.id, `${previousDoc?.status} → ${doc.status}`);
+          const action = doc.status === 'viewed' ? 'enquiry_view' : 'status_change';
+          await logAudit(req, action, 'enquiries', doc.id, `${previousDoc?.status} → ${doc.status}`);
         }
         return doc;
       },
@@ -66,15 +77,22 @@ export const Lead: CollectionConfig = {
       index: true,
       admin: { description: 'Routing target snapshot (property.agent at submission time).' },
     },
+    {
+      name: 'member',
+      type: 'relationship',
+      relationTo: 'members',
+      index: true,
+      admin: { description: 'Set when the enquirer was authenticated (§6.6).' },
+    },
     { name: 'locale', type: 'select', options: [...LOCALES] },
-    { name: 'source', type: 'select', required: true, options: [...LEAD_SOURCES] },
+    { name: 'source', type: 'select', required: true, options: [...ENQUIRY_SOURCES] },
     {
       name: 'status',
       type: 'select',
       required: true,
       defaultValue: 'new',
       index: true,
-      options: [...LEAD_STATUSES],
+      options: [...ENQUIRY_STATUSES],
     },
     {
       type: 'group',
@@ -88,10 +106,9 @@ export const Lead: CollectionConfig = {
     {
       name: 'reminderSentAt',
       type: 'date',
-      admin: { readOnly: true, description: 'When the §8.9 48 h unanswered reminder went out.' },
+      admin: { readOnly: true, description: 'When the unanswered-enquiry reminder went out.' },
     },
     { name: 'utm', type: 'json' },
-    { name: 'navigationPath', type: 'json', admin: { description: 'Reserved (empty in Phase 1).' } },
-    { name: 'crmContactId', type: 'text', admin: { description: 'Reserved for the Phase 2 CRM seam.' } },
+    { name: 'crmContactId', type: 'text', admin: { description: 'Reserved for the §23 CRM seam.' } },
   ],
 };

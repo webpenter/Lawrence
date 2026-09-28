@@ -63,7 +63,7 @@ export default async function ListWithUsPage({ params }: ListWithUsPageProps) {
           <h2 className="mb-1 font-display text-lg text-ink">{t('formTitle')}</h2>
           <p className="mb-5 text-xs text-graphite">{t('formSub')}</p>
           <EnquiryForm
-            source="list_with_us"
+            source="sell"
             locale={locale}
             labels={{
               name: tl('formName'),

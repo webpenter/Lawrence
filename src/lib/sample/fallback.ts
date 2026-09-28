@@ -9,7 +9,7 @@ import { textToLexical } from '@/lib/lexical';
 import type { SearchHit, SearchResult } from '@/lib/search/client';
 import type { Property } from '@/payload-types';
 
-import { SAMPLE_DESTINATIONS, SAMPLE_DESTINATION_BY_SLUG } from './destinations';
+import { SAMPLE_DESTINATIONS, SAMPLE_DESTINATION_BY_SLUG } from './markets';
 import { buildAllBlueprints, type ListingBlueprint } from './economics';
 
 /**

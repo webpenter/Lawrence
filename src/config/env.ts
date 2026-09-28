@@ -20,6 +20,12 @@ const envSchema = z.object({
     .string()
     .transform((val) => val === 'true')
     .default('true'),
+  MEMBER_REQUIRE_APPROVAL: z
+    .string()
+    .transform((val) => val === 'true')
+    .default('false'),
+  SIGNED_URL_SECRET: z.string().optional(),
+  MAGIC_LINK_SECRET: z.string().optional(),
   R2_ACCOUNT_ID: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),

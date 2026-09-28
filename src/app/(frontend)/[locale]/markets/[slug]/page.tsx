@@ -11,7 +11,7 @@ import { Link } from '@/i18n/navigation';
 import {
   getAggregatesForScope,
   getDestinationBySlug,
-  getDestinationCounts,
+  getMarketCounts,
   getPublishedLandingPages,
   searchPropertiesPostgres,
   type Locale,
@@ -21,27 +21,27 @@ import type { SearchHit } from '@/lib/search/client';
 import { passesEditorialGate } from '@/lib/seo/combos';
 import { hreflangAlternates } from '@/lib/seo/hreflang';
 import { breadcrumbJsonLd } from '@/lib/seo/jsonld';
-import type { Destination, LandingPage } from '@/payload-types';
+import type { LandingPage, Market } from '@/payload-types';
 import { HERO_SCRIM, horizonGradientFor } from '@/tokens/placeholders';
 import { layout } from '@/tokens/layout';
 
 // Destination pages (§10.5): SSG over known destinations + ISR.
 export const revalidate = 900;
 
-interface DestinationPageProps {
+interface MarketPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   try {
-    const counts = await getDestinationCounts();
+    const counts = await getMarketCounts();
     return counts.map((destination) => ({ slug: destination.slug }));
   } catch {
     return [];
   }
 }
 
-async function loadDestination(slug: string, locale: string): Promise<Destination | null> {
+async function loadDestination(slug: string, locale: string): Promise<Market | null> {
   try {
     return await getDestinationBySlug(slug, locale as Locale);
   } catch (err) {
@@ -50,7 +50,7 @@ async function loadDestination(slug: string, locale: string): Promise<Destinatio
   }
 }
 
-export async function generateMetadata({ params }: DestinationPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: MarketPageProps): Promise<Metadata> {
   const { slug, locale } = await params;
   const destination = await loadDestination(slug, locale);
   if (!destination) return {};
@@ -59,11 +59,11 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
     // §11.4: "Waterfront property for sale in {Destination} | {brand}".
     title: destination.metaTitle ?? t('metaTitle', { destination: destination.name }),
     description: destination.metaDescription ?? undefined,
-    alternates: hreflangAlternates(`/destinations/${slug}`),
+    alternates: hreflangAlternates(`/markets/${slug}`),
   };
 }
 
-export default async function DestinationPage({ params }: DestinationPageProps) {
+export default async function DestinationPage({ params }: MarketPageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const destination = await loadDestination(slug, locale);
@@ -82,8 +82,8 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
   let landingPages: LandingPage[] = [];
   try {
     [aggregates, { hits: listings }, landingPages] = await Promise.all([
-      getAggregatesForScope({ destinationId: destination.id }),
-      searchPropertiesPostgres({ destinationId: destination.id, limit: 12 }),
+      getAggregatesForScope({ marketId: destination.id }),
+      searchPropertiesPostgres({ marketId: destination.id, limit: 12 }),
       getPublishedLandingPages(locale as Locale),
     ]);
   } catch {
@@ -99,8 +99,8 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
 
   const jsonLd = breadcrumbJsonLd(locale, [
     { name: tl('breadcrumbHome'), path: '' },
-    { name: t('hubTitle'), path: '/destinations' },
-    { name: destination.name, path: `/destinations/${slug}` },
+    { name: t('hubTitle'), path: '/markets' },
+    { name: destination.name, path: `/markets/${slug}` },
   ]);
 
   return (
@@ -130,9 +130,9 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
           <StatsStrip aggregates={aggregates} />
         </div>
 
-        {destination.description ? (
+        {destination.intro ? (
           <section className="max-w-[74ch] px-7 pb-4 text-sm leading-relaxed text-graphite">
-            <RichText data={destination.description} />
+            <RichText data={destination.intro} />
           </section>
         ) : null}
 

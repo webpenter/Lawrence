@@ -127,12 +127,12 @@ export async function getSimilar(
 ): Promise<Property[]> {
   const payload = await getPayloadClient();
   const clauses: Where[] = [publicPredicate(), { id: { not_equals: property.id } }];
-  if (property.location?.destination) {
+  if (property.location?.market) {
     const marketId =
-      typeof property.location.destination === 'object'
-        ? property.location.destination.id
-        : property.location.destination;
-    clauses.push({ 'location.destination': { equals: marketId } });
+      typeof property.location.market === 'object'
+        ? property.location.market.id
+        : property.location.market;
+    clauses.push({ 'location.market': { equals: marketId } });
   } else if (property.location?.country) {
     clauses.push({ 'location.country': { equals: property.location.country } });
   }
@@ -224,7 +224,7 @@ export async function getAggregatesForScope(scope: {
   country?: string;
   waterBodyType?: string;
   propertyType?: string;
-  destinationId?: number;
+  marketId?: number;
 }): Promise<ScopeAggregates> {
   const payload = await getPayloadClient();
   const clauses: Where[] = [publicPredicate()];
@@ -232,8 +232,8 @@ export async function getAggregatesForScope(scope: {
   if (scope.waterBodyType)
     clauses.push({ 'waterfront.waterBodyType': { equals: scope.waterBodyType } });
   if (scope.propertyType) clauses.push({ propertyType: { equals: scope.propertyType } });
-  if (scope.destinationId != null)
-    clauses.push({ 'location.destination': { equals: scope.destinationId } });
+  if (scope.marketId != null)
+    clauses.push({ 'location.market': { equals: scope.marketId } });
 
   const res = await payload.find({
     collection: 'properties',
@@ -264,7 +264,7 @@ export async function getAggregatesForScope(scope: {
   };
 }
 
-import type { Destination, LandingPage } from '@/payload-types';
+import type { LandingPage, Market } from '@/payload-types';
 import { publishedLandingPagesWhere } from '@/lib/seo/combos';
 
 export async function getLandingPageBySlug(
@@ -302,10 +302,10 @@ export async function getPublishedLandingPages(
 export async function getDestinationBySlug(
   slug: string,
   locale: Locale = 'en',
-): Promise<Destination | null> {
+): Promise<Market | null> {
   const payload = await getPayloadClient();
   const res = await payload.find({
-    collection: 'destinations',
+    collection: 'markets',
     where: { slug: { equals: slug } },
     locale,
     depth: 1,
@@ -315,17 +315,17 @@ export async function getDestinationBySlug(
   return res.docs[0] ?? null;
 }
 
-export interface DestinationCount {
+export interface MarketCount {
   id: number;
   name: string;
   slug: string;
   count: number;
 }
 
-export async function getDestinationCounts(locale: Locale = 'en'): Promise<DestinationCount[]> {
+export async function getMarketCounts(locale: Locale = 'en'): Promise<MarketCount[]> {
   const payload = await getPayloadClient();
   const destinations = await payload.find({
-    collection: 'destinations',
+    collection: 'markets',
     limit: 100,
     depth: 0,
     locale,
@@ -337,7 +337,7 @@ export async function getDestinationCounts(locale: Locale = 'en'): Promise<Desti
       const { totalDocs } = await payload.count({
         collection: 'properties',
         where: {
-          and: [publicPredicate(), { 'location.destination': { equals: destination.id } }],
+          and: [publicPredicate(), { 'location.market': { equals: destination.id } }],
         },
       });
       return {
@@ -388,7 +388,7 @@ export async function getAgencyDashboardStats(
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { totalDocs: leadsLast30Days } = await payload.count({
-    collection: 'leads',
+    collection: 'enquiries',
     where: {
       and: [{ agency: { equals: agencyId } }, { createdAt: { greater_than_equal: thirtyDaysAgo } }],
     },

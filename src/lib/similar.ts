@@ -21,8 +21,8 @@ export function isSimilar(subject: Property, candidate: Property): boolean {
   if (['sold', 'expired', 'withdrawn', 'archived', 'draft'].includes(candidate.status)) return false;
 
   const sameMarket =
-    relId(subject.location?.destination) !== undefined &&
-    relId(subject.location?.destination) === relId(candidate.location?.destination);
+    relId(subject.location?.market) !== undefined &&
+    relId(subject.location?.market) === relId(candidate.location?.market);
 
   const priceComparable =
     subject.priceEur != null &&
@@ -41,9 +41,9 @@ export function similarCandidatesWhere(subject: Property): Where {
     { status: { in: ['available', 'reserved', 'under_offer'] } },
   ];
   const or: Where[] = [];
-  const marketId = relId(subject.location?.destination);
+  const marketId = relId(subject.location?.market);
   if (marketId !== undefined) {
-    or.push({ 'location.destination': { equals: marketId } });
+    or.push({ 'location.market': { equals: marketId } });
   }
   if (subject.priceEur != null) {
     or.push({
@@ -59,12 +59,12 @@ export function similarCandidatesWhere(subject: Property): Where {
 
 /** Rank candidates: same market first, then closest price. */
 export function rankSimilar(subject: Property, candidates: Property[], limit = 3): Property[] {
-  const marketId = relId(subject.location?.destination);
+  const marketId = relId(subject.location?.market);
   return candidates
     .filter((candidate) => isSimilar(subject, candidate))
     .sort((a, b) => {
-      const aMarket = relId(a.location?.destination) === marketId ? 0 : 1;
-      const bMarket = relId(b.location?.destination) === marketId ? 0 : 1;
+      const aMarket = relId(a.location?.market) === marketId ? 0 : 1;
+      const bMarket = relId(b.location?.market) === marketId ? 0 : 1;
       if (aMarket !== bMarket) return aMarket - bMarket;
       const aPrice = Math.abs((a.priceEur ?? 0) - (subject.priceEur ?? 0));
       const bPrice = Math.abs((b.priceEur ?? 0) - (subject.priceEur ?? 0));

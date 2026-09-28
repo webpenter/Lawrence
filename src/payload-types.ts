@@ -64,17 +64,24 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    members: MemberAuthOperations;
   };
   blocks: {};
   collections: {
     users: User;
+    members: Member;
     media: Media;
+    documents: Document;
     properties: Property;
     agencies: Agency;
     agents: Agent;
-    'water-bodies': WaterBody;
-    destinations: Destination;
-    leads: Lead;
+    markets: Market;
+    enquiries: Enquiry;
+    'saved-listings': SavedListing;
+    requirements: Requirement;
+    'member-activity': MemberActivity;
+    reports: Report;
+    'fx-snapshots': FxSnapshot;
     'landing-pages': LandingPage;
     taxonomies: Taxonomy;
     articles: Article;
@@ -91,13 +98,19 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    members: MembersSelect<false> | MembersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    documents: DocumentsSelect<false> | DocumentsSelect<true>;
     properties: PropertiesSelect<false> | PropertiesSelect<true>;
     agencies: AgenciesSelect<false> | AgenciesSelect<true>;
     agents: AgentsSelect<false> | AgentsSelect<true>;
-    'water-bodies': WaterBodiesSelect<false> | WaterBodiesSelect<true>;
-    destinations: DestinationsSelect<false> | DestinationsSelect<true>;
-    leads: LeadsSelect<false> | LeadsSelect<true>;
+    markets: MarketsSelect<false> | MarketsSelect<true>;
+    enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
+    'saved-listings': SavedListingsSelect<false> | SavedListingsSelect<true>;
+    requirements: RequirementsSelect<false> | RequirementsSelect<true>;
+    'member-activity': MemberActivitySelect<false> | MemberActivitySelect<true>;
+    reports: ReportsSelect<false> | ReportsSelect<true>;
+    'fx-snapshots': FxSnapshotsSelect<false> | FxSnapshotsSelect<true>;
     'landing-pages': LandingPagesSelect<false> | LandingPagesSelect<true>;
     taxonomies: TaxonomiesSelect<false> | TaxonomiesSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
@@ -126,13 +139,31 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | Member;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface MemberAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -249,6 +280,10 @@ export interface Media {
   id: number;
   alt: string;
   /**
+   * §6.5: a listing can show 10 public images and hold 30 for members. members = private bucket + signed URLs.
+   */
+  visibility: 'public' | 'members';
+  /**
    * Set automatically for agency uploads. Scopes edit access.
    */
   agency?: (number | null) | Agency;
@@ -346,6 +381,105 @@ export interface Agent {
   receivesLeads?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * End users (the off-market audience) — entirely separate from staff Users. §6.6.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "members".
+ */
+export interface Member {
+  id: number;
+  name?: string | null;
+  phone?: string | null;
+  country?: string | null;
+  preferredLocale?: ('en' | 'it' | 'fr' | 'de' | 'es' | 'ru') | null;
+  /**
+   * Self-declared, optional, never gating (§6.6).
+   */
+  memberType?: ('buyer' | 'advisor' | 'broker' | 'developer' | 'other') | null;
+  /**
+   * pending only occurs while MEMBER_REQUIRE_APPROVAL=true (§2.3).
+   */
+  status: 'active' | 'pending' | 'suspended';
+  emailVerifiedAt?: string | null;
+  marketingConsent?: boolean | null;
+  consentedAt?: string | null;
+  consentIp?: string | null;
+  lastActiveAt?: string | null;
+  source?: ('organic' | 'off_market_cta' | 'report_download' | 'enquiry' | 'referral') | null;
+  utm?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Optional for members in Phase 1 (§6.6); enrolment UI lands in Prompt 9.
+   */
+  twoFactorEnabled?: boolean | null;
+  /**
+   * Reserved for §23 (NDA / capability gating). Never written in Phase 1.
+   */
+  reserved?: {
+    ndaStatus?: string | null;
+    ndaSignedAt?: string | null;
+    capabilityStatus?: string | null;
+    capabilityBand?: string | null;
+    tier?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'members';
+}
+/**
+ * Private assets. Never in a sitemap, never cached publicly, never linked directly.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents".
+ */
+export interface Document {
+  id: number;
+  title: string;
+  documentType: 'floor_plan' | 'brochure' | 'inventory' | 'survey' | 'report_pdf' | 'other';
+  property?: (number | null) | Property;
+  /**
+   * Set automatically for agency uploads. Scopes edit access.
+   */
+  agency?: (number | null) | Agency;
+  credit?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * Lawrence lists property from €20M (€10–20M only on the prime exception track, an admin decision). Off-market listings never have a slug, never appear in sitemaps, feeds or the public search collection.
@@ -514,9 +648,9 @@ export interface Property {
     country?: string | null;
     continent?: string | null;
     /**
-     * The Market this listing belongs to (renamed in Prompt 4).
+     * The Market this listing belongs to (§6.4).
      */
-    destination?: (number | null) | Destination;
+    market?: (number | null) | Market;
     /**
      * @minItems 2
      * @maxItems 2
@@ -538,13 +672,13 @@ export interface Property {
   videoUrl?: string | null;
   virtualTourUrl?: string | null;
   /**
-   * Members-only by default (§6.5).
+   * Members-only by default (§6.5), served via signed URLs.
    */
-  floorplans?: (number | Media)[] | null;
+  floorplans?: (number | Document)[] | null;
   /**
-   * Private — staff and owning agency only. Never public.
+   * Private — members via signed URL, staff, owning agency. Never public.
    */
-  documents?: (number | Media)[] | null;
+  documents?: (number | Document)[] | null;
   description?: {
     root: {
       type: string;
@@ -650,16 +784,36 @@ export interface Property {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "destinations".
+ * via the `definition` "markets".
  */
-export interface Destination {
+export interface Market {
   id: number;
   name: string;
+  /**
+   * Per-locale slug (§6.7); the §5.5 resolver 301s aliases to the canonical.
+   */
   slug: string;
   country?: string | null;
   region?: string | null;
+  /**
+   * GeoJSON polygon of the market boundary (§6.7). Drawn from OSM/Natural Earth (§13.5).
+   */
+  polygon?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  centroid?: [number, number] | null;
   heroImage?: (number | null) | Media;
-  description?: {
+  intro?: {
     root: {
       type: string;
       children: {
@@ -674,6 +828,54 @@ export interface Destination {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Editor-maintained market data (§6.7). Every value needs its source URL and as-of date to count toward the §5.5 three-sourced-data-points rule.
+   */
+  stats?: {
+    medianPriceEurPerSqm?: {
+      value?: number | null;
+      /**
+       * Source URL — required for the stat to publish.
+       */
+      source?: string | null;
+      asOfDate?: string | null;
+    };
+    /**
+     * Where prime pricing starts in this market.
+     */
+    primeEntryEur?: {
+      value?: number | null;
+      /**
+       * Source URL — required for the stat to publish.
+       */
+      source?: string | null;
+      asOfDate?: string | null;
+    };
+    yoyChangePct?: {
+      value?: number | null;
+      /**
+       * Source URL — required for the stat to publish.
+       */
+      source?: string | null;
+      asOfDate?: string | null;
+    };
+    avgDaysOnMarket?: {
+      value?: number | null;
+      /**
+       * Source URL — required for the stat to publish.
+       */
+      source?: string | null;
+      asOfDate?: string | null;
+    };
+    transactionVolumeBand?: {
+      /**
+       * Transactions per year at this level — banded, never faked precision.
+       */
+      value?: ('under_10' | '10_50' | '50_200' | 'over_200') | null;
+      source?: string | null;
+      asOfDate?: string | null;
+    };
+  };
   metaTitle?: string | null;
   metaDescription?: string | null;
   updatedAt: string;
@@ -681,22 +883,9 @@ export interface Destination {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "water-bodies".
+ * via the `definition` "enquiries".
  */
-export interface WaterBody {
-  id: number;
-  name: string;
-  slug: string;
-  type?: ('sea' | 'ocean' | 'lake' | 'river' | 'lagoon' | 'canal' | 'fjord' | 'bay' | 'estuary') | null;
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "leads".
- */
-export interface Lead {
+export interface Enquiry {
   id: number;
   name: string;
   email: string;
@@ -711,8 +900,12 @@ export interface Lead {
    * Routing target snapshot (property.agent at submission time).
    */
   agent?: (number | null) | Agent;
+  /**
+   * Set when the enquirer was authenticated (§6.6).
+   */
+  member?: (number | null) | Member;
   locale?: ('en' | 'it' | 'fr' | 'de' | 'es' | 'ru') | null;
-  source: 'contact' | 'property' | 'landing' | 'boat_filter' | 'whatsapp' | 'list_with_us';
+  source: 'listing' | 'off_market' | 'market_page' | 'report' | 'contact' | 'sell' | 'desk_call';
   status: 'new' | 'sent' | 'viewed' | 'qualified' | 'spam';
   consent?: {
     consentMarketing?: boolean | null;
@@ -720,7 +913,7 @@ export interface Lead {
     consentIp?: string | null;
   };
   /**
-   * When the §8.9 48 h unanswered reminder went out.
+   * When the unanswered-enquiry reminder went out.
    */
   reminderSentAt?: string | null;
   utm?:
@@ -733,9 +926,147 @@ export interface Lead {
     | boolean
     | null;
   /**
-   * Reserved (empty in Phase 1).
+   * Reserved for the §23 CRM seam.
    */
-  navigationPath?:
+  crmContactId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "saved-listings".
+ */
+export interface SavedListing {
+  id: number;
+  member: number | Member;
+  property: number | Property;
+  /**
+   * Private to the member. Never shown to agencies or in analytics.
+   */
+  note?: string | null;
+  savedAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "requirements".
+ */
+export interface Requirement {
+  id: number;
+  member: number | Member;
+  budgetMinEur?: number | null;
+  budgetMaxEur?: number | null;
+  currency?: ('EUR' | 'USD' | 'GBP' | 'CHF' | 'AED' | 'SGD' | 'HKD') | null;
+  markets?: (number | Market)[] | null;
+  propertyTypes?:
+    | (
+        | 'villa'
+        | 'estate'
+        | 'penthouse'
+        | 'townhouse'
+        | 'chalet'
+        | 'castle'
+        | 'palazzo'
+        | 'private_island'
+        | 'vineyard_estate'
+        | 'equestrian_estate'
+        | 'hotel_resort'
+        | 'development_site'
+        | 'apartment'
+        | 'lodge'
+        | 'ranch'
+      )[]
+    | null;
+  mustHaveFeatures?:
+    | (
+        | 'pool'
+        | 'indoor_pool'
+        | 'spa'
+        | 'gym'
+        | 'cinema'
+        | 'wine_cellar'
+        | 'ballroom'
+        | 'library'
+        | 'chapel'
+        | 'helipad'
+        | 'tennis'
+        | 'padel'
+        | 'golf_hole'
+        | 'equestrian'
+        | 'vineyard'
+        | 'olive_grove'
+        | 'beach'
+        | 'private_dock'
+        | 'marina_berth'
+        | 'ski_in_ski_out'
+        | 'gatehouse'
+        | 'staff_quarters'
+        | 'guest_houses'
+        | 'generator'
+        | 'geothermal'
+        | 'solar'
+        | 'smart_home'
+        | 'car_gallery'
+        | 'panic_room'
+      )[]
+    | null;
+  timeline?: ('immediate' | '6_months' | '12_months' | 'opportunistic') | null;
+  notes?: string | null;
+  status: 'active' | 'paused' | 'closed';
+  notifyByEmail?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "member-activity".
+ */
+export interface MemberActivity {
+  id: number;
+  member: number | Member;
+  property?: (number | null) | Property;
+  action: 'off_market_list' | 'off_market_view' | 'document_download' | 'saved' | 'enquiry';
+  at: string;
+  ip?: string | null;
+  userAgent?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reports".
+ */
+export interface Report {
+  id: number;
+  title: string;
+  slug: string;
+  /**
+   * Ungated, 400–600 words with the key findings and figures (§11.6). Public and indexable.
+   */
+  summary?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Gated full report — requires an account, served via signed URL (§6.5).
+   */
+  pdf?: (number | null) | Document;
+  /**
+   * Chart data for the summary page (§6.7); every series carries its source.
+   */
+  charts?:
     | {
         [k: string]: unknown;
       }
@@ -744,10 +1075,43 @@ export interface Lead {
     | number
     | boolean
     | null;
+  publicationDate: string;
+  authors?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
-   * Reserved for the Phase 2 CRM seam.
+   * Cross-links to the relevant market pages (§11.5).
    */
-  crmContactId?: string | null;
+  markets?: (number | Market)[] | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fx-snapshots".
+ */
+export interface FxSnapshot {
+  id: number;
+  date: string;
+  /**
+   * Units of each currency per 1 EUR: { USD, GBP, CHF, AED, SGD, HKD }.
+   */
+  ratesPerEur:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  source?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -783,7 +1147,7 @@ export interface LandingPage {
         )
       | null;
     waterBodyType?: ('sea' | 'ocean' | 'lake' | 'river' | 'lagoon' | 'canal' | 'fjord' | 'bay' | 'estuary') | null;
-    destination?: (number | null) | Destination;
+    destination?: (number | null) | Market;
     country?: string | null;
   };
   /**
@@ -928,7 +1292,16 @@ export interface Redirect {
  */
 export interface AuditLog {
   id: number;
-  action: 'create' | 'update' | 'delete' | 'publish' | 'lead_view' | 'lead_anonymized' | 'status_change';
+  action:
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'publish'
+    | 'enquiry_view'
+    | 'enquiry_anonymized'
+    | 'lead_view'
+    | 'lead_anonymized'
+    | 'status_change';
   targetCollection: string;
   targetId: string;
   summary?: string | null;
@@ -1009,8 +1382,16 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'members';
+        value: number | Member;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'documents';
+        value: number | Document;
       } | null)
     | ({
         relationTo: 'properties';
@@ -1025,16 +1406,32 @@ export interface PayloadLockedDocument {
         value: number | Agent;
       } | null)
     | ({
-        relationTo: 'water-bodies';
-        value: number | WaterBody;
+        relationTo: 'markets';
+        value: number | Market;
       } | null)
     | ({
-        relationTo: 'destinations';
-        value: number | Destination;
+        relationTo: 'enquiries';
+        value: number | Enquiry;
       } | null)
     | ({
-        relationTo: 'leads';
-        value: number | Lead;
+        relationTo: 'saved-listings';
+        value: number | SavedListing;
+      } | null)
+    | ({
+        relationTo: 'requirements';
+        value: number | Requirement;
+      } | null)
+    | ({
+        relationTo: 'member-activity';
+        value: number | MemberActivity;
+      } | null)
+    | ({
+        relationTo: 'reports';
+        value: number | Report;
+      } | null)
+    | ({
+        relationTo: 'fx-snapshots';
+        value: number | FxSnapshot;
       } | null)
     | ({
         relationTo: 'landing-pages';
@@ -1069,10 +1466,15 @@ export interface PayloadLockedDocument {
         value: number | ConsentRecord;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'members';
+        value: number | Member;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1082,10 +1484,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'members';
+        value: number | Member;
+      };
   key?: string | null;
   value?:
     | {
@@ -1139,10 +1546,59 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "members_select".
+ */
+export interface MembersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  country?: T;
+  preferredLocale?: T;
+  memberType?: T;
+  status?: T;
+  emailVerifiedAt?: T;
+  marketingConsent?: T;
+  consentedAt?: T;
+  consentIp?: T;
+  lastActiveAt?: T;
+  source?: T;
+  utm?: T;
+  twoFactorEnabled?: T;
+  reserved?:
+    | T
+    | {
+        ndaStatus?: T;
+        ndaSignedAt?: T;
+        capabilityStatus?: T;
+        capabilityBand?: T;
+        tier?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  _verified?: T;
+  _verificationToken?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  visibility?: T;
   agency?: T;
   credit?: T;
   licence?: T;
@@ -1228,6 +1684,28 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents_select".
+ */
+export interface DocumentsSelect<T extends boolean = true> {
+  title?: T;
+  documentType?: T;
+  property?: T;
+  agency?: T;
+  credit?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "properties_select".
  */
 export interface PropertiesSelect<T extends boolean = true> {
@@ -1287,7 +1765,7 @@ export interface PropertiesSelect<T extends boolean = true> {
         region?: T;
         country?: T;
         continent?: T;
-        destination?: T;
+        market?: T;
         coordinates?: T;
         coordinatePrecision?: T;
         publicGeography?: T;
@@ -1387,27 +1865,56 @@ export interface AgentsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "water-bodies_select".
+ * via the `definition` "markets_select".
  */
-export interface WaterBodiesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  type?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "destinations_select".
- */
-export interface DestinationsSelect<T extends boolean = true> {
+export interface MarketsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   country?: T;
   region?: T;
+  polygon?: T;
+  centroid?: T;
   heroImage?: T;
-  description?: T;
+  intro?: T;
+  stats?:
+    | T
+    | {
+        medianPriceEurPerSqm?:
+          | T
+          | {
+              value?: T;
+              source?: T;
+              asOfDate?: T;
+            };
+        primeEntryEur?:
+          | T
+          | {
+              value?: T;
+              source?: T;
+              asOfDate?: T;
+            };
+        yoyChangePct?:
+          | T
+          | {
+              value?: T;
+              source?: T;
+              asOfDate?: T;
+            };
+        avgDaysOnMarket?:
+          | T
+          | {
+              value?: T;
+              source?: T;
+              asOfDate?: T;
+            };
+        transactionVolumeBand?:
+          | T
+          | {
+              value?: T;
+              source?: T;
+              asOfDate?: T;
+            };
+      };
   metaTitle?: T;
   metaDescription?: T;
   updatedAt?: T;
@@ -1415,9 +1922,9 @@ export interface DestinationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "leads_select".
+ * via the `definition` "enquiries_select".
  */
-export interface LeadsSelect<T extends boolean = true> {
+export interface EnquiriesSelect<T extends boolean = true> {
   name?: T;
   email?: T;
   phone?: T;
@@ -1425,6 +1932,7 @@ export interface LeadsSelect<T extends boolean = true> {
   property?: T;
   agency?: T;
   agent?: T;
+  member?: T;
   locale?: T;
   source?: T;
   status?: T;
@@ -1437,8 +1945,87 @@ export interface LeadsSelect<T extends boolean = true> {
       };
   reminderSentAt?: T;
   utm?: T;
-  navigationPath?: T;
   crmContactId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "saved-listings_select".
+ */
+export interface SavedListingsSelect<T extends boolean = true> {
+  member?: T;
+  property?: T;
+  note?: T;
+  savedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "requirements_select".
+ */
+export interface RequirementsSelect<T extends boolean = true> {
+  member?: T;
+  budgetMinEur?: T;
+  budgetMaxEur?: T;
+  currency?: T;
+  markets?: T;
+  propertyTypes?: T;
+  mustHaveFeatures?: T;
+  timeline?: T;
+  notes?: T;
+  status?: T;
+  notifyByEmail?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "member-activity_select".
+ */
+export interface MemberActivitySelect<T extends boolean = true> {
+  member?: T;
+  property?: T;
+  action?: T;
+  at?: T;
+  ip?: T;
+  userAgent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reports_select".
+ */
+export interface ReportsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  pdf?: T;
+  charts?: T;
+  publicationDate?: T;
+  authors?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  markets?: T;
+  metaTitle?: T;
+  metaDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fx-snapshots_select".
+ */
+export interface FxSnapshotsSelect<T extends boolean = true> {
+  date?: T;
+  ratesPerEur?: T;
+  source?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -3,22 +3,24 @@ import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload';
 import { ValidationError } from 'payload';
 import sharp from 'sharp';
 
-import { isAgencyRole, relationId, tenant } from '@/payload/access/tenant';
+import { isAgencyRole, relationId, staffUser, tenant } from '@/payload/access/tenant';
+import { isMember, isStaff } from '@/payload/access/member';
 
-const MIN_LONG_EDGE_PX = 1600;
+const MIN_LONG_EDGE_PX = 2000;
 
 /**
- * §6.8 Media rules: reject anything under 1600 px on the long edge with a clear
- * message, compute a blurhash LQIP and dominant colour, and scope uploads to
- * the uploading agency.
+ * §6.5 Media rules: reject anything under 2000 px on the long edge with a
+ * clear message, strip EXIF without exception (listing photos routinely carry
+ * the property's GPS), compute a blurhash LQIP and dominant colour, and scope
+ * uploads to the uploading agency.
  */
 const processUpload: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   const out = { ...data };
 
   // Agency scoping: agency users always own their uploads.
-  const user = req.user;
+  const user = staffUser(req.user);
   if (user && isAgencyRole(user.role)) {
-    out.agency = relationId(user.agency as number | { id: number } | null) ?? null;
+    out.agency = relationId(user.agency ?? null) ?? null;
   }
 
   const file = req.file;
@@ -37,6 +39,20 @@ const processUpload: CollectionBeforeChangeHook = async ({ data, req, operation 
             path: 'file',
           },
         ],
+      });
+    }
+
+    // §6.5: EXIF stripped without exception — the stored ORIGINAL is
+    // re-encoded (rotation baked in first) so no GPS/metadata survives even
+    // when the original file is served. Variants are re-encoded anyway.
+    try {
+      file.data = await sharp(file.data).rotate().toBuffer();
+      file.size = file.data.length;
+    } catch (err) {
+      console.error('[media] EXIF strip failed; refusing upload:', err);
+      throw new ValidationError({
+        collection: 'media',
+        errors: [{ message: 'Could not process this image file.', path: 'file' }],
       });
     }
 
@@ -66,10 +82,18 @@ const processUpload: CollectionBeforeChangeHook = async ({ data, req, operation 
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    // Public read: rendered images must be servable; private documents are
-    // attached via Property.documents whose own access controls exposure.
-    read: () => true,
-    create: ({ req }) => Boolean(req.user),
+    // §6.5 per-asset visibility: anonymous visitors see only public assets;
+    // active members also see members-only imagery (in production those files
+    // live in the private bucket behind /api/secure/media/[token]); staff and
+    // agency users see everything they own.
+    read: ({ req }) => {
+      const user = req.user as unknown as { collection?: string; role?: string; status?: string } | null;
+      if (!user) return { visibility: { equals: 'public' } };
+      if (isStaff(user) || isAgencyRole(user.role)) return true;
+      if (isMember(user) && user.status === 'active') return true;
+      return { visibility: { equals: 'public' } };
+    },
+    create: ({ req }) => Boolean(req.user && !isMember(req.user)),
     update: tenant(),
     delete: tenant({ fullRoles: ['admin'] }),
   },
@@ -77,7 +101,7 @@ export const Media: CollectionConfig = {
     beforeChange: [processUpload],
   },
   upload: {
-    // §6.8: variants generated at upload. WebP ladder here; AVIF is negotiated
+    // §6.5: variants generated at upload. WebP ladder here; AVIF is negotiated
     // at the CDN/Next-image layer (see DECISIONS.md).
     formatOptions: { format: 'webp', options: { quality: 82 } },
     imageSizes: [320, 640, 960, 1280, 1920, 2560].map((width) => ({
@@ -92,6 +116,18 @@ export const Media: CollectionConfig = {
       type: 'text',
       required: true,
       localized: true,
+    },
+    {
+      name: 'visibility',
+      type: 'select',
+      required: true,
+      defaultValue: 'public',
+      index: true,
+      options: ['public', 'members'],
+      admin: {
+        description:
+          '§6.5: a listing can show 10 public images and hold 30 for members. members = private bucket + signed URLs.',
+      },
     },
     {
       name: 'agency',

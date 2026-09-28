@@ -46,7 +46,7 @@ export const PROPERTY_SEARCH_SCHEMA = {
     // Display-only locality line for result rows ("Portofino · Liguria").
     { name: 'locality', type: 'string' as const, optional: true },
     { name: 'region', type: 'string' as const, optional: true },
-    { name: 'destinationId', type: 'int64' as const, facet: true, optional: true },
+    { name: 'marketId', type: 'int64' as const, facet: true, optional: true },
     { name: 'location', type: 'geopoint' as const, optional: true },
     { name: 'approximate', type: 'bool' as const, optional: true },
     { name: 'featured', type: 'bool' as const, optional: true },
@@ -87,7 +87,7 @@ export function filtersToTypesense(filters: PropertyFilters): string {
   if (filters.minFrontageM != null) parts.push(`waterFrontageM:>=${filters.minFrontageM}`);
 
   if (filters.country) parts.push(`country:=\`${esc(filters.country)}\``);
-  if (filters.destinationId != null) parts.push(`destinationId:=${filters.destinationId}`);
+  if (filters.marketId != null) parts.push(`marketId:=${filters.marketId}`);
   if (filters.status) parts.push(`status:=\`${filters.status}\``);
 
   if (filters.bbox) {

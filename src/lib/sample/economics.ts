@@ -1,7 +1,7 @@
 import {
   SAMPLE_DESTINATIONS,
   type SampleDestination,
-} from './destinations';
+} from './markets';
 
 /**
  * §13.10 blueprint engine: 60 deterministic listings with internally

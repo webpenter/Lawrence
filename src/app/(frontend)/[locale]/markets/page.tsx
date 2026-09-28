@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { Link } from '@/i18n/navigation';
-import { getDestinationCounts, type DestinationCount, type Locale } from '@/lib/db';
+import { getMarketCounts, type MarketCount, type Locale } from '@/lib/db';
 import { hreflangAlternates } from '@/lib/seo/hreflang';
 import { HERO_SCRIM, horizonGradientFor } from '@/tokens/placeholders';
 
@@ -21,13 +21,13 @@ export async function generateMetadata({ params }: HubProps): Promise<Metadata> 
   return {
     title: t('hubTitle'),
     description: t('hubSub'),
-    alternates: hreflangAlternates('/destinations'),
+    alternates: hreflangAlternates('/markets'),
   };
 }
 
-async function safeCounts(locale: Locale): Promise<DestinationCount[]> {
+async function safeCounts(locale: Locale): Promise<MarketCount[]> {
   try {
-    return await getDestinationCounts(locale);
+    return await getMarketCounts(locale);
   } catch {
     return [];
   }
@@ -51,7 +51,7 @@ export default async function DestinationsHub({ params }: HubProps) {
             {destinations.map((destination) => (
               <Link
                 key={destination.id}
-                href={`/destinations/${destination.slug}`}
+                href={`/markets/${destination.slug}`}
                 className="group relative flex aspect-[3/2] items-end overflow-hidden text-vellum"
               >
                 <span

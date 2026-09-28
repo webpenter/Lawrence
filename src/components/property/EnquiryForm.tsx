@@ -24,7 +24,7 @@ interface EnquiryFormLabels {
 interface EnquiryFormProps {
   /** Omitted for landing-page/contact leads — routed to the internal desk. */
   propertyId?: number;
-  source?: 'property' | 'landing' | 'contact' | 'list_with_us';
+  source?: 'listing' | 'off_market' | 'market_page' | 'report' | 'contact' | 'sell' | 'desk_call';
   locale: string;
   labels: EnquiryFormLabels;
 }
@@ -40,7 +40,7 @@ type FieldName = 'name' | 'email' | 'consent';
  * focuses an error summary whose entries link to their fields, and invalid
  * fields carry aria-invalid + aria-describedby pointing at their message.
  */
-export function EnquiryForm({ propertyId, source = 'property', locale, labels }: EnquiryFormProps) {
+export function EnquiryForm({ propertyId, source = 'listing', locale, labels }: EnquiryFormProps) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldName, string>>>({});
   const summaryRef = useRef<HTMLDivElement>(null);

@@ -72,7 +72,7 @@ async function safeAggregates(page: LandingPage): Promise<ScopeAggregates> {
       country: filters.country,
       waterBodyType: filters.waterBodyTypes?.[0],
       propertyType: filters.propertyTypes?.[0],
-      destinationId: filters.destinationId,
+      marketId: filters.marketId,
     });
   } catch {
     if (isFallbackContent(page)) {
@@ -281,7 +281,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
           <h2 className="mb-1 font-display text-lg text-ink">{t('enquiryTitle')}</h2>
           <p className="mb-4 text-xs text-graphite">{t('enquirySub')}</p>
           <EnquiryForm
-            source="landing"
+            source="market_page"
             locale={locale}
             labels={{
               name: tl('formName'),

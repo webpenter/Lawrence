@@ -2,13 +2,13 @@ import type { Access, CollectionBeforeChangeHook, CollectionConfig, Where } from
 import { ValidationError } from 'payload';
 
 import { logAudit } from '@/lib/audit';
-import { adminOnly, isAgencyRole, relationId, type Role } from '@/payload/access/tenant';
+import { adminOnly, isAgencyRole, relationId, staffUser, type Role } from '@/payload/access/tenant';
 
 const AGENCY_ASSIGNABLE_ROLES: Role[] = ['agency_admin', 'agency_agent'];
 
 // §8.1 "Manage users & roles": admin all; agency_admin own agents; everyone reads self.
 const readUsers: Access = ({ req }) => {
-  const user = req.user;
+  const user = staffUser(req.user);
   if (!user?.role) return false;
   if (user.role === 'admin' || user.role === 'editor') return true;
   const self: Where = { id: { equals: user.id } };
@@ -20,7 +20,7 @@ const readUsers: Access = ({ req }) => {
 };
 
 const writeUsers: Access = ({ req }) => {
-  const user = req.user;
+  const user = staffUser(req.user);
   if (!user?.role) return false;
   if (user.role === 'admin') return true;
   const self: Where = { id: { equals: user.id } };
@@ -37,7 +37,7 @@ const writeUsers: Access = ({ req }) => {
  * only touch their own profile fields.
  */
 const guardRoleAssignment: CollectionBeforeChangeHook = ({ data, req, originalDoc }) => {
-  const actor = req.user;
+  const actor = staffUser(req.user);
   if (!actor?.role) return data;
 
   if (actor.role === 'admin') return data;

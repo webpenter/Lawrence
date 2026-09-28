@@ -48,7 +48,7 @@ describe('filtersToWhere (§11.2 browse controls)', () => {
         features: ['helipad'],
         tenures: ['freehold'],
         country: 'IT',
-        destinationId: 7,
+        marketId: 7,
         status: 'available',
       }),
     );
@@ -63,7 +63,7 @@ describe('filtersToWhere (§11.2 browse controls)', () => {
     expect(and).toContainEqual({ features: { in: ['helipad'] } });
     expect(and).toContainEqual({ tenure: { in: ['freehold'] } });
     expect(and).toContainEqual({ 'location.country': { equals: 'IT' } });
-    expect(and).toContainEqual({ 'location.destination': { equals: 7 } });
+    expect(and).toContainEqual({ 'location.market': { equals: 7 } });
     expect(and).toContainEqual({ status: { equals: 'available' } });
   });
 

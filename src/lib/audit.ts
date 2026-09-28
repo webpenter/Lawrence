@@ -7,6 +7,8 @@ export type AuditAction =
   | 'update'
   | 'delete'
   | 'publish'
+  | 'enquiry_view'
+  | 'enquiry_anonymized'
   | 'lead_view'
   | 'lead_anonymized'
   | 'status_change';

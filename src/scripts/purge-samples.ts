@@ -35,7 +35,7 @@ export async function purgeSamples(payload: Payload): Promise<Record<string, num
 
   if (propertyIds.length > 0) {
     const leads = await payload.delete({
-      collection: 'leads',
+      collection: 'enquiries',
       where: { property: { in: propertyIds } },
       overrideAccess: true,
     });
@@ -43,7 +43,7 @@ export async function purgeSamples(payload: Payload): Promise<Record<string, num
   }
   if (agencyIds.length > 0) {
     const agencyLeads = await payload.delete({
-      collection: 'leads',
+      collection: 'enquiries',
       where: { agency: { in: agencyIds } },
       overrideAccess: true,
     });

@@ -17,7 +17,7 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
 
   const links = [
     { href: '/search', label: t('collection') },
-    { href: '/destinations', label: t('destinations') },
+    { href: '/markets', label: t('destinations') },
     { href: '/journal', label: t('journal') },
     { href: '/about', label: t('about') },
   ] as const;

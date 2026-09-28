@@ -21,7 +21,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const now = new Date();
   const threshold = new Date(now.getTime() - UNANSWERED_REMINDER_MS).toISOString();
   const stale = await payload.find({
-    collection: 'leads',
+    collection: 'enquiries',
     where: {
       and: [
         { status: { in: ['new', 'sent'] } },
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     await payload.update({
-      collection: 'leads',
+      collection: 'enquiries',
       id: lead.id,
       data: { reminderSentAt: now.toISOString() },
       overrideAccess: true,

@@ -11,7 +11,7 @@ import {
 import { getPayloadClient } from '@/lib/db';
 import { textToLexical } from '@/lib/lexical';
 import { SAMPLE_AGENCIES, SAMPLE_AGENTS } from '@/lib/sample/agencies';
-import { SAMPLE_DESTINATIONS, SAMPLE_DESTINATION_BY_SLUG } from '@/lib/sample/destinations';
+import { SAMPLE_DESTINATIONS, SAMPLE_DESTINATION_BY_SLUG } from '@/lib/sample/markets';
 import { buildAllBlueprints, type ListingBlueprint } from '@/lib/sample/economics';
 import { sourceGallery, type SourcedPhoto } from '@/lib/sample/unsplash';
 import { purgeSamples } from '@/scripts/purge-samples';
@@ -51,7 +51,7 @@ function parseFlags(argv: string[]): { count: number; destination?: string; wipe
 
 async function upsertBySlug(
   payload: Payload,
-  collection: 'destinations' | 'water-bodies' | 'agencies' | 'landing-pages' | 'articles',
+  collection: 'markets' | 'agencies' | 'landing-pages' | 'articles',
   slug: string,
   data: Record<string, unknown>,
   draft = false,
@@ -84,32 +84,21 @@ async function upsertBySlug(
 }
 
 async function seedReferenceData(payload: Payload): Promise<{
-  destinationIds: Map<string, number>;
-  waterBodyIds: Map<string, number>;
+  marketIds: Map<string, number>;
 }> {
-  const destinationIds = new Map<string, number>();
-  const waterBodyIds = new Map<string, number>();
+  const marketIds = new Map<string, number>();
 
   for (const destination of SAMPLE_DESTINATIONS) {
-    if (!waterBodyIds.has(destination.waterBody.slug)) {
-      waterBodyIds.set(
-        destination.waterBody.slug,
-        await upsertBySlug(payload, 'water-bodies', destination.waterBody.slug, {
-          name: destination.waterBody.name,
-          type: destination.waterBody.type,
-        }),
-      );
-    }
-    destinationIds.set(
+    marketIds.set(
       destination.slug,
-      await upsertBySlug(payload, 'destinations', destination.slug, {
+      await upsertBySlug(payload, 'markets', destination.slug, {
         name: destination.name,
         country: destination.country,
         region: destination.region,
       }),
     );
   }
-  return { destinationIds, waterBodyIds };
+  return { marketIds };
 }
 
 async function seedAgencies(payload: Payload): Promise<{
@@ -161,7 +150,7 @@ async function seedAgencies(payload: Payload): Promise<{
 
 async function seedEditorialStubs(
   payload: Payload,
-  destinationIds: Map<string, number>,
+  marketIds: Map<string, number>,
 ): Promise<void> {
   // 10 landing pages (drafts behind the §5.4 gate until sourced copy lands).
   for (const seed of LANDING_PAGE_SEEDS.slice(0, 10)) {
@@ -179,7 +168,7 @@ async function seedEditorialStubs(
           propertyType: seed.propertyType,
           waterBodyType: seed.waterBodyType,
           country: seed.country,
-          destination: destinationSlug ? destinationIds.get(destinationSlug) : undefined,
+          destination: destinationSlug ? marketIds.get(destinationSlug) : undefined,
         },
       },
       true,
@@ -289,6 +278,7 @@ async function attachGallery(
           size: buffer.length,
         },
         data: {
+          visibility: 'public',
           alt: `${altBase} — ${photo.role}`,
           agency: agencyId,
           credit: `${photo.credit} / Unsplash`,
@@ -315,9 +305,9 @@ async function main(): Promise<void> {
     await purgeSamples(payload);
   }
 
-  const { destinationIds } = await seedReferenceData(payload);
+  const { marketIds } = await seedReferenceData(payload);
   const { agencyIds, agentIdsByAgency } = await seedAgencies(payload);
-  await seedEditorialStubs(payload, destinationIds);
+  await seedEditorialStubs(payload, marketIds);
 
   let blueprints = buildAllBlueprints(60);
   if (flags.destination) {
@@ -387,7 +377,7 @@ async function main(): Promise<void> {
         country: SAMPLE_DESTINATION_BY_SLUG.get(blueprint.destinationSlug)?.country,
         coordinates: blueprint.coordinates,
         coordinatePrecision: blueprint.coordinatePrecision,
-        destination: destinationIds.get(blueprint.destinationSlug),
+        destination: marketIds.get(blueprint.destinationSlug),
       },
       _status: 'published',
     };

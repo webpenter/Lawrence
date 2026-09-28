@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 
-import { SAMPLE_DESTINATION_BY_SLUG } from './destinations';
+import { SAMPLE_DESTINATION_BY_SLUG } from './markets';
 import { buildAllBlueprints, buildBlueprint } from './economics';
 
 const blueprints = buildAllBlueprints(60);

@@ -18,7 +18,7 @@ function listing(overrides: Partial<Property>): Property {
     moderation: 'approved',
     sourceType: 'manual',
     priceEur: 30_000_000,
-    location: { destination: 5 },
+    location: { market: 5 },
     updatedAt: '',
     createdAt: '',
     ...overrides,
@@ -35,13 +35,13 @@ describe('isSimilar (§11.3: comparable properties in the same market and band)'
 
   it('rejects price outside ±35% when the market differs', () => {
     expect(
-      isSimilar(subject, listing({ id: 4, priceEur: 60_000_000, location: { destination: 9 } })),
+      isSimilar(subject, listing({ id: 4, priceEur: 60_000_000, location: { market: 9 } })),
     ).toBe(false);
   });
 
   it('accepts the same market even when price is far apart', () => {
     expect(
-      isSimilar(subject, listing({ id: 5, priceEur: 75_000_000, location: { destination: 5 } })),
+      isSimilar(subject, listing({ id: 5, priceEur: 75_000_000, location: { market: 5 } })),
     ).toBe(true);
   });
 
@@ -62,9 +62,9 @@ describe('isSimilar (§11.3: comparable properties in the same market and band)'
 describe('rankSimilar', () => {
   it('prefers same market, then closest price, and respects the limit', () => {
     const candidates = [
-      listing({ id: 20, priceEur: 39_000_000, location: { destination: 9 } }),
-      listing({ id: 21, priceEur: 31_000_000, location: { destination: 9 } }),
-      listing({ id: 22, priceEur: 72_000_000, location: { destination: 5 } }),
+      listing({ id: 20, priceEur: 39_000_000, location: { market: 9 } }),
+      listing({ id: 21, priceEur: 31_000_000, location: { market: 9 } }),
+      listing({ id: 22, priceEur: 72_000_000, location: { market: 5 } }),
       listing({ id: 23, status: 'sold' }),
     ];
     const ranked = rankSimilar(subject, candidates, 2);

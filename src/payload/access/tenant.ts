@@ -99,3 +99,18 @@ export const anyLoggedIn: Access = ({ req }) => Boolean(req.user);
 export function isAgencyRole(role: string | undefined): boolean {
   return role === 'agency_admin' || role === 'agency_agent';
 }
+
+/**
+ * req.user is a User | Member union since the members collection landed.
+ * Staff/agency users are the ones carrying a `role`; members never do. This
+ * narrows for call sites that read role/agency/agentProfile directly.
+ */
+export interface StaffUser extends TenantUser {
+  id: number;
+  collection?: string;
+}
+
+export function staffUser(user: unknown): StaffUser | null {
+  if (user && typeof user === 'object' && 'role' in user) return user as StaffUser;
+  return null;
+}

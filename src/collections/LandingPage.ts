@@ -24,7 +24,7 @@ export const LandingPage: CollectionConfig = {
   hooks: {
     afterChange: [
       async ({ doc }) => {
-        const paths = ['/destinations'];
+        const paths = ['/markets'];
         if (typeof doc.slug === 'string' && doc.slug) {
           paths.push(`/waterfront/${doc.slug}`);
         }
@@ -34,7 +34,7 @@ export const LandingPage: CollectionConfig = {
     ],
     afterDelete: [
       async ({ doc }) => {
-        const paths = ['/destinations'];
+        const paths = ['/markets'];
         if (typeof doc.slug === 'string' && doc.slug) {
           paths.push(`/waterfront/${doc.slug}`);
         }
@@ -52,7 +52,7 @@ export const LandingPage: CollectionConfig = {
       fields: [
         { name: 'propertyType', type: 'select', options: [...PROPERTY_TYPES] },
         { name: 'waterBodyType', type: 'select', options: [...WATER_BODY_TYPES] },
-        { name: 'destination', type: 'relationship', relationTo: 'destinations' },
+        { name: 'destination', type: 'relationship', relationTo: 'markets' },
         { name: 'country', type: 'text', maxLength: 2 },
       ],
     },

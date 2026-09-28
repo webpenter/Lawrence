@@ -26,7 +26,7 @@ export interface PropertyFilters {
   minFrontageM?: number;
   country?: string;
   /** The market relation id (§6.4 — field is renamed from destination in Prompt 4). */
-  destinationId?: number;
+  marketId?: number;
   status?: (typeof PUBLICLY_VISIBLE_STATUSES)[number];
   bbox?: Bbox;
   sort?: 'price_asc' | 'price_desc' | 'newest';
@@ -77,8 +77,8 @@ export function filtersToWhere(filters: PropertyFilters): Where {
     and.push({ 'waterfront.waterFrontageM': { greater_than_equal: filters.minFrontageM } });
 
   if (filters.country) and.push({ 'location.country': { equals: filters.country } });
-  if (filters.destinationId != null)
-    and.push({ 'location.destination': { equals: filters.destinationId } });
+  if (filters.marketId != null)
+    and.push({ 'location.market': { equals: filters.marketId } });
   if (filters.status) and.push({ status: { equals: filters.status } });
 
   if (filters.bbox) and.push(withinBboxWhere('location.coordinates', filters.bbox));

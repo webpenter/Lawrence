@@ -5,7 +5,7 @@ import { getPayloadClient } from '@/lib/db';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { runImport } from '@/lib/import/runner';
 import type { RawRow } from '@/lib/import/validate-row';
-import { relationId } from '@/payload/access/tenant';
+import { relationId, staffUser } from '@/payload/access/tenant';
 
 // §8.4 bulk import: upload → dry-run report → confirm → import. Auth is the
 // Payload session/API key; agency users import only into their own agency.
@@ -19,16 +19,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!payload) return NextResponse.json({ ok: false }, { status: 503 });
 
   const { user } = await payload.auth({ headers: request.headers });
-  if (!user || !['admin', 'agency_admin'].includes(user.role)) {
+  const staff = staffUser(user);
+  if (!staff || !['admin', 'agency_admin'].includes(staff.role ?? '')) {
     return NextResponse.json({ ok: false }, { status: 403 });
   }
 
   const url = new URL(request.url);
   const dryRun = url.searchParams.get('dryRun') !== 'false';
   const requestedAgency = Number(url.searchParams.get('agency') ?? '');
-  const ownAgency = relationId(user.agency as number | { id: number } | null);
+  const ownAgency = relationId(staff.agency ?? null);
   const agencyId =
-    user.role === 'admin'
+    staff.role === 'admin'
       ? Number.isFinite(requestedAgency) && requestedAgency > 0
         ? requestedAgency
         : ownAgency

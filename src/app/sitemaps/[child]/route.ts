@@ -47,15 +47,15 @@ async function landingEntries(): Promise<SitemapEntry[]> {
 async function destinationEntries(): Promise<SitemapEntry[]> {
   const payload = await getPayloadClient();
   const res = await payload.find({
-    collection: 'destinations',
+    collection: 'markets',
     limit: 500,
     depth: 0,
     select: { slug: true, updatedAt: true },
     overrideAccess: true,
   });
   return [
-    { path: '/destinations' },
-    ...res.docs.map((doc) => ({ path: `/destinations/${doc.slug}`, lastmod: doc.updatedAt })),
+    { path: '/markets' },
+    ...res.docs.map((doc) => ({ path: `/markets/${doc.slug}`, lastmod: doc.updatedAt })),
   ];
 }
 

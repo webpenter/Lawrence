@@ -17,7 +17,7 @@ import {
   deleteListingEverywhere,
   upsertListingDocument,
 } from '@/lib/search/sync';
-import { isAgencyRole, relationId } from '@/payload/access/tenant';
+import { isAgencyRole, relationId, staffUser } from '@/payload/access/tenant';
 
 import type { Currency, ValueTier } from './enums';
 import { LISTING_LIFETIME_DAYS } from './enums';
@@ -78,16 +78,15 @@ export const sanitizeAgencySubmission: CollectionBeforeChangeHook = ({
   req,
   originalDoc,
 }) => {
-  const user = req.user;
+  const user = staffUser(req.user);
   if (!user || !isAgencyRole(user.role)) return data;
 
   const out: PropertyData = { ...data };
   const original = (originalDoc ?? {}) as PropertyData;
 
-  out.agency = relationId(user.agency as number | { id: number } | null) ?? original.agency;
+  out.agency = relationId(user.agency ?? null) ?? original.agency;
   if (user.role === 'agency_agent') {
-    out.agent =
-      relationId(user.agentProfile as number | { id: number } | null) ?? original.agent;
+    out.agent = relationId(user.agentProfile ?? null) ?? original.agent;
   }
 
   out.featured = original.featured ?? false;

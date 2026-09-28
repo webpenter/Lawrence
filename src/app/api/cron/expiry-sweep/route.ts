@@ -116,13 +116,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   for (const listing of soldCandidates.docs) {
     if (!soldPageShouldRetire(listing, now)) continue;
-    const destinationId =
-      typeof listing.location?.destination === 'object'
-        ? listing.location.destination?.id
-        : listing.location?.destination;
+    const marketId =
+      typeof listing.location?.market === 'object'
+        ? listing.location.market?.id
+        : listing.location?.market;
     const parent = landingPages.find((page) => {
       const combo = page.combo?.destination;
-      return (typeof combo === 'object' ? combo?.id : combo) === destinationId;
+      return (typeof combo === 'object' ? combo?.id : combo) === marketId;
     });
     const to = parent ? `/waterfront/${parent.slug}` : '/search';
 

@@ -10,9 +10,15 @@ import { Media } from './collections/Media';
 import { Property } from './collections/Property';
 import { Agency } from './collections/Agency';
 import { Agent } from './collections/Agent';
-import { WaterBody } from './collections/WaterBody';
-import { Destination } from './collections/Destination';
-import { Lead } from './collections/Lead';
+import { Members } from './collections/Members/index';
+import { Market } from './collections/Market';
+import { Enquiry } from './collections/Enquiry';
+import { SavedListing } from './collections/SavedListing';
+import { Requirement } from './collections/Requirement';
+import { MemberActivity } from './collections/MemberActivity';
+import { Report } from './collections/Report';
+import { Documents } from './collections/Documents';
+import { FxSnapshot } from './collections/FxSnapshot';
 import { LandingPage } from './collections/LandingPage';
 import { Taxonomy } from './collections/Taxonomy';
 import { Article } from './collections/Article';
@@ -42,13 +48,19 @@ export default buildConfig({
   },
   collections: [
     Users,
+    Members,
     Media,
+    Documents,
     Property,
     Agency,
     Agent,
-    WaterBody,
-    Destination,
-    Lead,
+    Market,
+    Enquiry,
+    SavedListing,
+    Requirement,
+    MemberActivity,
+    Report,
+    FxSnapshot,
     LandingPage,
     Taxonomy,
     Article,

@@ -1,7 +1,7 @@
 /**
  * §13.2.1 image query sets — a typed map so queries can be tuned without
  * touching the generator. Keys under byDestination match the sample
- * destination slugs in src/lib/sample/destinations.ts.
+ * destination slugs in src/lib/sample/markets.ts.
  */
 export const imageQueries = {
   byDestination: {

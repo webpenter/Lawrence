@@ -10,11 +10,11 @@ export const leadSchema = z.object({
   email: z.string().email().max(320),
   phone: z.string().max(50).optional(),
   message: z.string().max(5000).optional(),
-  /** Absent for landing/contact/list-with-us leads — routed to the desk (§8.9). */
+  /** Absent for contact/sell/desk enquiries — routed to the desk (§11.8). */
   propertyId: z.number().int().positive().optional(),
   source: z
-    .enum(['contact', 'property', 'landing', 'boat_filter', 'whatsapp', 'list_with_us'])
-    .default('property'),
+    .enum(['listing', 'off_market', 'market_page', 'report', 'contact', 'sell', 'desk_call'])
+    .default('listing'),
   consent: z.literal(true),
   locale: z.enum(['en', 'it', 'fr', 'de', 'es', 'ru']).optional(),
   /** Honeypot — humans never see it; any value means a bot. */

@@ -73,9 +73,9 @@ export async function getAgencyDashboard(agencyId: number): Promise<AgencyDashbo
         {
           ...listing,
           marketId:
-            typeof listing.location?.destination === 'object'
-              ? (listing.location?.destination?.id ?? null)
-              : (listing.location?.destination ?? null),
+            typeof listing.location?.market === 'object'
+              ? (listing.location?.market?.id ?? null)
+              : (listing.location?.market ?? null),
           hasValue: listing.priceEur != null || listing.internalValueEur != null,
         },
         now,
@@ -96,7 +96,7 @@ export async function getAgencyDashboard(agencyId: number): Promise<AgencyDashbo
 
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 3600_000).toISOString();
   const leads = await payload.find({
-    collection: 'leads',
+    collection: 'enquiries',
     where: {
       and: [{ agency: { equals: agencyId } }, { createdAt: { greater_than_equal: thirtyDaysAgo } }],
     },
@@ -171,7 +171,7 @@ export async function getAdminDashboard(): Promise<AdminDashboard> {
       where: {
         and: [
           { status: { in: ['available', 'reserved', 'under_offer'] } },
-          { 'location.destination': { equals: null } },
+          { 'location.market': { equals: null } },
         ],
       },
       overrideAccess: true,
@@ -201,7 +201,7 @@ export async function getAdminDashboard(): Promise<AdminDashboard> {
 
   const eightWeeksAgo = new Date(now.getTime() - 8 * 7 * 24 * 3600_000).toISOString();
   const recentLeads = await payload.find({
-    collection: 'leads',
+    collection: 'enquiries',
     where: { createdAt: { greater_than_equal: eightWeeksAgo } },
     limit: 1000,
     depth: 0,
@@ -226,7 +226,7 @@ export async function getAdminDashboard(): Promise<AdminDashboard> {
             overrideAccess: true,
           }),
           payload.count({
-            collection: 'leads',
+            collection: 'enquiries',
             where: { agency: { equals: agency.id } },
             overrideAccess: true,
           }),

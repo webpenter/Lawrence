@@ -14,7 +14,7 @@ import {
   type AgencyDashboard,
 } from '@/lib/db/dashboard';
 import { humanizeEnum } from '@/lib/humanize';
-import { relationId } from '@/payload/access/tenant';
+import { relationId, staffUser } from '@/payload/access/tenant';
 
 // Prompt 15 B/C: read-only backoffice dashboards, role-gated via the Payload
 // session. Never indexable; the Recharts chunk loads only on this route.
@@ -33,10 +33,11 @@ async function resolveViewer(): Promise<Viewer | null> {
   try {
     const payload = await getPayloadClient();
     const { user } = await payload.auth({ headers: await headers() });
-    if (!user?.role) return null;
+    const staff = staffUser(user);
+    if (!staff?.role) return null;
     return {
-      role: user.role,
-      agencyId: relationId(user.agency as number | { id: number } | null),
+      role: staff.role,
+      agencyId: relationId(staff.agency ?? null),
     };
   } catch {
     return null;

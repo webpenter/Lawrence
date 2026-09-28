@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildAllBlueprints } from '@/lib/sample/economics';
-import { SAMPLE_DESTINATION_BY_SLUG } from '@/lib/sample/destinations';
+import { SAMPLE_DESTINATION_BY_SLUG } from '@/lib/sample/markets';
 
 import { composeDescription, composeTitle, DESCRIPTION_TEMPLATES } from './index';
 import type { DescriptionInput } from './types';

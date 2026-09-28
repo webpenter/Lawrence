@@ -1,3 +1,4 @@
+import { staffUser } from '@/payload/access/tenant';
 import { NextResponse, type NextRequest } from 'next/server';
 import { anonymizeLead } from '@/lib/privacy/anonymize';
 import { getPayloadClient } from '@/lib/db';
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Admin session only (§16.4 one-click action) — the retention cron has its
     // own CRON_SECRET-guarded route; no bearer shortcut here.
     const { user } = await payload.auth({ headers: request.headers });
-    if (!user || !['admin', 'editor'].includes(user.role)) {
+    if (!user || !['admin', 'editor'].includes(staffUser(user)?.role ?? '')) {
       return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
     }
 

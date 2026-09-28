@@ -85,12 +85,12 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
     });
 
     await payload.create({
-      collection: 'leads',
+      collection: 'enquiries',
       overrideAccess: true,
       data: {
         name: 'Buyer',
         email: `buyer-${suffix}@test.lawrence`,
-        source: 'property',
+        source: 'listing',
         status: 'new',
         property: listingA.id,
         agency: agencyA.id,
@@ -100,7 +100,7 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
 
   afterAll(async () => {
     for (const [collection, where] of [
-      ['leads', { email: { like: `%${suffix}@test.lawrence` } }],
+      ['enquiries', { email: { like: `%${suffix}@test.lawrence` } }],
       ['properties', { title: { equals: 'Agency A listing' } }],
       ['agents', { name: { equals: 'Agent A' } }],
       ['users', { email: { like: `%${suffix}@test.lawrence` } }],
@@ -110,7 +110,7 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
     }
   });
 
-  async function findAs(userId: number, collection: 'properties' | 'leads' | 'agencies') {
+  async function findAs(userId: number, collection: 'properties' | 'enquiries' | 'agencies') {
     const user = await payload.findByID({
       collection: 'users',
       id: userId,
@@ -136,7 +136,7 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
   });
 
   it("agency B sees none of agency A's leads", async () => {
-    const results = await findAs(agencyBAdmin.id, 'leads');
+    const results = await findAs(agencyBAdmin.id, 'enquiries');
     expect(results.docs).toHaveLength(0);
   });
 

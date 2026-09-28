@@ -71,7 +71,7 @@ describe('comboToFilters / comboToSearchQuery', () => {
       propertyTypes: ['villa'],
       waterBodyTypes: ['sea'],
       country: 'IT',
-      destinationId: 5,
+      marketId: 5,
     });
   });
 

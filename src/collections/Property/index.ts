@@ -296,11 +296,11 @@ export const Property: CollectionConfig = {
                 },
                 { name: 'continent', type: 'text' },
                 {
-                  name: 'destination',
+                  name: 'market',
                   type: 'relationship',
-                  relationTo: 'destinations',
+                  relationTo: 'markets',
                   index: true,
-                  admin: { description: 'The Market this listing belongs to (renamed in Prompt 4).' },
+                  admin: { description: 'The Market this listing belongs to (§6.4).' },
                 },
                 { name: 'coordinates', type: 'point', index: true },
                 {
@@ -341,16 +341,16 @@ export const Property: CollectionConfig = {
             {
               name: 'floorplans',
               type: 'relationship',
-              relationTo: 'media',
+              relationTo: 'documents',
               hasMany: true,
-              admin: { description: 'Members-only by default (§6.5).' },
+              admin: { description: 'Members-only by default (§6.5), served via signed URLs.' },
             },
             {
               name: 'documents',
               type: 'relationship',
-              relationTo: 'media',
+              relationTo: 'documents',
               hasMany: true,
-              admin: { description: 'Private — staff and owning agency only. Never public.' },
+              admin: { description: 'Private — members via signed URL, staff, owning agency. Never public.' },
             },
             { name: 'description', type: 'richText', localized: true },
             {

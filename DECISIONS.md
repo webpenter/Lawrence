@@ -120,3 +120,45 @@ Postgres+PostGIS and Typesense — the €20M block, prime override + €10M abs
 internalValueEur enforcement, USD→EUR conversion, tier derivation, off-market null slug,
 public/member index routing on publish, channel flip and unpublish cleanup. Bundle budgets pass
 (home 109.0/110 kB, listing 124.9/130 kB). /api/health ok; home and search render 200.
+
+## 2026-09-28 — Phase 4: the remaining collections (§6.5–6.7)
+
+**Decision**: The member side is a separate auth collection (`members`) from staff (`users`), with
+email verification on (Payload `auth.verify`), 5-attempt lockout, and a 14-day session. New
+accounts are `active`; `MEMBER_REQUIRE_APPROVAL=true` routes them to `pending` in the registration
+hook — one env flag, no migration, exactly as §2.3 promises. The §6.6 reserved fields (ndaStatus,
+capabilityStatus, tier…) exist in a `reserved` group and are never written.
+
+Notable calls, all reversible:
+- **Isolation model**: one helper set (`src/payload/access/member.ts`) — staff full,
+  member-only-self via where-clauses, everyone else nothing. Ownership relations are pinned to the
+  session in beforeChange hooks so a hostile client cannot save rows as another member.
+  `req.user` became a User|Member union; `staffUser()` narrows it (role only exists on staff).
+- **Renames done at the model layer now** rather than dragging legacy names through later phases:
+  `leads`→`enquiries` (§6.6 fields and sources), `destinations`→`markets` (§6.7 fields: per-locale
+  slug, polygon, centroid, sourced stats group where EVERY number carries source URL + asOfDate),
+  route `/destinations`→`/markets`, filter `destinationId`→`marketId`. The `waterline`-era
+  WaterBody collection is deleted. transactionVolumeBand bands chosen (under_10/10_50/50_200/
+  over_200 — §6.7 names the enum without values).
+- **Documents** is its own private upload collection (floor plans, brochures, surveys):
+  read = active members + staff + owning agency; locally Payload's file route enforces that
+  access, in production the files live in the private bucket behind /api/secure/* signed URLs.
+  Property.floorplans/documents now point at it.
+- **Media §6.5 hardening**: per-asset `visibility` (public/members) enforced in read access
+  (anonymous readers get a `visibility=public` where-clause — members-only assets cannot be
+  listed or served), the stored ORIGINAL is re-encoded via sharp so EXIF/GPS is stripped without
+  exception, and the long-edge floor rose to 2000px.
+- **Signed URLs (§8.6)**: `src/lib/media/signed-url.ts` — HMAC(kind, assetId, memberId, expiry,
+  nonce), 15-minute TTL, constant-time verify, nonce store injected (memory now, Upstash in
+  Prompt 9). Magic-link tokens (`src/lib/member/magic-link.ts`) use the same shape; both are
+  unit-tested. The /api/secure/* and /api/member/* routes mount in Prompt 9.
+- **Report** (ungated 400–600 word summary + gated PDF via Documents), **FxSnapshot** (daily
+  auditable ECB rates row, written by /api/cron/fx-snapshot) added per §6.7.
+- Migration baseline squashed again (still no deployment): one `lawrence_initial`.
+
+**Gate evidence**: 260/260 tests green, including 8 new integration tests proving the Prompt 4
+gate with overrideAccess:false against real Postgres — member A cannot read B's profile, saved
+listings, requirements, activity or enquiries; ownership cannot be spoofed; a member cannot
+promote their own status; MemberActivity is server-write-only; members-only media returns nothing
+to anonymous queries; MEMBER_REQUIRE_APPROVAL routes to pending. Bundle budgets green;
+/api/health ok; /en and /en/markets render 200.

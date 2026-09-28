@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { brand } from '@/config/brand';
-import { getDestinationCounts, getPublishedLandingPages } from '@/lib/db';
+import { getMarketCounts, getPublishedLandingPages } from '@/lib/db';
 import { passesEditorialGate } from '@/lib/seo/combos';
 import { siteBase } from '@/lib/seo/sitemap';
 
@@ -14,10 +14,10 @@ export async function GET(): Promise<NextResponse> {
   let destinationLines = '- (destination index unavailable)';
   let landingLines = '- (landing index unavailable)';
   try {
-    const destinations = await getDestinationCounts();
+    const destinations = await getMarketCounts();
     if (destinations.length > 0) {
       destinationLines = destinations
-        .map((d) => `- [${d.name}](${base}/en/destinations/${d.slug}): ${d.count} listings`)
+        .map((d) => `- [${d.name}](${base}/en/markets/${d.slug}): ${d.count} listings`)
         .join('\n');
     }
     const landing = (await getPublishedLandingPages('en', 200)).filter(passesEditorialGate);

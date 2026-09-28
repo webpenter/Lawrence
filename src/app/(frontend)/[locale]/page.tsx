@@ -4,8 +4,8 @@ import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { Link } from '@/i18n/navigation';
-import { getDestinationCounts, getFeatured, type Locale } from '@/lib/db';
-import type { DestinationCount } from '@/lib/db';
+import { getMarketCounts, getFeatured, type Locale } from '@/lib/db';
+import type { MarketCount } from '@/lib/db';
 import type { Property } from '@/payload-types';
 import { HERO_SCRIM, HORIZON_LINE, horizonGradientFor } from '@/tokens/placeholders';
 
@@ -27,9 +27,9 @@ async function safeFeatured(locale: Locale): Promise<Property[]> {
   }
 }
 
-async function safeDestinations(locale: Locale): Promise<DestinationCount[]> {
+async function safeDestinations(locale: Locale): Promise<MarketCount[]> {
   try {
-    return (await getDestinationCounts(locale)).slice(0, 8);
+    return (await getMarketCounts(locale)).slice(0, 8);
   } catch {
     return sampleFallbackEnabled() ? FALLBACK_DESTINATIONS.slice(0, 8) : [];
   }
@@ -201,7 +201,7 @@ export default async function HomePage({
             {destinations.map((destination) => (
               <Link
                 key={destination.id}
-                href={`/destinations/${destination.slug}`}
+                href={`/markets/${destination.slug}`}
                 className="group relative flex aspect-[3/2] items-end overflow-hidden text-vellum"
               >
                 <span

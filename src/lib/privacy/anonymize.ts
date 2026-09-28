@@ -27,7 +27,7 @@ export async function anonymizeLead(
   const idNum = typeof leadId === 'string' ? parseInt(leadId, 10) : leadId;
 
   const lead = await payload.findByID({
-    collection: 'leads',
+    collection: 'enquiries',
     id: idNum,
     overrideAccess: true,
   });
@@ -39,7 +39,7 @@ export async function anonymizeLead(
   const anonymizedAt = new Date().toISOString();
 
   await payload.update({
-    collection: 'leads',
+    collection: 'enquiries',
     id: idNum,
     overrideAccess: true,
     data: {
@@ -53,7 +53,6 @@ export async function anonymizeLead(
         consentIp: '[ANONYMIZED]',
       },
       utm: undefined,
-      navigationPath: undefined,
     },
   });
 
@@ -98,7 +97,7 @@ export async function runRetentionSweep(): Promise<RetentionSweepResult> {
   // 1. Find leads older than 24 months that are not already anonymized
   try {
     const oldLeads = await payload.find({
-      collection: 'leads',
+      collection: 'enquiries',
       where: {
         createdAt: { less_than: cutoffLeads },
       },

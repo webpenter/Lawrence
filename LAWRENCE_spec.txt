@@ -1,0 +1,2555 @@
+LAWRENCE PRIVATE COLLECTION
+A Portal for Trophy Property — Public Collection + Members' Off-Market Section
+Complete Technical Speciﬁcation, Build Brief & Operating Manual — Version 2.0 (deﬁnitive)
+
+0. How to read this document
+This is the complete brief for Lawrence Private Collection: a portal listing exceptional property from roughly €20 million, built as a
+normal, fully public, fully indexable listings site, with one addition — an Oﬀ-Market section that requires a free account.
+There is deliberately no NDA, no proof of funds and no manual vetting in this phase. A visitor creates an account, conﬁrms
+their email, and the oﬀ-market listings open. That is the whole gate. Everything heavier (NDA signature, ﬁnancial capability
+conﬁrmation, per-member watermarking, manual approval) is designed for but not built — §23 speciﬁes exactly how each is switched
+on later without a migration or a rewrite.
+The same applies to the multi-agency backoﬃce: the data model carries the agency ﬁelds from day one, but Phase 1 runs as a singleteam CMS. Turning on external agency accounts is a conﬁguration and UI task, not an architectural one (§9.4).
+It is written for one senior full-stack developer working with Cursor + Claude, and designed so the developer reaches 90–100 % of a
+launch-ready site without asking the client a single question. Copy (§12), design values (§10.2), workﬂows (§8, §9), where
+every piece of content comes from (§13) and 48 product decisions (§21) are all pre-answered.
+Normally asked
+
+Answered in
+
+"Where do I get photos, copy, market ﬁgures, geodata?"
+
+§13 — every asset, named source, licence position
+
+"What copy goes here?"
+
+§12 — complete English microcopy
+
+"What colours, fonts, spacing, logo?"
+
+§10 and §13.4
+
+"How does oﬀ-market access work?"
+
+§8 — registration only, nothing more
+
+"Which decisions are mine?"
+
+§21 — 48 defaults, all reversible
+
+"When do I stop and ask?"
+
+§1.5 — four items, and none of them block building
+
+Reading order: §1 → §2 → §6 → §8 → §13 → §21 → §22.
+
+0.1 The two layers
+Layer
+
+Who sees it
+
+Content
+
+The Collection (public,
+indexable)
+
+Everyone, including Google
+and AI assistants
+
+Full listings with photography, facts, descriptions and maps. A normal, excellent luxury portal.
+
+Oﬀ-Market (members,
+free account)
+
+Anyone with a conﬁrmed email
+address
+
+Discreet listings the seller does not want published: full detail, but never indexed, never in a
+sitemap, never in a public API response.
+
+The Collection is the acquisition engine. Oﬀ-Market is the reason people create an account — and the account is what turns
+anonymous traﬃc into a contactable audience. That is the entire business logic of this build.
+
+0.2 Two delivery tracks
+Track A — the fast launch (Prompts 1–14). Public Collection, Oﬀ-Market with simple registration, market-intelligence pages,
+sample inventory, SEO, performance, accessibility, deploy. Depends on nothing outside the repository.
+Track B — optional, before or after go-live (Prompts 15–16). External agency accounts with roles, bulk import and a moderation
+queue. Every ﬁeld it needs already exists from Prompt 3.
+Build Track A end to end ﬁrst. Do not begin Track B until the public site is live or demonstrably ready.
+
+1. Developer operating method
+1.1 /CLAUDE.md (create before any feature code)
+
+# LAWRENCE PRIVATE COLLECTION — project rules for AI assistants
+## What this is
+A portal for trophy property from ~€20M. Two layers: a fully public, indexable Collection, and an
+Off-Market section that requires a free member account (email confirmation only — no NDA, no
+proof of funds, no manual vetting in this phase).
+Next.js 15 App Router + Payload 3 + Postgres/PostGIS + Typesense, deployed on Vercel.
+## Non-negotiable rules
+1. Off-market content never leaks. It is never statically generated, never edge-cached, always
+noindex, never in a sitemap, OG image, RSS feed, public API response or 404 suggestion list,
+and always behind a server-side session check. Hiding it with CSS or a client-side conditional
+is a bug, not an implementation.
+2. Every data-layer function takes an explicit Viewer argument. There is no ambient current-user
+global. A function that forgets the viewer must not compile.
+3. Field visibility is decided by an ALLOWLIST projection per audience, never a denylist. A new
+model field is invisible everywhere until someone adds it to a projection deliberately.
+4. Public performance budgets are acceptance criteria: LCP < 1.2s mobile, first-load JS < 110KB
+home / < 130KB listing gzip. Check `pnpm analyze` before committing.
+5. No component or route queries the database directly; everything goes through /src/lib/db.
+6. No hardcoded design values outside /src/tokens. No literal user-facing strings outside
+/src/messages.
+7. Controlled enums over free text, always.
+8. Sample listings always carry isSample=true, show a SAMPLE badge, emit noindex and are excluded
+from sitemaps.
+9. WCAG 2.2 AA everywhere, including the account area.
+10. Agency multi-tenancy fields exist on every relevant collection from day one and every query is
+written agency-aware, even though Phase 1 runs single-team. Never remove them "for simplicity".
+## Definition of done for any task
+pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e && pnpm analyze pass;
+new logic has tests; `pnpm audit:exposure` passes; no console or hydration errors.
+## audit:exposure
+A required script that crawls every public route as an anonymous visitor and asserts that no
+response contains: an off-market listing id or slug, an exact address, owner data, internalValueEur,
+or a price for a listing whose priceDisclosure is not "exact". Must pass before every merge.
+## Commands
+pnpm dev · build · typecheck · lint · test · test:e2e · analyze · seed · sample:purge
+search:reindex · audit:seo · audit:a11y · audit:exposure · audit:all
+
+1.2 /.cursor/rules/lawrence.mdc
+The same rules, plus: "Before implementing any feature that renders listing data, state which audience (anonymous, member, staﬀ)
+sees which ﬁelds and where the server-side check happens. Then implement. Then self-check against the acceptance criteria and
+report pass/fail per line."
+
+1.3 /DECISIONS.md
+Append-only. Date, decision, alternatives, reason, reversibility. This is what the client reviews at handover instead of being interrupted.
+
+1.4 The build loop
+Plan → implement on a branch → self-verify against the prompt's acceptance criteria → pnpm audit:all → commit and tag → log
+decisions. Small reversible commits. When the context degrades, start a fresh chat anchored on CLAUDE.md plus the relevant spec
+section.
+
+1.5 The only four things that require the client
+Everything else is settled by §21 or decided by the developer and logged.
+1. Domain, logo approval and legal entity details for the footer and policies.
+2. Legal review of the policy placeholders before go-live (§13.11) — does not block any development.
+3. Go-live date and DNS access.
+4. Staging sign-oﬀ.
+
+2. Product definition
+2.1 One-line deﬁnition
+Lawrence Private Collection: the world's trophy homes, published openly — and the ones that are not, kept for members.
+
+2.2 Admission policy (enforced in code)
+Default threshold: €20 M or local-currency equivalent at the daily FX snapshot.
+
+Tier
+
+Range
+
+Behaviour
+
+prime
+
+€10–20 M
+
+Exception track, admin decision, capped at 10 % of published inventory — for markets where €20 M is
+eﬀectively the ceiling (parts of Italy, Greece, Portugal, the Caribbean). Without this valve half of Europe looks empty.
+
+trophy
+
+€20–50 M
+
+The core of the Collection
+
+signature
+
+€50 M+
+
+Editorially prioritised, always featured
+
+off_market
+
+no ﬂoor, but in
+practice the same
+standard
+
+Members only
+
+Listings priced "on request" still carry an admin-only internalValueEur so the threshold can be enforced. That ﬁeld is never exposed
+publicly under any circumstance.
+
+2.3 Access model (deliberately minimal)
+Audience
+
+How
+
+Sees
+
+Visitor
+
+—
+
+The entire public Collection in full: photography, facts, description, locality-level map, price or "Price
+on request", agency contact, enquiry form. Plus market pages, intelligence and journal.
+
+Member
+
+Free account: email + password (or
+magic link), email conﬁrmation, done
+
+Everything above, plus the Oﬀ-Market section, saved listings with private notes, a requirements
+proﬁle, and a "new oﬀ-market matches" email.
+
+Staﬀ
+
+Invited
+
+Everything, plus the CMS.
+
+There is no application, no waiting list, no NDA, no document upload and no manual approval in Phase 1. Registration is two ﬁelds and
+a conﬁrmation click. Friction is the enemy of the ﬁrst 5,000 accounts; exclusivity in this phase is expressed by the inventory, not by
+the gate.
+An requireApproval feature ﬂag exists and is oﬀ. Turning it on later routes new accounts to a pending state with an admin queue —
+one ﬂag, no migration (§23.1).
+
+2.4 Audiences
+Audience
+
+Need
+
+Feature
+
+UHNW buyers and their advisors
+
+Quality inventory, discretion, no time wasted
+
+Collection + Oﬀ-Market, requirements proﬁle, direct desk
+contact
+
+Prime brokers and agencies
+
+International exposure, control over what is
+published
+
+Per-listing publication control (§8.4); Track B accounts later
+
+Private sellers
+
+Selling without the market knowing
+
+Oﬀ-market placement, discreet owner submission form
+
+Search engines and AI
+assistants
+
+Authoritative market data
+
+The Collection plus the market-intelligence library (§15.4)
+
+2.5 Scope of Phase 1 (Track A)
+In: public Collection (home, browse, listing detail, market pages, intelligence, journal, editorial, contact), member accounts with the
+Oﬀ-Market section, saved listings and requirements proﬁle, enquiry handling and routing, single-team CMS with full listing
+management, sample inventory of 45 listings, 6 languages, complete SEO + AI-discovery layer, accessibility to WCAG 2.2 AA,
+analytics, performance pass, staging and launch.
+Track B (optional, §9.4): external agency accounts, roles, bulk CSV import, moderation queue, agency dashboard.
+Explicitly deferred with seams in place (§23): NDA e-signature, ﬁnancial capability conﬁrmation, per-member forensic
+watermarking, manual member vetting, named per-listing access grants, in-app messaging, data rooms, payments, CRM, AI semantic
+matching, native apps.
+
+3. Benchmarks
+3.0 Legal boundary
+We replicate interaction patterns and information architecture — conventions, not property. We never copy HTML/CSS/JS, scraped
+markup, photography, logos, licensed fonts, listing copy, editorial text or a competitor's inventory. Scraping a competitor's database is
+a terms breach and a legal risk, and is unnecessary (§13).
+
+3.1 Primary references
+
+Christie's International Real Estate — https://www.christiesrealestate.com — the closest tonal target: restraint, serif typography,
+editorial pacing, auction-house authority. Take: type hierarchy, whitespace, the calm of the listing page, the lifestyles/ URL structure
+as a landing-page model. Avoid: heavy hero video and a long scroll before the ﬁrst property.
+Sotheby's International Realty — https://www.sothebysrealty.com — a global network presented as a single brand, with country and
+region navigation at scale. Take: destination architecture, agent trust signals, the collection-page rhythm.
+JamesEdition — https://www.jamesedition.com/real_estate — the scale benchmark (200,000+ listings from 16,000 luxury oﬃces
+across 50+ countries) and proof that lifestyle-facet category pages drive organic acquisition. Take: the category-as-landing-page
+engine, applied here to market × segment combinations; the dense-but-calm card grid. Avoid: its marketplace feel — our positioning
+is the opposite.
+Knight Frank — https://www.knightfrank.com and The Wealth Report — the most important reference in this document, not for
+listings but for research. Their published prime-market indices are why advisors know the name. §15.4 adapts that model directly:
+sourced, dated, citable data that makes us the source rather than a vendor.
+Savills Research — https://www.savills.com/research/ — the same lesson in repeatable formats that rank for years.
+Vladi Private Islands — https://www.vladi-private-islands.de/en/ — over 2,400 certiﬁed island sales and a masterclass in nicheauthority tone from what is essentially a private register with a website. Avoid: dated execution — that gap is the opportunity.
+Concierge Auctions — https://www.conciergeauctions.com — study their registration copy: qualiﬁcation presented as part of the
+exclusivity rather than as friction. Our account creation should feel the same, at a fraction of the eﬀort.
+Barnes International — https://www.barnes-international.com · Engel & Völkers — https://www.engelvoelkers.com — useful for
+multi-locale structure and for how market pages are organised across countries.
+
+3.2 Pattern references
+Site
+
+Take exactly this
+
+airbnb.com
+
+Map + list mechanics, in-card gallery, ﬁlter pills, saved-listing UX
+
+compass.com
+
+Listing-page rhythm: gallery → facts → story → map → agent
+
+1stdibs.com
+
+High-value item pages with restrained luxury e-commerce patterns
+
+sothebys.com (auction house)
+
+Provenance and lot storytelling — how a €60 M estate should be narrated
+
+stripe.com · linear.app
+
+Perceived performance, typographic discipline, instant transitions
+
+mercury.com · wise.com
+
+Account creation that feels premium rather than bureaucratic
+
+rightmove.co.uk
+
+Information density and speed on mobile
+
+3.3 The thesis
+At this price level the inventory is fragmented across brokerage websites that are slow, badly structured and invisible to search.
+Nobody has built a fast, editorially serious, data-rich portal at the top of the market with a genuine research library in front of it. The
+moat is twofold: the research content, which compounds and is what assistants cite, and the member base, which is an owned
+audience rather than rented traﬃc.
+
+4. Design decisions (settled — do not re-open)
+1. Silence over spectacle. Fewer elements per screen than any competitor. One idea per viewport. No badges, no ribbons, no "hot
+property", no countdown, no urgency devices.
+2. Monochrome plus one warm metal. Obsidian, bone, graphite, with a muted aged-brass accent at ≤2 % of surface area (§10.2).
+No gold gradients, no black-and-gold cliché.
+3. Editorial typography. High-contrast serif display, quiet grotesque body, letterspaced small-caps labels, tabular ﬁgures for
+every price and measurement.
+4. Photography full-bleed, one uniform colour treatment, generous margins, never more than three images competing for
+attention.
+5. The Oﬀ-Market invitation is a whisper, not a wall. On public pages it appears as a single quiet line with a count ("41
+properties are held oﬀ-market"), never as a blur, a lock icon or an interstitial.
+6. Account creation is two ﬁelds. Email and password, or a magic link. Nothing else on that screen.
+7. Slower motion. 300–420 ms, no parallax, no scroll-jacking, prefers-reduced-motion honoured.
+8. Locality-level maps on public listings, exact pins only where the seller permits ( coordinatePrecision ); oﬀ-market listings always
+show a circle, never a pin.
+9. No live chat widget, ever. The desk is an enquiry form and a scheduled call.
+10. Empty states are computed, never generic: name the most restrictive ﬁlter and oﬀer one click to relax it.
+
+5. Information architecture
+5.1 Locales
+6 locales: en (default), it , fr , de , es , ru . Adding one is a conﬁg entry plus a message ﬁle. Locale preﬁx always present; / performs
+an uncached 302 language detect. No trailing slash.
+
+5.2 Public routes (indexable)
+/[locale]
+Home
+/[locale]/collection
+Browse the public Collection (canonical paths, §15.3)
+/[locale]/property/[slug]
+Listing detail
+/[locale]/markets
+Market index (the research hub)
+/[locale]/markets/[market]
+Market page: data, editorial, listings
+/[locale]/markets/[market]/[segment]
+e.g. /markets/cote-dazur/waterfront-estates
+/[locale]/intelligence · /intelligence/[slug]
+Reports (summary open, PDF requires an account)
+/[locale]/journal · /journal/[slug]
+Editorial
+/[locale]/about · /discretion · /contact
+/[locale]/sell
+Owner and broker submission
+/[locale]/join
+Create a free account (off-market access)
+/[locale]/legal/[slug]
+Privacy, cookies, terms, disclaimer
+/[locale]/404 · /410
+Designed error states
+
+5.3 Member routes (all noindex , dynamic, never edge-cached)
+/[locale]/off-market
+/[locale]/off-market/[id]
+/[locale]/account
+/[locale]/account/saved
+/[locale]/account/requirements
+/api/member/*
+
+The Off-Market section
+Off-market listing detail
+Profile and preferences
+Saved listings with private notes
+Requirements profile (what they are looking for)
+Session-guarded endpoints
+
+5.4 Backoﬃce and API
+/admin/*
+Payload CMS (staff; Track B adds agency roles)
+/admin/members
+Member list, activity, export
+/admin/enquiries
+Enquiry queue with routing and status
+/api/health · /api/revalidate · /api/og/[type]/[id]
+/api/property/[slug]/brochure.pdf
+/api/enquiry
+Rate-limited intake
+/sitemap.xml + /sitemaps/*.xml · /robots.txt · /llms.txt
+/api/public/markets/[market]/stats
+Machine-readable market data (§15.6)
+
+5.5 Market page grammar (the SEO engine)
+Canonical: /[locale]/markets/[market] and /[locale]/markets/[market]/[segment] , where segment belongs to a controlled taxonomy:
+waterfront-estates · vineyard-estates · ski-chalets · penthouses · private-islands · historic-estates · equestrian-estates · newdevelopments · golf-estates .
+
+Rules: one canonical URL per combination; a resolver normalises aliases with
+301s; slugs come from the Taxonomy collection, localised per locale; a page renders
+only when it has published editorial copy plus at least three sourced data
+points. Empty combinations are never auto-published — that is the fastest
+route to a Helpful-Content demotion.
+6. Data model
+Payload 3 collections generate the TypeScript types used everywhere. Postgres 16 + PostGIS.
+
+6.1 Property — identity and lifecycle
+
+Field
+
+Type
+
+Notes
+
+id
+
+uuid
+
+Oﬀ-market listings are addressed by id, never by a guessable slug
+
+slug
+
+text unique nullable
+
+Public listings only; null for oﬀ-market
+
+reference
+
+text
+
+Unique per agency
+
+agency / agent
+
+relations, agency
+required indexed
+
+Present from day one, even though Phase 1 is single-team (§9.4)
+
+channel
+
+enum required
+
+public · off_market — the single routing decision
+
+valueTier
+
+enum
+
+prime · trophy · signature
+
+status
+
+enum
+
+draft · available · reserved · under_offer · sold · withdrawn · expired ·
+archived
+
+moderation
+
+enum
+
+unreviewed · approved · rejected · changes_requested + moderationNote —
+dormant in Phase 1, used by Track B
+
+isSample
+
+bool default false
+
+Demo ﬂag
+
+featured
+
+bool
+
+Editorial only
+
+publishedAt · expiresAt ·
+lastVerifiedAt
+
+timestamps
+
+120-day freshness cycle (§9.3)
+
+fingerprint · duplicateOf
+
+text indexed / relation
+
+Duplicate detection
+
+sourceType
+
+enum
+
+manual · csv_import · feed · owner_submission
+
+viewCount · memberViewCount ·
+enquiryCount
+
+int
+
+Oﬀ-market views counted separately
+
+6.2 Commercial and structure
+priceType enum fixed · on_request · price_band · auction · priceAmount numeric nullable · priceBandMin / priceBandMax numeric ·
+currency enum EUR · USD · GBP · CHF · AED · SGD · HKD · priceEur generated indexed · internalValueEur numeric required, adminonly, never serialised publicly · priceDisclosure enum exact · band · on_request · tenure enum freehold · leasehold · usufruct ·
+concession · ownershipStructure enum direct · spv · trust · foundation · company · saleStructure enum asset_sale · share_transfer
+· fractional · auction · annualRunningCostEur numeric nullable · taxNotes localised rich text (factual, never advice) · mandateType
+enum exclusive · open · introduction_only · commissionTerms text staﬀ-only · availableFrom date.
+
+6.3 Physical and provenance
+propertyType enum: villa · estate · penthouse · townhouse · chalet · castle · palazzo · private_island · vineyard_estate ·
+equestrian_estate · hotel_resort · development_site · apartment · lodge · ranch .
+bedrooms · bathrooms · receptionRooms · builtAreaSqm · plotAreaSqm · plotAreaHa · terraceAreaSqm · floors · yearBuilt · renovatedYear ·
+architect · heritageStatus enum none · listed · protected · unesco_area · provenance localised rich text · condition enum ·
+staffAccommodation int · parkingSpaces int · energyRating .
+features multi-enum: pool · indoor_pool · spa · gym · cinema · wine_cellar · ballroom · library · chapel · helipad · tennis · padel
+· golf_hole · equestrian · vineyard · olive_grove · beach · private_dock · marina_berth · ski_in_ski_out · gatehouse · staff_quarters
+· guest_houses · generator · geothermal · solar · smart_home · car_gallery · panic_room .
+
+Optional waterfront sub-block (valuable at this level, and the bridge to the sister portal): waterAccess bool · waterBodyType enum ·
+waterFrontageM numeric · mooringType enum · maxBoatLoaM numeric · berthCount int.
+
+6.4 Location with disclosure control
+location group: label (audience-aware display string) · addressLine staﬀ-only, never serialised to any audience · locality ·
+province · region · country ISO-2 indexed · continent · market relation → Market · coordinates PostGIS geography(Point,4326) GISTindexed · coordinatePrecision enum exact · approximate_500m · locality_only (default approximate_500m ) · publicGeography enum
+country · region · market · locality — the coarsest truthful label shown to anonymous visitors.
+
+Implementation rule: the serialiser uses an allowlist of ﬁelds per audience, never a denylist. A new model ﬁeld is invisible until
+someone deliberately adds it. This one decision prevents most exposure incidents.
+
+6.5 Media and documents
+Media — variants at upload (320…3200 px, AVIF + WebP), EXIF stripped without exception (listing photos routinely carry the
+property's GPS), blurhash LQIP, visibility enum public · members per asset (a listing can show 10 public images and hold 30 for
+members), minimum 2000 px long edge, credit / licence / sourceUrl , agency scoping. Public assets go to the public bucket;
+member-only assets go to the private bucket and are served through a signed URL route.
+Document — ﬂoor plans, brochures, inventories, surveys. Members-only by default, delivered via /api/secure/document/[token] with a
+short-lived signed URL. No watermarking in Phase 1 (the seam is §23.3).
+
+6.6 Members and engagement
+Member (authenticated end user; separate from User , which is staﬀ): name · email unique · phone optional · country optional ·
+preferredLocale · memberType enum buyer · advisor · broker · developer · other (self-declared, optional, never gating) · status enum
+active · pending · suspended (default active ; pending only when the requireApproval ﬂag is on) · emailVerifiedAt · marketingConsent
+bool + consentedAt + consentIp · lastActiveAt · source enum organic · off_market_cta · report_download · enquiry · referral · utm
+json · twoFactorEnabled bool (optional for members in Phase 1) · reserved and unused: ndaStatus , ndaSignedAt , capabilityStatus ,
+capabilityBand , tier — created now, never written to, so §23 is a ﬂag rather than a migration.
+SavedListing — member, property, note (private), savedAt .
+Requirement — member · budgetMinEur / budgetMaxEur · currency · markets · property types · must-have features · timeline enum
+immediate · 6_months · 12_months · opportunistic · notes · status enum active · paused · closed · notifyByEmail bool. Used for the
+"new oﬀ-market matches your requirements" email and for the admin matching view.
+MemberActivity — append-only: member, property, action enum off_market_list · off_market_view · document_download · saved ·
+enquiry , at , ip , userAgent . Lightweight, but it is what lets the desk say to a seller "eleven members viewed your property this week",
+
+and it is the foundation of everything in §23.
+Enquiry — name, email, phone, message, property , agency , member (when authenticated), locale , source enum listing · off_market
+· market_page · report · contact · sell · desk_call , marketingConsent + timestamp + IP, utm json, status enum new · sent · viewed
+· qualified · spam .
+
+6.7 Content collections
+Market — name (localised), slug per locale, country, region, polygon, centroid, hero image, localised intro, and a stats group
+maintained by editors: medianPriceEurPerSqm , primeEntryEur , yoyChangePct , avgDaysOnMarket , transactionVolumeBand , each with source
+(URL) and asOfDate . Every published number carries a source and a date — that discipline is what makes the research citable rather
+than decorative.
+Report — title, slug, ungated summary (400–600 words with the key ﬁndings and chart data), gated PDF (requires an
+account), charts JSON, publication date, authors.
+Article , Page (block-based), Taxonomy , Agency , Agent , Redirect , User (staﬀ roles admin · editor , plus Track B's agency_admin ·
+agency_agent ), AuditLog (staﬀ actions), ImportJob (Track B), FxSnapshot .
+
+6.8 Indexes
+slug · agency · channel · status · valueTier · priceEur · propertyType · country · market · expiresAt · fingerprint · isSample · GIST on
+coordinates · composite (channel, status, isSample) for the hot public query · Member(email) , Member(status) · MemberActivity(member,
+at) and (property, at) · SavedListing(member) .
+
+7. Stack and setup
+7.1 Decisions
+
+Area
+
+Choice
+
+Why
+
+Framework
+
+Next.js 15 App Router, TS strict
+
+Collection static (SSG/ISR), Oﬀ-Market dynamic
+
+CMS
+
+Payload 3 embedded in the same app
+
+No second server, Postgres-native, generated types, real
+admin UI, and access control granular enough for Track B
+later
+
+DB
+
+Postgres 16 + PostGIS (Neon)
+
+Geo queries DB-side; PostGIS from day one
+
+Search
+
+Typesense Cloud, two collections: public_listings and member_listings ,
+with separate keys — the browser only ever receives the public search-only key
+
+Physical separation beats a ﬁlter ﬂag
+
+Member
+auth
+
+Payload auth on the Member collection: email + password and magic link,
+email conﬁrmation required, optional TOTP 2FA
+
+No social login: it leaks the fact of membership to a third
+party
+
+Styling
+
+Tailwind v4 + token CSS variables
+
+One ﬁle restyles everything
+
+Maps
+
+MapLibre GL + MapTiler (Protomaps if tile cost grows)
+
+Locality circles and polygons; pins only where permitted
+
+Media
+
+Cloudﬂare R2 (public bucket + private bucket) + Cloudﬂare Images
+
+Variants at upload, global CDN, signed URLs for member
+assets
+
+i18n
+
+next-intl, 6 locales
+
+Forms
+
+Zod + React Hook Form
+
+Shared schemas
+
+Email
+
+Resend + React Email
+
+Enquiries, account, digests
+
+Rate limit /
+sessions
+
+Upstash Redis
+
+Also signed-URL nonces
+
+Bot
+protection
+
+Cloudﬂare Turnstile on join, login, enquiry
+
+Invisible, privacy-preserving
+
+Scheduling
+
+Cal.com embed for desk calls
+
+PDF
+
+@react-pdf/renderer
+
+Brochures
+
+Analytics
+
+Plausible on the public layer; member behaviour measured through
+MemberActivity
+
+Privacy-ﬁrst, no third party inside the member area
+
+Monitoring
+
+Sentry (PII scrubbed) + Vercel Speed Insights
+
+Testing
+
+Vitest + Playwright + axe-core + Lighthouse CI
+
+Deploy
+
+Vercel
+
+7.2 Bootstrap
+pnpm create payload-app@latest lawrence --template website --db postgres --use-pnpm
+cd lawrence
+pnpm add next-intl zod react-hook-form @hookform/resolvers maplibre-gl typesense \
+@react-pdf/renderer sharp blurhash resend react-email @react-email/components \
+@upstash/redis @upstash/ratelimit otplib qrcode papaparse date-fns clsx \
+tailwind-merge lucide-react @vercel/og i18n-iso-countries
+pnpm add -D tailwindcss @tailwindcss/postcss autoprefixer vitest @vitejs/plugin-react \
+playwright @playwright/test @axe-core/playwright eslint prettier \
+prettier-plugin-tailwindcss typescript @faker-js/faker tsx dotenv-cli \
+@next/bundle-analyzer @lhci/cli
+docker run -d --name lw-pg -p 5432:5432 -e POSTGRES_PASSWORD=lawrence \
+-e POSTGRES_DB=lawrence postgis/postgis:16-3.4
+docker run -d --name lw-ts -p 8108:8108 -v /tmp/ts:/data typesense/typesense:27.1 \
+--data-dir /data --api-key=devkey --enable-cors
+psql postgresql://postgres:lawrence@localhost:5432/lawrence \
+-c "CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+pnpm payload generate:types && pnpm dev
+
+7.3 Environment variables
+
+ISR, previews, edge cache
+
+DATABASE_URL=
+PAYLOAD_SECRET=
+NEXT_PUBLIC_SITE_URL=
+NEXT_PUBLIC_DEFAULT_LOCALE=en
+R2_ACCOUNT_ID= R2_ACCESS_KEY_ID= R2_SECRET_ACCESS_KEY=
+R2_PUBLIC_BUCKET= R2_PRIVATE_BUCKET=
+NEXT_PUBLIC_CF_IMAGES_URL=
+NEXT_PUBLIC_MAPTILER_KEY=
+TYPESENSE_HOST= TYPESENSE_ADMIN_KEY=
+TYPESENSE_PUBLIC_SEARCH_KEY=
+TYPESENSE_MEMBER_SEARCH_KEY=
+UPSTASH_REDIS_REST_URL= UPSTASH_REDIS_REST_TOKEN=
+SIGNED_URL_SECRET=
+RESEND_API_KEY= DESK_NOTIFY_TO= NOTIFY_FROM=
+TURNSTILE_SITE_KEY= TURNSTILE_SECRET_KEY=
+UNSPLASH_ACCESS_KEY= PEXELS_API_KEY=
+FX_API_URL=https://api.frankfurter.app
+REVALIDATE_SECRET= CRON_SECRET=
+NEXT_PUBLIC_PLAUSIBLE_DOMAIN=
+SENTRY_DSN=
+SAMPLE_DATA_ENABLED=true
+MEMBER_REQUIRE_APPROVAL=false
+
+7.4 Folder structure
+/src
+/app/[locale]/(public)/…
+home, collection, property, markets, intelligence, journal, join
+/app/[locale]/(member)/…
+off-market, account — force-dynamic, noindex, private cache
+/app/(payload)/…
+admin
+/app/api/{health,og,revalidate,secure,enquiry,member,cron,public}
+/components/{ui,property,collection,member,account,admin,layout}
+/lib/db
+typed access; EVERY function takes a Viewer argument
+/lib/access
+viewer resolution, audience projections
+/lib/media
+signed URLs, EXIF stripping, variants
+/lib/activity
+MemberActivity helpers
+/lib/search /lib/geo /lib/seo /lib/pdf /lib/email /lib/schemas /lib/match
+/lib/services
+EMPTY — future CRM, e-signature, KYC seams
+/payload/{collections,access,hooks}
+/tokens /messages /content /scripts /data
+
+8. Members and the Off-Market section
+8.1 The Viewer
+Every data-layer call receives an explicit viewer. There is no ambient current-user global — a function that forgets it will not compile.
+type Viewer =
+| { kind: 'anonymous' }
+| { kind: 'member'; id: string; status: 'active'|'pending'|'suspended' }
+| { kind: 'staff'; id: string; role: 'admin'|'editor' }
+| { kind: 'agency'; id: string; agencyId: string };
+// Track B
+
+8.2 Visibility rules
+canSee(viewer, property) =
+(property.channel = 'public')
+? status is publicly visible AND (isSample allowed by config)
+: viewer.kind = 'member' AND viewer.status = 'active'
+OR viewer.kind = 'staff'
+OR (viewer.kind = 'agency' AND property.agency = viewer.agencyId)
+
+Oﬀ-market listings are excluded from: generateStaticParams , sitemaps, the public Typesense collection, OG image routes, RSS, relatedlisting suggestions, 404 recommendations, the public stats API, and every public JSON response. All of this is asserted by
+audit:exposure in CI.
+
+8.3 Field projections (allowlist)
+/src/lib/access/projections.ts — one table, exhaustively tested.
+
+Field group
+
+Anonymous (public listing)
+
+Member (public listing)
+
+Member (oﬀ-market)
+
+Staﬀ
+
+Title, type, full facts
+
+✅
+
+✅
+
+✅
+
+✅
+
+Full gallery (public assets)
+
+✅
+
+✅
+
+✅
+
+✅
+
+Member-only assets
+
+—
+
+✅
+
+✅
+
+✅
+
+Price
+
+per priceDisclosure
+
+per priceDisclosure
+
+exact or band
+
+exact
+
+Location
+
+publicGeography label + circle
+
+locality + circle
+
+locality + circle
+
+exact
+
+Exact coordinates / addressLine
+
+never
+
+never
+
+never
+
+✅
+
+Description, provenance
+
+✅
+
+✅
+
+✅
+
+✅
+
+Documents / ﬂoor plans
+
+—
+
+✅
+
+✅
+
+✅
+
+Running costs, ownership structure
+
+—
+
+✅
+
+✅
+
+✅
+
+internalValueEur , commissionTerms , owner data
+
+never
+
+never
+
+never
+
+✅
+
+Note the shape of it: the public Collection is genuinely open — this is a normal portal, not a teaser. The account buys the oﬀmarket inventory, the extra imagery, the documents and the saved-listing tools. That is an honest value exchange, and honest value
+exchanges convert better than artiﬁcial scarcity.
+
+8.4 Publication control on a listing
+One required control in the CMS: "How should this property be published?"
+Choice
+
+Sets
+
+Published openly
+
+channel = public , price per the seller's instruction
+
+Published without a price
+
+channel = public , priceDisclosure = on_request
+
+Published as a band
+
+channel = public , priceDisclosure = band
+
+Oﬀ-market (members only)
+
+channel = off_market
+
+Beside it, a live preview showing exactly what an anonymous visitor and a member would see. Brokers trust what they can be shown.
+
+8.5 The registration ﬂow (deliberately two minutes)
+1. Join ( /join ) — email + password, or magic link. Optional: name, phone, country, what they are looking for. Marketing consent
+checkbox, unticked, optional. Turnstile. Nothing else.
+2. Conﬁrm email — one click. Account becomes active and the Oﬀ-Market section opens immediately.
+3. (Optional, ﬂag-gated and oﬀ by default) MEMBER_REQUIRE_APPROVAL=true sends new accounts to pending with an admin queue and a
+"we will conﬁrm within one business day" message.
+4. First login experience — a short, quiet welcome panel: here is the Oﬀ-Market section, here is how to save a listing, here is how to
+tell us what you are looking for.
+5. Requirements proﬁle (optional, prompted after the third oﬀ-market view) — budget, markets, types, timeline. Feeds the match
+email and the admin view.
+6. Members may delete their account themselves; deletion anonymises MemberActivity and removes saved listings.
+Copy throughout is in §12.3, and it never says "sign up" — it says "create an account to see the oﬀ-market collection".
+
+8.6 Member media and documents
+Member-only images and all documents live in the private bucket and are served through /api/secure/media/[token] and
+/api/secure/document/[token] : an HMAC over (assetId, memberId, expiry, nonce) , 15-minute lifetime, nonce burned in Redis, session
+re-checked server-side, Cache-Control: private, no-store , X-Robots-Tag: noindex, noimageindex . An unauthenticated request returns
+404, not 403 — never conﬁrm that an asset exists.
+No watermarking in Phase 1; the pipeline is speciﬁed in §23.3 and can be enabled per asset later.
+
+8.7 Activity and what it is for
+MemberActivity is written on oﬀ-market list views, detail views, document downloads, saves and enquiries. It powers three things that
+matter commercially: the admin's view of demand per listing, the "eleven members viewed your property this week" line the desk
+gives sellers, and the match notiﬁcations. It is not analytics for its own sake, and no third-party script ever sees it.
+
+8.8 Matching (small, high-value)
+
+/src/lib/match.ts scores active Requirement records against new listings (budget overlap, market, type, must-haves). When a new oﬀmarket listing is published, matching members with notifyByEmail receive one discreet email. Admins see a matching board. One page
+and one function — deliberately isolated so it can become embedding-based later without touching anything else.
+
+9. Backoffice
+9.1 Phase 1: single-team CMS
+Payload admin with staﬀ roles admin and editor . Listing form grouped as: Essentials → Publication (the §8.4 control) → Commercial →
+Physical & provenance → Location → Media (with per-asset visibility) → Documents → SEO → Publishing. Live preview, drafts, versions,
+autosave, localised editing across 6 locales, media library with drag-and-drop gallery ordering, and a completeness meter.
+
+9.2 Admin dashboard
+Inventory by channel, market, value tier and status · members over time with source breakdown and the conversion from visitor to
+account · oﬀ-market views and document downloads per listing · enquiries per week by source with response status · requirements
+board with matches · a data-quality panel (missing images, short descriptions, missing market, expiring soon) · a warning if any
+sample content is publicly reachable. All queries via /src/lib/db , Recharts, read-only.
+
+9.3 Listing freshness
+120-day cycle. At T-14 the responsible editor gets a "conﬁrm these are still available" list with one-click conﬁrmation. On expiry:
+removed from search and sitemap, public URL returns 410 Gone with a designed page suggesting the market page. Sold listings keep
+a "sold" state for 90 days without a price, then noindex , then 301 to the market page. Stale inventory is the fastest way to lose
+credibility at this level.
+
+9.4 Track B: external agency accounts (optional, later)
+Everything needed is already in the model: Property.agency , Property.agent , moderation , sourceType , ImportJob , and agency-aware
+queries throughout. Track B adds only:
+Roles agency_admin and agency_agent in a single reusable tenant access function in /payload/access/tenant.ts , applied to every
+collection.
+Agencies cannot publish directly — saving sets moderation = unreviewed and a review queue at /admin/review with automated
+checks (threshold including internalValueEur , ≥8 images at ≥2000 px, description ≥600 characters, no contact details in public
+text, coordinates plausible for the stated market, EXIF stripped) and a publication preview.
+Bulk CSV/XLSX import with a dry-run validation report (row-by-row, column-level reasons), idempotent on (agency, reference) ,
+images fetched, validated and optimised, ImportJob audit, summary email with an error CSV.
+An agency dashboard scoped to their own listings, views, enquiries and response times.
+Playwright tests proving agency A cannot see agency B's listings, enquiries or media through either the UI or the API.
+Explicitly not in Track B: automated feeds into the oﬀ-market channel. Conﬁdential inventory is entered deliberately, by a person.
+
+10. Design system
+10.1 Brand constant
+/src/config/brand.ts is the only place the brand is named:
+export const brand = {
+name: 'Lawrence Private Collection',
+short: 'Lawrence',
+legalName: '—',
+// client to supply
+domain: 'lawrenceprivatecollection.com',
+tagline: 'Exceptional property, openly and otherwise.',
+deskEmail: 'desk@…', memberEmail: 'members@…', privacyEmail: 'privacy@…',
+registeredAddress: '—',
+social: { instagram: '', linkedin: '' },
+} as const;
+
+Every UI string, email, PDF, JSON-LD and metadata template reads from it.
+
+10.2 Tokens — /src/tokens/tokens.ts
+
+export const tokens = {
+color: {
+obsidian:'#0A0B0D',
+// dark sections, headings
+ink:'#15171A',
+// body text
+graphite:'#4A4D52',
+// secondary text
+mist:'#9A9A94',
+// labels, tertiary
+bone:'#F3F0EA',
+// page surface
+vellum:'#FAF8F4',
+// raised surface
+line:'rgba(10,11,13,0.10)',
+patina:'#7E6B4F',
+// the single warm accent, max 2% of surface
+patinaSoft:'#B9A888',
+focus:'#7E6B4F',
+success:'#3C6B52', warning:'#8A6A24', danger:'#8C3A2E',
+},
+font: {
+display:'"Canela","Cormorant Garamond",ui-serif,Georgia,serif',
+body:'"Inter",ui-sans-serif,system-ui,sans-serif',
+mono:'ui-monospace,"SF Mono",monospace',
+},
+size:{xs:'0.75rem',sm:'0.875rem',base:'1rem',lg:'1.25rem',xl:'1.625rem',
+'2xl':'2.25rem','3xl':'3rem','4xl':'4.25rem','5xl':'6rem'},
+tracking:{label:'0.14em',display:'-0.02em'},
+space:[0,4,8,12,16,24,32,48,64,96,128,192],
+radius:{none:'0',sm:'2px',md:'3px',lg:'6px'},
+shadow:{card:'none',pop:'0 12px 48px rgba(10,11,13,.18)'},
+z:{map:10,sticky:20,header:30,drawer:40,modal:50,toast:60},
+bp:{sm:'640px',md:'768px',lg:'1024px',xl:'1280px','2xl':'1536px'},
+motion:{fast:'200ms',base:'320ms',slow:'420ms',ease:'cubic-bezier(.22,.61,.36,1)'},
+} as const;
+
+Acceptance: changing color.obsidian and font.display restyles the site, the PDFs and the emails with no other edit.
+
+10.3 Art direction
+Full-bleed imagery at ≥78 vh; one uniform colour treatment ( saturate(0.98) contrast(1.02) ); ﬁxed aspect ratios (hero 21:9 desktop /
+4:5 mobile, cards 4:3, gallery 3:2) so CLS is zero by construction; gradient scrims for legibility; tabular ﬁgures for all prices and
+measurements; letterspaced small-caps labels; margins never below 32 px mobile / 96 px on large screens; no card shadows —
+separation comes from rules and space; motion 300–420 ms with prefers-reduced-motion honoured; fonts self-hosted, subset, max four
+ﬁles.
+
+10.4 The Oﬀ-Market invitation state
+Where an oﬀ-market listing would appear in a public context, render a single quiet line — small-caps label, a count, one link: "41
+properties are held oﬀ-market. Create an account to view them." Never a blurred card, never a lock icon, never a modal that interrupts
+reading. On an oﬀ-market listing page, members see a calm one-line notice that the property is not publicly marketed and asking them
+to treat the details as conﬁdential.
+
+10.5 Component inventory
+
+Button
+
+· QuietLink · Input · Select · Combobox · RangeInput · Checkbox · Switch · Tooltip · Dialog · Drawer · Tabs ·
+
+· Container · Section · Header · Footer · LocaleSwitcher · CurrencySwitcher · UnitSwitcher · PropertyCard ·
+PropertyCardCompact · Gallery · FactTable · ProvenanceBlock · MarketStatStrip · MapLocality (circle/polygon) ·
+MapPrecise (staff only) · OffMarketInvite · SaveButton · JoinForm · LoginForm · RequirementsForm · EnquiryForm · DeskCta ·
+MemberNav · Breadcrumbs · Pagination · Skeleton · EmptyState · Toast · SampleBadge . All rendered in /dev/styleguide in
+Accordion
+
+every state including focus, error, loading and empty.
+11. Page specifications
+11.1 Home — SSG + ISR 300 s
+1. Hero — one full-bleed image, display headline, one line of subcopy, two quiet actions: "View the collection" and "See the oﬀmarket properties". No search bar on the homepage; this is not a search product at ﬁrst contact.
+2. The Collection — 6 featured properties, large 4:3 cards showing price (or band), market, headline facts. Never more than three
+competing for attention on desktop.
+3. Oﬀ-Market — a short editorial panel with the real live count and a single action to create an account. This is the highest-value
+block on the page; give it a full viewport.
+4. Markets — 8 market tiles, each with one live statistic and its asOfDate .
+5. Intelligence — the latest report with its ungated summary.
+
+6. How it works — three lines: browse openly, create a free account for the oﬀ-market collection, speak to the desk.
+7. For owners and brokers — the supply-side entry.
+8. Footer: markets, intelligence, legal, locale/currency/unit switchers, desk contact.
+
+11.2 Collection browse — SSG + ISR
+A curated grid with controls that map to canonical paths, not query strings: market, property type, price band, segment. Sorting:
+editorial, newest, price. Optional map view showing locality circles. Deeper ﬁltering (beds, features, area) uses query parameters that
+are noindex, follow and never linked from navigation (§15.3). 24 per page, Pagination with page 1 canonical.
+
+11.3 Listing detail (public) — SSG + ISR 600 s
+Gallery (ﬁrst image priority , lightbox code-split, keyboard and swipe, blurhash) → headline (title, market label, price per
+priceDisclosure , reference, save button) → fact table (beds, baths, receptions, built area, plot in m² and ha, year, architect, heritage
+status, tenure) → highlights → full description and provenance → locality map with a circle, never a pin → features grid → market
+context strip (three live statistics from the Market record, each with source and date) → comparable properties in the same market
+and band → member-only extras block where applicable ("12 further images and the ﬂoor plans are available to members") → enquiry
+form and desk contact → brochure PDF → breadcrumbs → JSON-LD ( RealEstateListing , Offer / PriceSpecification , BreadcrumbList ) →
+view counter, server-side, session-deduplicated, non-blocking.
+States to design: available, reserved, under oﬀer, sold (90 days, never with a price), expired (410), sample (badge and banner).
+
+11.4 Oﬀ-Market section — dynamic, noindex , never cached
+Index: a dense, scannable grid-and-table hybrid with ﬁlters (market, type, budget band, features, "matches my requirements"), served
+from the member Typesense collection using a server-side key that never reaches the browser. A calm one-line notice explains that
+these properties are not publicly marketed.
+Detail: everything a public listing shows, plus documents, the full gallery including member-only assets, running costs and ownership
+structure where supplied, and three actions — enquire, save, add to requirements. Every view writes MemberActivity .
+
+11.5 Market pages — the SEO engine
+Editorial introduction answering the query in its ﬁrst 60 words → market statistics table, every ﬁgure with source and asOfDate →
+available listings in that market → the oﬀ-market count with the join action → buying notes (structures, typical costs, timelines —
+factual, sourced, never advice) → related markets and segments, 6–10 internal links → FAQ with FAQPage JSON-LD → cross-link to the
+relevant report.
+
+11.6 Intelligence
+Index plus report pages. Every report has an ungated 400–600-word summary with the key ﬁgures and charts and a gated full
+PDF that requires an account. The summary is the acquisition asset — it is what ranks and what assistants cite; the PDF is what
+converts a reader into a member. This is the single most eﬃcient registration driver on the site, more than the oﬀ-market listings
+themselves.
+
+11.7 Account
+Proﬁle and preferences · saved listings with private notes · requirements proﬁle · email preferences · delete account. Show members
+their own activity if it is useful, never anyone else's.
+
+11.8 Others
+Join · Login · Sell (broker submission and a discreet owner-direct form routed to the desk, never auto-published) · About · Discretion (a
+genuine page explaining how oﬀ-market inventory is handled — it converts) · Contact with Cal.com scheduling · Legal · designed 404
+and 410.
+
+12. Copy deck (use verbatim; translate per §13.9)
+12.1 Home
+H1: "Exceptional property, openly and otherwise."
+Sub: "Lawrence Private Collection publishes the world's ﬁnest homes from €20 million. The properties that cannot be published are
+kept for members."
+Actions: "View the collection" · "See the oﬀ-market properties"
+Oﬀ-market panel: "Held oﬀ-market" / "{count} properties are not publicly listed. Sellers at this level often prefer discretion.
+Create a free account to view them." / "Create an account"
+How it works: "Browse openly — the collection is public, in full." · "Create an account — an email address is all it takes; the oﬀmarket properties open immediately." · "Speak to the desk — we arrange viewings and introductions directly with the listing agent."
+
+Owners: "If you are selling and would prefer the market not to know, speak to the desk."
+
+12.2 Listing
+Price: exact, or "Guide €{min}–{max} M", or "Price on request"
+Member extras: "{n} further images and the ﬂoor plans are available to members." / "Create a free account"
+Location line: "{Locality}, {Market}, {Country}" with "Exact location provided on enquiry."
+Oﬀ-market notice: "This property is not publicly marketed. Please treat the details as conﬁdential."
+Sold: "This property has been sold." (never with a price)
+Expired: "This property is no longer available." + link to the market page
+Sample: "Sample listing — demonstration data, not a real property."
+Enquiry: "Request details" / "The desk replies within one business day." / Consent: "I agree that my details are shared with the
+listing agent and processed as described in the Privacy Policy."
+
+12.3 Account creation (tone: an open door, not a gate)
+Join H1: "Create an account"
+Sub: "It takes an email address. You will see the oﬀ-market collection immediately, and you can save properties and tell us what
+you are looking for."
+Field labels: "Email" · "Password" · "Or continue with a one-time link"
+Optional block: "Optional — helps us show you the right properties: name, telephone, country, what you are looking for."
+Consent: "Send me new properties matching my requirements." (unticked, optional)
+Conﬁrmation email subject: "Conﬁrm your email to open the oﬀ-market collection"
+Welcome: "Your account is open." / "The oﬀ-market collection is now visible. Save anything you would like to revisit, and tell us
+what you are looking for so we can alert you when something arrives."
+Requirements prompt: "Tell us what you are looking for" / "Budget, markets and type. Two minutes, and you will hear ﬁrst when
+something matches."
+Match email subject: "A property matching your requirements has arrived"
+
+12.4 Meta templates
+Listing: {PropertyType} for sale in {Locality}, {Market} — {priceOrOnRequest} | Lawrence Private Collection · description:
+{bedrooms} bedrooms, {builtAreaSqm} m² on {plotArea} in {Locality}, {Market}. {Architect or heritage note}. Trophy property from
+€20M.
+
+Market: Prime property for sale in {Market} — market data and homes from €20M | Lawrence Private Collection · description: Prime
+entry {primeEntry}, {yoy} year on year as of {asOfDate}. {count} properties published, plus off-market inventory for members.
+
+Segment: {SegmentPlural} in {Market} — {count} for sale | Lawrence Private Collection
+Report: {Title} — Lawrence Intelligence
+
+12.5 Emails (React Email templates)
+Conﬁrm your email · welcome · password reset · magic link · new match for your requirements · saved-listing weekly digest (opt-in) ·
+enquiry received (to member) · enquiry notiﬁcation (to desk and agent) · viewing request · report download link · account deleted
+conﬁrmation · listing expiring reminder (staﬀ) · weekly desk digest (staﬀ). Token-styled, plain-text fallback, one call to action, logo only.
+
+12.6 Legal pages
+Privacy policy · cookie policy · terms of use · member terms (conﬁdentiality expectation for oﬀ-market details, no onward disclosure,
+no scraping) · agency terms (Track B) · listing disclaimer shown on every property page: "Details are provided by the listing agent.
+Measurements, boundaries, structures and availability are indicative and must be veriﬁed independently before any transaction."
+
+13. Content sourcing and production — where everything comes from
+This chapter exists so the developer never has to ask "what do I put here?". Nothing in this build waits on the client.
+
+13.1 Content inventory
+
+Asset
+
+Quantity for launch
+
+Source
+
+Eﬀort
+
+Listing photography
+
+~500 images
+
+Unsplash / Pexels API via the generator (§13.2)
+
+Automatic
+
+Listing data
+
+45 listings (30 public, 15 oﬀ-market)
+
+Generator (§13.10)
+
+Automatic
+
+Listing descriptions, 6 locales
+
+270 texts
+
+Template grammar (§13.8)
+
+Automatic
+
+Market pages
+
+18 × 400 words + statistics
+
+AI-drafted from named data sources (§13.6, §13.7)
+
+~3 days
+
+Segment pages
+
+~30 × 300 words
+
+Same
+
+~2 days
+
+Intelligence reports
+
+3 × (600-word summary + 8-page PDF)
+
+Same, built on open data (§13.6)
+
+~2 days
+
+Journal articles
+
+8 × 900 words
+
+AI-drafted, developer-reviewed (§13.7)
+
+~1.5 days
+
+UI strings, 6 locales
+
+~450 keys
+
+Copy deck §12 + machine translation (§13.9)
+
+~0.5 day
+
+Geodata (markets, polygons, coordinates)
+
+18 markets
+
+GeoNames + Natural Earth + OSM (§13.5)
+
+~0.5 day
+
+Fonts, icons
+
+2 families, ~40 icons
+
+Google Fonts + Lucide (§13.3)
+
+1 hour
+
+Logo / wordmark / favicon
+
+1 set
+
+Type-only recipe (§13.4)
+
+2 hours
+
+Agency and agent identities
+
+8 + 16
+
+Fictional, generated (§13.2.4)
+
+Automatic
+
+Legal pages
+
+5
+
+Generator templates, ﬂagged (§13.11)
+
+2 hours
+
+Emails
+
+13 templates
+
+Copy deck §12.5 + React Email
+
+~1 day
+
+FX rates
+
+daily
+
+ECB via Frankfurter API
+
+1 hour
+
+Total content eﬀort: roughly two weeks inside the build, with zero client input. The market pages and reports are the expensive
+part, and they are also the entire acquisition engine — do not shortcut them.
+
+13.2 Photography
+Free, commercially usable, API-accessible:
+Source
+
+API
+
+Licence position
+
+Use for
+
+Unsplash
+
+unsplash.com/documentation
+
+Free commercial use; the download-tracking call is required
+by their API terms
+
+Primary source
+
+Pexels
+
+pexels.com/api
+
+Free commercial use, no attribution required
+
+Fallback and variety
+
+Pixabay
+
+pixabay.com/api/docs
+
+Free commercial use
+
+Third fallback
+
+Openverse
+
+api.openverse.org
+
+Aggregated CC — check each licence individually
+
+Last resort
+
+Wikimedia
+Commons
+
+Commons API
+
+Mixed, often attribution + share-alike
+
+Editorial illustration of named
+places only
+
+Paid upgrades if the free imagery ever looks generic: Unsplash+ (~€10/month), Adobe Stock, Getty/iStock, Stocksy (best
+quality), Shutterstock. Ten Adobe Stock images are enough to lift the six homepage slots and the three report covers — a €100
+decision the developer can make alone.
+13.2.1 Query sets live in /src/scripts/image-queries.ts :
+
+export const imageQueries = {
+byMarket: {
+saint_tropez:['saint tropez villa','french riviera estate pool','provence coastal villa'],
+cap_ferrat:['cap ferrat villa sea','belle epoque villa riviera'],
+monaco:['monaco penthouse terrace','monte carlo harbour view apartment'],
+lake_como:['lake como villa','como lakefront terrace garden'],
+porto_cervo:['sardinia luxury villa sea','costa smeralda villa'],
+tuscany:['tuscan estate cypress','tuscan villa pool countryside'],
+marbella:['marbella modern villa','andalusian luxury villa pool'],
+ibiza:['ibiza cliff villa sea','white modern villa mediterranean'],
+mykonos:['mykonos villa infinity pool','cycladic luxury villa'],
+london_pcl:['belgravia townhouse','london stucco townhouse facade','mayfair interior'],
+gstaad:['gstaad chalet snow','luxury alpine chalet interior'],
+courchevel:['courchevel chalet','ski chalet wood interior fireplace'],
+aspen:['aspen mountain home','colorado luxury mountain house'],
+palm_beach:['palm beach mansion','florida waterfront estate'],
+hamptons:['hamptons beach house','long island shingle estate'],
+dubai:['dubai palm villa','dubai penthouse skyline terrace'],
+geneva:['lake geneva villa','swiss lakefront property'],
+algarve:['algarve clifftop villa','portugal coastal luxury villa'],
+},
+byRoom:{
+interior:['luxury living room fireplace','grand entrance hall marble',
+'designer kitchen luxury','master bedroom suite view','wine cellar luxury',
+'home cinema luxury','marble bathroom luxury'],
+exterior:['manicured estate garden','infinity pool sunset','estate gates driveway',
+'terrace dining sea view','tennis court estate','helipad estate'],
+aerial:['aerial luxury estate','drone coastal villa'],
+},
+} as const;
+
+13.2.2 Selection rules (implemented as ﬁlters, not taste). Reject any image under 2000 px on the long edge, or carrying a
+watermark, a recognisable face in the foreground, a visible brand or licence plate, or a perceptual hash already used in the same
+market. Prefer landscape 3:2, daylight, no heavy ﬁlters. Compose each gallery as: 1 exterior hero · 2 exterior/grounds · 4–6 interior · 1
+aerial · 1 detail — so galleries read as authored rather than random.
+13.2.3 Storage discipline. Always persist credit , licence , sourceUrl , sourceId on Media , render attribution in the gallery footer of
+sample listings, and call Unsplash's download endpoint. This makes the whole demo defensible in one sentence.
+13.2.4 People imagery — a real rule. Never use a stock portrait of a real person as a ﬁctional agent. It puts an identiﬁable
+individual in front of a business they have never heard of: a personality-rights and GDPR problem independent of the stock licence.
+Use monogram avatars generated from initials in brand colours (a 20-line SVG component). Real photographs only for real, consenting
+staﬀ.
+13.2.5 AI-generated imagery. Acceptable for abstract editorial headers, report covers and texture, using a model whose terms
+permit commercial use (Adobe Fireﬂy is safest on training provenance; Flux and Midjourney are usable on their commercial tiers).
+Never for listing photography, even in demo data — an invented photorealistic house presented as a property is exactly the
+misrepresentation §13.12 exists to prevent. Record licence: 'ai-generated' and the model name if used anywhere.
+
+13.3 Fonts and icons
+Recommended pairing (free, self-hosted from Google Fonts): display Cormorant Garamond or Playfair Display ; body Inter .
+Alternatives with more character: Fraunces , Instrument Serif , Newsreader , Libre Caslon Display ; body alternatives Geist , Public Sans ,
+Source Sans 3 .
+Paid upgrades if a brand budget appears: Canela, GT Sectra, Ogg, Tiempos (display); Söhne, Neue Haas Grotesk, ABC Diatype
+(body). Licensing is per-domain and per-pageview tier — never self-host a paid font without the web licence, and log the decision.
+Download via google-webfonts-helper or fontsource , subset to Latin + Latin-Extended + Cyrillic with glyphhanger , WOFF2 only, four
+ﬁles maximum. Icons: Lucide (ISC), or Phosphor.
+
+13.4 Logo and favicon without a designer
+A type-only wordmark is correct for this category and takes two hours.
+1. "LAWRENCE" in the display face, all caps, letter-spacing: 0.18em , weight 400, optical size ≥48 px; "PRIVATE COLLECTION" beneath
+in the body face, small caps, letter-spacing: 0.22em , at 38 % of the wordmark size.
+2. Optional 1 px rule between the two lines at 100 % of the wordmark width.
+3. Monogram for favicon and app icons: "L" in the display face on color.obsidian with 12 % padding.
+4. Export SVG + PNG at 1× and 2×, generate the full icon set with realfavicongenerator.net , commit site.webmanifest .
+5. Everything in /public/brand/ , referenced only through /src/config/brand.ts .
+
+13.5 Geodata — markets, coordinates, polygons
+
+Need
+
+Source
+
+Licence
+
+Cities, regions, coordinates, population, localised
+alternate names
+
+GeoNames ( geonames.org )
+
+CC BY 4.0 — attribute in the colophon
+
+Country and region polygons
+
+Natural Earth
+
+Public domain
+
+Finer market polygons (e.g. Belgravia, Cap Ferrat)
+
+OpenStreetMap via Overpass ( overpassturbo.eu )
+
+ODbL — attribute "© OpenStreetMap
+contributors" on every map
+
+Geocoding during import
+
+Nominatim (1 req/s policy) or a paid geocoder in
+bulk
+
+ODbL
+
+Localised country and region names
+
+i18n-iso-countries + CLDR
+
+Open
+
+Map tiles
+
+MapTiler free tier (100k loads) or self-hosted
+Protomaps .pmtiles
+
+Commercial / BSD
+
+Cache extracts in /data/geo/ and refresh quarterly. Never query Overpass or Nominatim at runtime.
+
+13.6 Market data — the sources that make the research real
+Every published ﬁgure needs a source URL and an asOfDate . These are the sources to use, all free:
+Region
+
+Source
+
+What it gives
+
+Italy
+
+Agenzia delle Entrate — OMI ( agenziaentrate.gov.it ,
+Osservatorio del Mercato Immobiliare)
+
+Oﬃcial €/m² quotations by municipality and zone, twice yearly — the
+single best free property dataset in Europe
+
+Italy
+
+ISTAT
+
+House price index, transaction volumes
+
+UK
+
+HM Land Registry Price Paid Data + UK House Price Index
+(Open Government Licence)
+
+Every recorded transaction, address-level, free and reusable
+
+France
+
+DVF — Demandes de valeurs foncières ( data.gouv.fr ) and
+Notaires de France indices
+
+Transaction prices by commune
+
+Spain
+
+INE + Ministerio de Transportes (MITMA) housing statistics
+
+Price per m², transactions
+
+Portugal
+
+INE Portugal
+
+House price index by municipality
+
+Greece
+
+Bank of Greece residential property price indices
+
+Switzerland
+
+BFS/OFS and cantonal registries
+
+USA
+
+FRED (St. Louis Fed), Redﬁn Data Center, Zillow Research,
+county assessor portals
+
+County-level medians, days on market
+
+UAE
+
+Dubai Land Department open data
+
+Transaction volumes and prices
+
+Global
+
+BIS residential property price database, Eurostat, OECD
+
+Cross-country comparability
+
+Context
+
+Knight Frank Wealth Report, Savills Research, Christie's Luxury
+Deﬁned
+
+Cite with attribution and a link — never reproduce tables or
+paragraphs
+
+The rule that makes this legally and editorially safe: we publish our own derived ﬁgures from open data, plus short attributed
+references to published research. We never copy a table, a chart or a paragraph from a commercial report. A sentence such as "Knight
+Frank reported prime prices in {market} rose x % in {year} (source, date)" is ﬁne; reproducing their index table is not.
+Store the ﬁgures in the Market.stats group with source and asOfDate , and surface them through /api/public/markets/[market]/stats
+(§15.6). Refresh quarterly; a stale index is worse than none.
+
+13.7 Editorial copy — the writing brief and the AI workﬂow
+The developer writes the editorial with AI assistance. This is a legitimate, high-quality workﬂow; unreviewed AI output is not.
+Market page (400–450 words): a 40–60-word answer paragraph opening the page (what the market is, what the entry price is,
+what you get) · one paragraph on character and who buys there · one paragraph of hard speciﬁcs with our own ﬁgures · one paragraph
+on buying practicalities (structures, typical costs, timelines, seasonality) · closing line to the listings. Two question-form H2s. No
+adjective that could apply to any market.
+Journal article (800–1,000 words): answer-ﬁrst opening, three to ﬁve question-form H2s, one table or list of concrete ﬁgures, every
+non-obvious claim sourced with a link and a date, a short "what this means for buyers" close.
+Report (600-word summary + 8-page PDF): a ﬁnding, a method note, three to ﬁve charts from open data, a table by market, and
+a short caveats section. Honest methodology beats impressive claims: state the sample, the source and the limits.
+Four non-negotiable rules:
+1. Never publish a statistic produced from memory. Every number comes from a named source with a URL and a date, or from our
+own database aggregates.
+
+2. Every external claim carries an inline source and asOfDate .
+3. The developer reads every published sentence. Anything not veriﬁable in 30 seconds is deleted rather than softened.
+4. No AI-generated text about law, tax or residency beyond stating that a rule exists and linking the oﬃcial source.
+Article backlog for launch (pick 8): how oﬀ-market sales actually work at €20 M+ · buying through an SPV versus directly, and
+when share transfer makes sense · residency and investment-visa status across Portugal, Greece, Italy, Spain and the UAE (facts +
+oﬃcial links only) · what it costs to complete: taxes and fees by market · heritage and listed-building constraints in Italy and France ·
+the real timeline of a €50 M transaction · why prime markets decouple from national indices · running costs of a large estate, itemised
+· buying a private island: the eight questions to ask ﬁrst · ski property: altitude, access and the value of ski-in/ski-out · what a helipad
+or a 40 m berth adds to value · the discretion playbook: selling without the market knowing.
+
+13.8 Listing descriptions — template grammar
+Listing copy is generated from a slot grammar per locale in /src/content/description-templates/{locale}.ts :
+{OpeningByType} {PositioningByMarket} {AccommodationSentence} {GroundsSentence}
+{ProvenanceSentence?} {FeatureSentence} {LocationSentence} {ClosingByTier}
+
+Six to ten variants per slot, selected deterministically by listing id so copy is stable across runs and no two listings read alike. Numbers
+always come from structured ﬁelds, never from prose. This produces plausible, locale-native copy at zero marginal cost — and it is how
+real agency descriptions get written anyway.
+
+13.9 Translations
+English is the source of truth. Draft it , fr , de , es , ru with the DeepL API or an LLM pass, mark each string machineTranslated: true ,
+and hand-check the 40 highest-traﬃc strings (navigation, CTAs, form labels, error messages, consent text). Never machinetranslate the legal pages or the consent copy. Keep /docs/translation-review.md for a native reviewer later; a professional review
+of ~450 strings costs roughly €300–500 per language and is a post-launch proposal, not a blocker.
+
+13.10 Sample inventory generator
+/src/scripts/seed-sample-data.ts creates 45 properties — 30 public and 15 oﬀ-market — across Saint-Tropez, Cap Ferrat & Cap
+d'Antibes, Monaco, Lake Como, Porto Cervo, Tuscany, Marbella & La Zagaleta, Ibiza, Mykonos, London Prime Central, Gstaad,
+Courchevel, Aspen, Palm Beach, the Hamptons, Dubai, Lake Geneva and the Algarve. Values €10 M–€180 M, weighted so trophy
+dominates, signature is ~20 %, and exactly four prime exceptions demonstrate the 10 % valve. Every priceDisclosure mode is
+represented so all three price states can be demonstrated.
+
+Also generated: 8 ﬁctional agencies and 16 agents with monogram avatars; 8 test members (active, pending, suspended, with and
+without requirements) whose credentials live only in .env.local ; 12 saved listings and a populated MemberActivity so the dashboards
+are not empty; 18 Market records with clearly-marked sample statistics; 3 reports; 8 journal articles; 30 segment pages.
+Deterministic: @faker-js/faker with a ﬁxed seed, idempotent upsert on (agency, reference) , ﬂags --count , --market , --wipe , and a
+summary table on completion.
+
+13.11 Legal and policy text
+Draft placeholders from a reputable generator (Termly, iubenda, or the GDPR.eu templates) plus a cookie table generated from the
+cookies actually in use, each ﬁle marked PLACEHOLDER — pending legal review in a header comment and in an admin note. The
+developer produces: privacy policy, cookie policy, terms of use, member terms, listing disclaimer. Legal review is a client task at the
+end and blocks nothing.
+
+13.12 Sample-data safety rules (mandatory)
+Publishing invented property adverts as real is a consumer-protection problem in most of our markets and poisons the index before
+launch. Therefore: every sample record has isSample = true ; a visible "SAMPLE LISTING — demonstration data" badge and banner in
+all locales; noindex, nofollow and excluded from sitemaps while SAMPLE_DATA_ENABLED=true ; enquiries on sample listings log but never
+email an agent; sample member accounts never receive real email (route to a catch-all); no real agency, agent, owner, address or
+telephone number; monogram avatars only, never stock portraits; coordinates plausible for the market but never on an identiﬁable
+private property; pnpm sample:purge removes every sample record, member, media asset and activity row; the launch checklist blocks
+go-live while any sample content is publicly reachable.
+
+13.13 Pre-launch content checklist
+Green before DNS cutover: hero imagery selected and within budget · all 45 sample listings have ≥8 images and a complete
+description in every locale · 18 market pages have reviewed editorial copy and at least three sourced statistics each · ~30 segment
+pages published · 3 reports with ungated summaries and downloadable PDFs · 8 articles with sources · UI strings translated and the
+top 40 hand-checked · geodata loaded with attribution rendered on maps · fonts subset and self-hosted · logo and favicon set
+committed · legal placeholders in place and ﬂagged · FX snapshot job running · audit:exposure and audit:seo clean · sample data
+purged if real inventory has arrived.
+
+14. Performance
+Metric
+
+Public layer
+
+Member area
+
+LCP
+
+< 1.2 s
+
+< 1.8 s
+
+CLS
+
+< 0.02
+
+< 0.05
+
+INP
+
+< 150 ms
+
+< 200 ms
+
+TTFB
+
+< 150 ms (edge)
+
+< 400 ms (dynamic)
+
+First-load JS — home
+
+< 110 KB gz
+
+—
+
+First-load JS — listing
+
+< 130 KB gz
+
+< 170 KB gz
+
+First-load JS — collection (pre-map)
+
+< 150 KB gz
+
+—
+
+Hero image transferred
+
+< 120 KB AVIF
+
+—
+
+Lighthouse mobile perf / a11y / SEO
+
+≥ 95 / 100 / 100
+
+≥ 90 / 100 / n/a
+
+Signed media ﬁrst byte
+
+—
+
+< 300 ms
+
+Rules. Public pages are SSG or ISR only; force-dynamic is forbidden there. The member area is force-dynamic with Cache-Control:
+private, no-store and must never be edge-cached. Map, lightbox, charts and the PDF renderer are next/dynamic with ssr:false . AVIF
+ﬁrst with explicit sizes , variants at upload never on demand, exactly one priority image per page, blurhash elsewhere. Fonts selfhosted, subset, preloaded, max four ﬁles. Fixed aspect ratios and dimension-matched skeletons everywhere. ISR plus a signed
+/api/revalidate webhook from Payload afterChange . Analytics is the only third-party script and it loads afterInteractive ; no tag
+managers, no chat widgets, no A/B tools in Phase 1. CI enforces every budget and fails the build on regression. Perceived speed:
+prefetch on card hover, optimistic saves, instant skeletons, View Transitions where supported.
+
+15. SEO and AI discovery
+15.1 The principle
+The public Collection is genuinely open and complete, so it can rank like any strong portal. The research library is what earns authority
+and citations. The account gate sits only in front of the oﬀ-market inventory and the report PDFs — never in front of content we want
+indexed.
+
+15.2 Foundations
+Canonical on every page · hreﬂang for all 6 locales + x-default · sitemap index split by type (properties, markets, segments, reports,
+journal, static), 50k URLs max per child, correct lastmod , excluding oﬀ-market, sample, expired and non-public content · robots.txt ·
+designed 404 and 410 · one H1 per page · breadcrumbs everywhere · 6–10 contextual internal links per market page · image ﬁlenames
+and alt text generated from structured data ( villa-saint-tropez-sea-view-01.avif , alt "Nine-bedroom villa with sea view in SaintTropez, Côte d'Azur").
+
+15.3 A ﬁnite crawl surface
+All indexable browse states are canonical paths under /collection/... and /markets/... . Query-string ﬁlters are noindex, follow
+and never linked from navigation. Pagination beyond page 1 is noindex, follow with a canonical to page 1. /off-market/* and
+/account/* are excluded by robots.txt , by X-Robots-Tag , and by authentication — three independent layers.
+
+15.4 The market-intelligence engine (the real growth strategy)
+Modelled on Knight Frank and Savills research. Phase 1 ships:
+18 market pages with sourced, dated statistics: Saint-Tropez, Cap Ferrat & Cap d'Antibes, Monaco, Lake Como, Porto Cervo,
+Tuscany, Mallorca, Ibiza, Marbella & La Zagaleta, Mykonos, London Prime Central, Geneva & Lake Léman, Gstaad, Courchevel &
+Méribel, Aspen, Palm Beach, the Hamptons, Dubai.
+~30 market × segment pages, each gated on real editorial copy plus three data points.
+3 reports with ungated summaries: a prime-entry-price comparison across markets, a note on purchase structures and total
+acquisition costs in four jurisdictions, and a study of published versus oﬀ-market share by market.
+A journal answering what this audience actually searches (§13.7 backlog).
+
+15.5 Structured data
+
+RealEstateListing + Offer / PriceSpecification (bands as minPrice / maxPrice ) · BreadcrumbList everywhere · Organization + WebSite
+with SearchAction · FAQPage on market pages · Article on journal posts · Dataset on reports and on the market stats endpoint —
+under-used and ideally suited to a price index · RealEstateAgent on agency pages. Vitest shape tests plus a Rich Results check in CI.
+
+15.6 AI and answer-engine discovery
+1. /llms.txt — a Markdown map of the site: what it is, the admission threshold, the market index, the data licence, contact. /llmsfull.txt lists every market and report.
+2. Crawler policy in robots.txt : allow GPTBot , OAI-SearchBot , PerplexityBot , ClaudeBot , Google-Extended on the public layer; disallow
+/off-market , /account , /api , /admin and ﬁlter URLs. Default is allow — being the cited source for prime-market data is worth far
+more than the content.
+3. Answer-ﬁrst structure — every market page and report summary opens with a 40–60-word direct answer containing the key
+ﬁgures with units and dates, then question-form H2s.
+4. Machine-readable data — /api/public/markets/[market]/stats returning the published ﬁgures as JSON with source and asOfDate ,
+referenced by Dataset JSON-LD. Cheap to build, disproportionately citable.
+5. Entity clarity — consistent Organization with sameAs , a plainly worded About page, consistent market naming across the whole
+site.
+6. Freshness — honest dateModified in JSON-LD and sitemaps, updated when the data actually changes.
+7. Measurement — track assistant-referral domains in Plausible and record a monthly citation spot-check in DECISIONS.md .
+
+15.7 What must never be indexable
+
+Off-market listings and their ids, member identities, exact coordinates, addressLine ,
+internalValueEur , commission terms, documents and signed media URLs. pnpm audit:exposure
+asserts all of it on every build — the most important script in the repository.
+16. Accessibility — WCAG 2.2 AA
+This audience skews older and uses large screens and, increasingly, assistive technology. Accessibility here is commercial, not only
+legal — and in the EU the European Accessibility Act now reaches services of this kind.
+Contrast ≥4.5:1 for body text and ≥3:1 for large text and UI borders — check mist and patina against bone before shipping · every
+interactive element a real button or a , keyboard-reachable, with a visible 2 px focus-visible ring · gallery with arrow keys, Esc , focus
+trap and restoration, announced image counter · a "skip map" link and a non-map equivalent for every map action · labelled inputs
+(labels, not placeholders), aria-live result counts, error summaries focused on submit, errors linked with aria-describedby · target
+size ≥24 × 24 px · prefers-reduced-motion honoured · logical heading order · the account creation and login ﬂow must be
+completable with a keyboard and a screen reader — a gate that excludes is a gate that loses clients. axe-core on 10 routes in CI
+including the member area, plus a recorded manual keyboard pass.
+
+17. Security and privacy
+17.1 Application security
+Member sessions in HttpOnly , Secure , SameSite=Lax cookies with a 30-day remember-me and silent refresh; optional TOTP 2FA for
+members, mandatory for staﬀ; rate limits on login (5/15 min), join (3/h/IP), enquiry (5/h), signed media (60/min/member), password
+reset (3/h); Turnstile on join, login and enquiry; strict CSP compatible with MapLibre and Plausible; HSTS, Referrer-Policy: strictorigin-when-cross-origin , Permissions-Policy , X-Content-Type-Options ; signed webhooks for revalidation and cron; dependency audit in
+CI; Sentry with PII scrubbing and no request bodies captured on member routes.
+
+17.2 Exposure integrity (the critical control)
+Allowlist projections (§8.3) · audit:exposure in CI · Playwright tests fetching every public route anonymously and asserting the absence
+of oﬀ-market markers · a test asserting that an anonymous request to an oﬀ-market id returns 404 (not 403 — never conﬁrm
+existence) · a test asserting signed media URLs expire and are single-use · a test asserting internalValueEur and addressLine never
+appear in any response body. Treat a failure here as a production incident, not a test failure.
+
+17.3 Multi-tenancy (dormant but enforced)
+Even in single-team Phase 1, every listing query is agency-aware and the tenant access function exists with tests. This is what makes
+Track B a conﬁguration change rather than a refactor.
+
+17.4 Privacy
+Phase 1 processes ordinary contact data only — no identity documents, no ﬁnancial documents — which keeps the compliance burden
+light and a DPIA unnecessary at this stage (it becomes necessary if §23.2 is ever built). Requirements: non-blocking, deferred, granular
+cookie consent with a stored consent record; analytics only after consent where required; privacy, cookie and terms pages live before
+launch; DPAs with Vercel, Neon, Cloudﬂare, Upstash, Resend, Typesense, Sentry, Cal.com; a processing register; self-service account
+deletion plus a one-click admin anonymisation that preserves pseudonymised MemberActivity ; a documented subject-access procedure
+in /docs/privacy-procedures.md .
+
+17.5 Retention
+Enquiries 24 months then anonymised · MemberActivity 24 months · dormant member accounts ﬂagged at 24 months and deleted at
+36 after two notices · staﬀ AuditLog 24 months · sample data purged before launch.
+
+17.6 Anti-scraping
+No public bulk endpoint; unguessable media paths; rate limits and Cloudﬂare bot rules; no exact coordinates in any public response;
+the oﬀ-market channel requires a session plus a signed URL. State the prohibition in the Terms. Accept that the public layer can be
+copied — it is deliberately the part we are content to have copied.
+
+18. Analytics
+Public layer — Plausible, events deﬁned once in /src/lib/analytics.ts : collection_viewed · listing_viewed (id, market, band) ·
+filter_applied · off_market_cta_clicked (from which surface — this tells you exactly what drives registration) · join_started /
+join_completed · report_summary_read · report_download_gated · market_viewed · enquiry_submitted (source) · desk_call_scheduled ·
+save_clicked · locale_switched · currency_switched . No personal data in payloads.
+Member area — no third-party analytics at all. Product metrics come from MemberActivity aggregates in the admin: active
+members, oﬀ-market views per listing, document downloads, saves, requirement matches proposed and acted on, and the funnel from
+ﬁrst visit to account to enquiry. Nothing personal leaves the system.
+
+19. Testing
+Unit (Vitest): audience projections — a table-driven test enumerating every viewer × channel × ﬁeld group and asserting exact
+presence or absence (the highest-value test in the codebase) · ﬁlter-to-Typesense translation · price-band formatting and FX
+conversion · signed-URL generation and expiry · combo/segment resolver and canonicalisation · metadata and JSON-LD builders ·
+match scoring · description template determinism.
+E2E (Playwright): join → conﬁrm email → oﬀ-market opens, end to end · an anonymous request to an oﬀ-market id returns 404 · oﬀmarket listings absent from sitemap, OG routes, public search and related-listing suggestions · signed media URL fails after expiry and
+on second use · public listing renders correctly for all three priceDisclosure modes · save, note and requirements ﬂows persist ·
+enquiry submits, routes and emails · expired listing returns 410 · sample content emits noindex and is absent from sitemaps · locale
+switch preserves path and query · audit:exposure passes · keyboard-only completion of join and enquiry · (Track B) agency A cannot
+see agency B's listings or enquiries.
+Non-functional: Lighthouse CI budgets, axe-core on 10 routes, bundle-size assertions, visual regression on 10 viewports.
+
+20. Runbooks, Definition of Done, launch
+20.1 Runbooks
+Deploy: merge to main → CI gates → Vercel promotion; instant rollback, plus a committed down-migration for every schema change.
+Database: Neon daily backups with 7-day PITR; migrations reviewed as SQL before applying. Search: reindex into an alias and swap,
+never in place; the member collection is written with the admin key only, never from a client; if Typesense is unreachable, a Postgres
+fallback query path serves results with reduced faceting — implement it, do not assume it. Exposure incident: if oﬀ-market data is
+suspected to have leaked, switch the aﬀected listings to draft , pull MemberActivity for them, check CDN and search-engine caches,
+request removal via Search Console, notify the seller within 24 h, document in DECISIONS.md , then ﬁx the code. Content freeze /
+launch: 48 h before cutover freeze content edits, verify sitemaps and redirects, purge sample data, set SAMPLE_DATA_ENABLED=false ,
+then cut DNS with a 300 s TTL set 24 h earlier. Availability target 99.9 %.
+
+20.2 Deﬁnition of Done
+1. Every budget in §14 veriﬁed in Lighthouse CI and on PageSpeed Insights.
+
+2. Public Collection complete: browse, listing detail in all three price modes, all lifecycle states, comparable listings, brochure PDF.
+3. Oﬀ-Market works end to end: join, email conﬁrmation, immediate access, saved listings, requirements, match email — and
+audit:exposure is green.
+4. Member media and documents served only via signed URLs with expiry and single use proven by test.
+5. CMS complete: an editor can create, localise and publish a listing, and set its publication mode, without a developer.
+6. 45 sample listings, 8 sample members and populated activity live, badged, noindex, purgeable.
+7. 18 market pages and ~30 segment pages published with sourced, dated statistics; 3 reports with ungated summaries; 8 articles;
+llms.txt served.
+8. Valid JSON-LD on every template; audit:seo clean; sitemaps exclude everything gated or sample.
+9. WCAG 2.2 AA on 10 routes including join and the member area.
+10. Security headers grade A, rate limits veriﬁed, CSP clean, staﬀ 2FA enforced.
+11. Enquiries save with consent, route correctly, notify, and are rate-limited.
+12. Changing /tokens/tokens.ts restyles site, PDFs and emails.
+13. /lib/services empty and documented; every §23 seam present and unused.
+14. DECISIONS.md , README.md (new developer running in 10 minutes), /docs/admin-guide.md , /docs/architecture.md , /docs/privacyprocedures.md complete.
+15. Staging signed oﬀ; launch checklist executed; SAMPLE_DATA_ENABLED=false in production; §13.13 content checklist green.
+
+21. Pre-answered decisions
+#
+
+Question
+
+Default
+
+1
+
+Brand name
+
+Lawrence Private Collection; short form "Lawrence"
+
+2
+
+Admission threshold
+
+€20 M, with a prime exception track €10–20 M capped at 10 % of published inventory
+
+3
+
+Below-threshold submissions
+
+Rejected automatically with a courteous explanation
+
+4
+
+On-request pricing
+
+Allowed; internalValueEur still required for threshold enforcement
+
+5
+
+Default price display
+
+As the seller instructs: exact, band, or on request
+
+6
+
+Oﬀ-market gate
+
+Free account, email conﬁrmation only. No NDA, no proof of funds, no vetting
+
+7
+
+Manual approval of members
+
+Oﬀ by default; MEMBER_REQUIRE_APPROVAL ﬂag exists
+
+8
+
+Social login
+
+No — it discloses membership to a third party
+
+9
+
+Member 2FA
+
+Optional for members, mandatory for staﬀ
+
+10
+
+Locales
+
+en (default), it, fr, de, es, ru
+
+11
+
+Currencies
+
+EUR base; USD, GBP, CHF, AED, SGD, HKD display, daily ECB snapshot
+
+12
+
+Units
+
+Metric default, imperial toggle; land shown in both hectares and acres
+
+13
+
+Public map precision
+
+Locality circle, never a pin; exact coordinates staﬀ-only
+
+14
+
+Minimum media
+
+8 images at ≥2000 px; EXIF always stripped
+
+15
+
+Watermarking
+
+None in Phase 1 (seam in §23.3)
+
+16
+
+Documents
+
+Members only, signed URLs, 15-minute expiry
+
+17
+
+Listing freshness
+
+120 days, T-14 reminder, then expired + 410
+
+18
+
+Sold listings
+
+90 days without a price, then noindex, then 301 to the market page
+
+19
+
+Duplicate listings
+
+Canonical listing displayed, duplicates linked
+
+20
+
+Featured slots
+
+6 on home, editorial choice only
+
+21
+
+Default sort
+
+Editorial, then newest
+
+22
+
+Pagination
+
+24 per page, page 1 canonical, later pages noindex follow
+
+23
+
+Report gating
+
+Summary open, PDF requires an account
+
+24
+
+Newsletter
+
+Opt-in at join and at report download, double opt-in, digest sending in Phase 1 limited to match emails
+
+25
+
+Match emails
+
+Opt-in, maximum one per day per member
+
+26
+
+Enquiry routing
+
+Desk ﬁrst, then listing agent; response commitment one business day
+
+27
+
+Live chat
+
+Never
+
+28
+
+Desk contact
+
+Enquiry form plus Cal.com scheduling; no published direct number in Phase 1
+
+29
+
+Agency accounts
+
+Track B, after launch unless the client has agency inventory waiting
+
+30
+
+Automated feeds
+
+Public channel only, never oﬀ-market, and only in Track B
+
+31
+
+Auto-approval of listings
+
+Not applicable in Phase 1 (single team); in Track B, never
+
+32
+
+AI crawlers
+
+Allowed on the public layer, blocked on /off-market , /account , /api , /admin
+
+33
+
+Cookie banner
+
+Non-blocking, granular, one-click reject
+
+34
+
+Analytics
+
+Plausible on the public layer only
+
+35
+
+Domain strategy
+
+Single domain, locale paths, apex canonical, www 301s, no trailing slash
+
+36
+
+Error pages
+
+Designed 404 and 410 with markets and the collection
+
+37
+
+Session length
+
+30 days remember-me, silent refresh, logout everywhere available
+
+38
+
+Signed URL lifetime
+
+15 minutes, single use
+
+39
+
+Account deletion
+
+Self-service, immediate, anonymises activity
+
+40
+
+Sample data
+
+Purged before DNS cutover
+
+41
+
+Uptime target
+
+99.9 %, monitored externally
+
+42
+
+Support addresses
+
+desk@, members@, agents@, privacy@
+
+43
+
+Blog authorship
+
+House byline "Lawrence Intelligence" until real authors exist
+
+44
+
+Market data refresh
+
+Quarterly, with asOfDate shown on every ﬁgure
+
+45
+
+Image source
+
+Unsplash/Pexels for sample data; agency-supplied for real listings
+
+46
+
+Agent avatars
+
+Monograms for sample data; real photos only for real, consenting people
+
+47
+
+Legal text
+
+Generator placeholders, clearly ﬂagged, lawyer review before go-live
+
+48
+
+Handover
+
+README, DECISIONS, admin guide, architecture doc, privacy procedures, launch checklist, recorded walkthrough
+
+22. READY-TO-PASTE CURSOR PROMPTS
+In order. Track A is Prompts 1–14; Track B is 15–16 and can run before or after launch. Each prompt ends with acceptance criteria —
+require a pass/fail report per line before committing. Keep CLAUDE.md , §6 and §8 open as context.
+
+Prompt 1 — Scaﬀold and guardrails
+Set up the project "lawrence":
+- Next.js 15 App Router + TypeScript strict (noUncheckedIndexedAccess), Payload 3 embedded with the
+Postgres adapter, Tailwind v4 reading CSS variables, ESLint + Prettier.
+- Folder structure exactly as spec §7.4, with route groups (public) and (member). Every route under
+(member) is force-dynamic with Cache-Control: private, no-store and X-Robots-Tag: noindex, applied
+once in a shared layout — not per page.
+- Zod-validated env module failing fast at boot; .env.example with every variable in §7.3.
+- /src/config/brand.ts exactly as in §10.1 — the only place the brand is named.
+- /api/health returning { ok, db, search, redis, version }.
+- docker-compose with postgis and typesense; a migration enabling postgis and pg_trgm.
+- Vitest + Playwright + axe + Lighthouse CI; GitHub Actions running typecheck, lint, test, e2e, lhci,
+bundle budgets, audit:seo, audit:a11y and audit:exposure on every PR.
+- CLAUDE.md from spec §1.1, /.cursor/rules/lawrence.mdc, empty DECISIONS.md.
+- Scripts: dev build start typecheck lint test test:e2e analyze seed sample:purge search:reindex
+audit:seo audit:a11y audit:exposure audit:all.
+ACCEPTANCE: pnpm dev boots; /api/health ok; CI green; a new route added under (member) is
+automatically noindex and uncached, proven by a curl assertion in a test.
+
+Prompt 2 — Tokens and components
+
+Build the design system per spec §10, using the exact token values in §10.2.
+Generate CSS variables from tokens, wire Tailwind v4 via @theme, and add an ESLint rule banning hex
+colours, px font sizes and arbitrary spacing outside /src/tokens.
+Self-host Cormorant Garamond (display) and Inter (body) per §13.3: subset Latin + Latin-Extended +
+Cyrillic, WOFF2 only, max 4 files, font-display swap, preload only the above-the-fold display weight.
+Use tabular figures for every price and measurement.
+Build the component inventory in §10.5 using tokens only, including OffMarketInvite rendering exactly
+the state described in §10.4 (small-caps label, real count, one quiet link — never a blur, never a
+lock icon) and SaveButton with an optimistic state.
+Fixed aspect-ratio wrappers on every image component.
+/dev/styleguide (dev-only) renders every component in every state.
+ACCEPTANCE: changing color.obsidian and font.display restyles the whole styleguide; axe reports zero
+violations; every control is keyboard reachable with a visible focus ring; contrast verified for mist
+and patina on bone.
+
+Prompt 3 — Property collection
+Create the Payload collection Property exactly per spec §6.1–6.5, localised into en (default), it,
+fr, de, es, ru. Include ALL fields, including agency and agent (present from day one even though
+Phase 1 is single-team), channel, valueTier, moderation, internalValueEur, priceDisclosure,
+priceBandMin/Max, ownershipStructure, saleStructure, provenance, heritageStatus, the full feature
+enum, the optional waterfront sub-block, and the location group with coordinatePrecision and
+publicGeography.
+Hooks:
+- beforeValidate: block publication when internalValueEur (or priceAmount) is below €20M unless
+valueTier = prime AND an admin override is set; enforce the 10% cap on prime listings in the public
+channel and explain any rejection in plain language.
+- beforeChange: compute priceEur from the stored daily FX snapshot; derive valueTier; generate slug
+only for channel = public; set expiresAt = publishedAt + 120 days; compute fingerprint.
+- afterChange: upsert into the correct Typesense collection (public_listings vs member_listings)
+based on channel; trigger ISR revalidation for public listings only.
+Admin UI: field groups ordered Essentials → Publication → Commercial → Physical & provenance →
+Location → Media → Documents → SEO → Publishing, with the single "How should this property be
+published?" control from §8.4 and a live preview of what an anonymous visitor and a member see.
+Drafts + versions + autosave. All indexes in §6.8. Show me the SQL migration before applying.
+ACCEPTANCE: a €12M listing cannot publish without the prime override; an off-market listing never
+receives a slug; Typesense routing is correct for both channels; types compile; EXPLAIN shows index
+usage on the hot public query.
+
+Prompt 4 — Remaining collections
+Create: Media (variants at upload per §14, EXIF stripped without exception, 2000px minimum enforced
+with a clear error, blurhash, per-asset visibility public|members routing to the public or private
+bucket, credit/licence/sourceUrl, agency scoping), Document (members only, private bucket), Member,
+SavedListing, Requirement, MemberActivity (append-only — no update or delete for anyone, including
+admins), Enquiry, Market (with the stats group where every figure carries source and asOfDate),
+Report, Article, Page, Taxonomy, Agency, Agent, Redirect, User (admin/editor now; agency roles
+reserved), AuditLog, ImportJob, FxSnapshot — all per spec §6.5–6.7.
+Member auth: Payload auth on the Member collection, email + password and magic link, email
+confirmation required before status becomes active, optional TOTP 2FA, MEMBER_REQUIRE_APPROVAL flag
+routing new accounts to pending when true.
+Write the RESERVED unused fields on Member (ndaStatus, ndaSignedAt, capabilityStatus, capabilityBand,
+tier) so §23 is a flag later, not a migration. Never write to them now.
+ACCEPTANCE: a member cannot read another member's record through any API; MemberActivity rejects
+updates and deletes; an unconfirmed account cannot reach any (member) route; document uploads land
+only in the private bucket and are unreadable without a signed URL.
+
+Prompt 5 — The access layer (before any page that renders listing data)
+Implement spec §8.1–8.3.
+- /src/lib/access/viewer.ts resolving the Viewer from the request (anonymous, member with status,
+staff, agency) — no ambient globals.
+- /src/lib/access/visibility.ts implementing canSee() exactly as specified.
+- /src/lib/access/projections.ts: ALLOWLIST projections per audience, exactly the table in §8.3,
+including the never-exposed fields (internalValueEur, commissionTerms, addressLine, exact
+coordinates, owner data).
+- Every function in /src/lib/db takes Viewer as its first argument and applies the projection before
+returning. Make it impossible to compile a call without a viewer.
+- A table-driven Vitest suite enumerating EVERY viewer × channel × field group with the exact
+expected presence or absence, no skipped cells.
+- /src/scripts/audit-exposure.ts implementing the audit described in CLAUDE.md, wired into CI as a
+blocking check.
+ACCEPTANCE: the enumerated table test passes; audit:exposure passes; removing a field from a
+projection makes a test fail rather than silently leaking; adding a new model field exposes it
+nowhere by default.
+
+Prompt 6 — Data layer, geo, search
+
+Build /src/lib/db (getListingBySlug, getOffMarketById, getFeatured, getComparables, searchListings,
+getMarketAggregates, getMarketStats, getAdminDashboardStats, getMemberDashboard), /src/lib/geo
+(bbox, radius, ST_DWithin helpers, and a deterministic jitter used for the locality circle so a
+public listing never exposes an exact point) and /src/lib/search (two Typesense collections —
+public_listings and member_listings — with distinct keys; only the public search-only key may reach
+the browser; full reindex into an alias with atomic swap; incremental upsert/delete from the Property
+hooks; a Postgres fallback path used automatically when Typesense is unreachable).
+ACCEPTANCE: unit tests cover filter translation; no public API response contains exact coordinates;
+grepping the client build finds no member search key; killing Typesense locally still returns results.
+
+Prompt 7 — i18n, currency, units
+Set up next-intl for en (default), it, fr, de, es, ru per spec §5.1.
+Per-locale routing, language detection only on "/" (302, uncached), all other routes always prefixed,
+no trailing slash. /src/messages/*.json seeded with the complete copy deck from §12 in English, with
+machine-translated drafts for the other locales marked machineTranslated:true per §13.9. Fallback to
+en with a dev-time warning listing missing keys. LocaleSwitcher preserving path and query and mapping
+localised market and segment slugs. CurrencySwitcher converting from priceEur using the stored daily
+FX snapshot, showing the original currency on hover. UnitSwitcher (metric/imperial, land in ha and
+acres) stored in a cookie. One hreflang helper emitting all locales + x-default on every page.
+ACCEPTANCE: switching locale on a market page lands on the equivalent page; hreflang validates; an
+ESLint rule proves no literal user-facing string exists in any component.
+
+Prompt 8 — Public Collection pages
+Build the public layer per spec §11.1–11.3 and the copy deck §12.1–12.2: home, collection browse
+(canonical paths only — no crawlable filter query strings), and the listing detail with all three
+priceDisclosure modes, the locality circle map, the market context strip, comparable listings, the
+member-extras block, the enquiry form, the brochure link, breadcrumbs and JSON-LD per §15.5.
+SSG + ISR, dynamic OG images, and the available / reserved / under offer / sold / expired / sample
+states. Expired returns HTTP 410 with the designed page.
+ACCEPTANCE: Lighthouse mobile ≥95 with LCP < 1.2s on home and listing; first-load JS within the §14
+budgets; audit:exposure passes against an anonymous crawl of every generated page; no response for
+any public listing contains exact coordinates, addressLine or internalValueEur.
+
+Prompt 9 — Membership and the Oﬀ-Market section
+Implement spec §8.5–8.8 and §11.4 with the copy in §12.3.
+- /join: email + password or magic link, optional fields, optional marketing consent, Turnstile.
+Email confirmation opens the account immediately. MEMBER_REQUIRE_APPROVAL defaults to false.
+- Login, logout, password reset, optional TOTP enrolment.
+- /off-market and /off-market/[id]: dynamic, noindex, never cached, served from the member Typesense
+collection with a server-side key only. Filters per §11.4 including "matches my requirements".
+- Member media and documents through /api/secure/media/[token] and /api/secure/document/[token]:
+HMAC over (assetId, memberId, expiry, nonce), 15-minute lifetime, nonce burned in Redis, session
+re-checked server-side, private no-store headers, and 404 (never 403) for unauthenticated requests.
+- MemberActivity written on off-market list views, detail views, document downloads, saves and
+enquiries.
+- Account area: profile, saved listings with private notes, requirements profile, email preferences,
+self-service deletion that anonymises activity.
+- /src/lib/match.ts scoring requirements against new listings, plus the match email (opt-in, max one
+per day per member) and an admin matching board.
+ACCEPTANCE: the join → confirm → off-market journey passes end to end in Playwright; an anonymous
+request to an off-market id returns 404; a signed URL fails after expiry and on second use; off-market
+ids appear in no sitemap, OG route, public search response or related-listing block; deleting an
+account leaves no personal data and preserves pseudonymised activity.
+
+Prompt 10 — Market intelligence and the SEO engine
+Build /markets, /markets/[market], /markets/[market]/[segment], /intelligence and
+/intelligence/[slug] per spec §11.5, §11.6 and §15.4, plus /journal.
+Every statistic renders with its source link and asOfDate. Reports have an ungated 400–600 word
+summary with charts and a gated PDF requiring an account.
+Seed 18 market records and ~30 segment pages with editorial copy written per the brief in §13.7,
+answering the query in the first 60 words, using figures drawn from the open sources listed in §13.6
+with a source URL and date on every number. Seed 3 reports and 8 articles.
+Implement the full SEO layer: the metadata helper with the templates in §12.4, canonical, hreflang +
+x-default, dynamic OG images, a sitemap index excluding off-market, sample, expired and gated
+content, robots.txt with the AI crawler policy in §15.6, /llms.txt and /llms-full.txt, JSON-LD per
+§15.5 including Dataset on reports, and /api/public/markets/[market]/stats returning sourced JSON.
+pnpm audit:seo must report missing canonicals or descriptions, duplicate titles, orphan pages and
+sitemap URLs returning non-200.
+ACCEPTANCE: audit:seo clean; Rich Results passes for listing, market, report and organisation; no
+gated URL appears in any sitemap; llms.txt served as text/plain; every market page has a unique title
+and description and at least three sourced statistics.
+
+Prompt 11 — Enquiries, desk, brochures, dashboards
+
+A) Enquiry form used on listing, off-market, market and contact pages: Zod schema shared client and
+server, Turnstile, honeypot, timing check, rate limiting (5/IP/hour), consent stored with timestamp
+and IP, UTM captured. Routing to the desk and the listing agent via Resend using the React Email
+templates in §12.5, sent from our domain with reply-to the enquirer. Member enquiries attach the
+memberId. Sample listings log but never email. Cal.com embed for desk calls.
+B) Brochure PDF in /src/lib/pdf: A4, localised, token-styled, audience-aware (a public brochure omits
+member-only content), with cover image, logo, price per priceDisclosure, fact table, provenance,
+6 gallery images, a static locality map and the disclaimer footer. Exposed at
+/api/property/[slug]/brochure.pdf and as an admin action.
+C) Admin dashboard per §9.2 and the member-facing account dashboard. All queries via /src/lib/db.
+ACCEPTANCE: the PDF restyles when tokens change; a public brochure contains no member-only field;
+dashboards load under 1s with the sample dataset; an enquiry routes, emails and appears in the queue.
+
+Prompt 12 — Sample data and content production
+Implement spec §13.10 using the image rules in §13.2, the description grammar in §13.8 and the safety
+rules in §13.12: 45 properties (30 public, 15 off-market) across the 18 markets with the correct tier
+weighting and exactly four prime exceptions, all three priceDisclosure modes represented, 8 fictional
+agencies with 16 agents on monogram avatars, 8 test members across every status with credentials only
+in .env.local, 12 saved listings, populated MemberActivity, 18 market records with clearly-marked
+sample statistics, 3 reports, 8 articles, ~30 segment pages.
+Deterministic seed, idempotent upsert, --count/--market/--wipe flags, summary table.
+Add pnpm sample:purge removing every sample record, member, media asset and activity row.
+ACCEPTANCE: running twice is idempotent; every filter returns at least three results; each sample
+member demonstrates their state on login; no sample content is indexable; purge leaves zero orphans.
+
+Prompt 13 — Accessibility and performance passes
+A) WCAG 2.2 AA per spec §16, including join, login, the account area and the off-market section.
+axe-core on 10 routes in CI; commit a manual keyboard-only test script.
+B) Performance per spec §14: audit public routes for accidental dynamic rendering and member routes
+for accidental caching; bundle analysis with dynamic imports for map, lightbox, charts and PDF;
+explicit sizes on every next/image with exactly one priority image per page; cache headers with a
+verified edge HIT on public pages; the signed /api/revalidate webhook from Payload afterChange;
+Lighthouse CI budgets as hard failures.
+Report before/after numbers for every budget and list the top five remaining offenders.
+ACCEPTANCE: zero axe violations on all 10 routes; Lighthouse accessibility 100 on home, collection
+and listing; every §14 budget met; no member route ever returns a public cache header.
+
+Prompt 14 — Security, tests, staging, launch, handover
+Implement spec §17, §19 and §20.
+Security headers with a strict CSP compatible with MapLibre and Plausible; rate limits; Turnstile;
+staff 2FA; signed webhooks; Sentry with PII scrubbing and no request bodies on member routes;
+dependency audit in CI. Privacy: granular consent with a stored record, self-service account deletion,
+one-click admin anonymisation preserving pseudonymised activity, retention jobs per §17.5, and
+/docs/privacy-procedures.md.
+Tests: the full enumerated projection table, the E2E suite in §19 including signed-URL expiry and
+off-market exposure assertions, visual regression baselines, Plausible events per §18 on the public
+layer only, and an external uptime monitor.
+Deploy to a password-protected Vercel staging domain and document every env var.
+Produce LAUNCH-CHECKLIST.md (blocking items: audit:exposure green, no sample content reachable,
+SAMPLE_DATA_ENABLED=false, legal placeholders replaced, §13.13 content checklist green), README.md
+(new developer running in 10 minutes), /docs/admin-guide.md, /docs/architecture.md, and a recorded
+walkthrough script covering: publish a public listing, publish an off-market listing, approve nothing
+(explain the flag), read the dashboards, add a market page.
+ACCEPTANCE: securityheaders.com grade A; CSP clean on every page including the member area; CI fully
+green; every checklist item ticked or explicitly deferred in DECISIONS.md.
+
+Prompt 15 — TRACK B: agency accounts and roles (optional)
+Implement spec §9.4 part one.
+- ONE reusable tenant access function in /src/payload/access/tenant.ts applied to every collection.
+- Roles agency_admin and agency_agent with the permission model in §9.4: agencies may create and edit
+their own listings but saving sets moderation = unreviewed; they never publish directly and never
+see another agency's data.
+- Agency onboarding: application at /sell reviewed by an admin, agency record created, set-password
+email, profile completeness gate before the first submission.
+- An agency dashboard scoped to their own listings, views, enquiries and response times.
+ACCEPTANCE: Playwright proves agency B receives 403 or empty results on agency A's listings, media and
+enquiries through both the admin UI and the REST/GraphQL API; an agency user cannot set status to
+published; an editor can.
+
+Prompt 16 — TRACK B: moderation and bulk import (optional)
+
+Implement spec §9.4 part two.
+- Review queue at /admin/review: submitted data side by side with automated checks (threshold
+including internalValueEur, ≥8 images at ≥2000px, description ≥600 characters, no contact details
+in public text, coordinates plausible for the stated market, EXIF stripped, duplicate fingerprint
+matches) and a publication preview showing what a visitor and a member would see. Approve, request
+changes, or reject with a note that reaches the agency.
+- CSV/XLSX bulk import: upload → dry-run validation report with row and column level reasons →
+confirm → background job → summary email with a downloadable error CSV. Idempotent on
+(agency, reference). Images fetched, validated, optimised and deduplicated. ImportJob audit record.
+- Import may set channel = public only; off-market listings must be entered manually.
+ACCEPTANCE: importing the sample CSV twice creates no duplicates; a row priced at €4M is rejected with
+a clear reason; a row attempting channel = off_market is rejected; a listing with 5 images is blocked
+by moderation.
+
+23. Deferred features — exactly how each one switches on
+Nothing here is built now. Each is listed with the seam that already exists, so the work is additive.
+
+23.1 Member vetting and approval
+Seam: Member.status already supports pending ; MEMBER_REQUIRE_APPROVAL already gates the join ﬂow; /admin/members already lists
+accounts. Work: an approval queue UI, two email templates, and turning the ﬂag on. Half a day.
+
+23.2 NDA and ﬁnancial capability conﬁrmation
+Seam: Member.ndaStatus , ndaSignedAt , capabilityStatus , capabilityBand , tier exist and are unused; /lib/services/ is the integration
+boundary; the projection table already supports more than two audiences. Work: an e-signature integration (Dropbox Sign, DocuSign,
+Yousign), a capability upload with private storage, an admin review screen, tier promotion, and a fourth column in the projection table.
+If this is ever built, a DPIA becomes necessary and capability documents must be deleted on veriﬁcation, with only the outcome
+retained — design it that way from the ﬁrst line. Roughly two weeks.
+
+23.3 Per-member forensic watermarking
+Seam: all member media already ﬂows through /api/secure/media/[token] with the member id in scope, and MemberActivity already
+records every access. Work: a sharp composite for images and a pdf-lib overlay for documents carrying the member's name and a
+token, cached per member-asset pair for 24 h, with the token recorded in the activity row. Two to three days, and it is what convinces
+the most cautious sellers to place inventory.
+
+23.4 Named per-listing access
+Seam: canSee() is a single function, and the projection table is data, not code. Work: an AccessGrant collection, one clause in canSee ,
+an admin action, and an expiry job. Two days.
+
+23.5 Agency feeds
+Seam: Property.sourceType and ImportJob exist; the import validation pipeline arrives with Track B. Work: per-agency tokens, a
+documented inbound JSON schema, adapters for common formats, and a cron diﬀ report. Public channel only. About a week.
+
+23.6 Semantic matching and AI search
+Seam: /src/lib/match.ts is one isolated function; no embedding column exists yet, deliberately, because it is machine-generated and
+a script can backﬁll it in one run. Work: enable pgvector , add the column, backﬁll, swap the scoring function. Two days.
+
+23.7 CRM, messaging, data rooms, payments
+Seam: /lib/services is empty and is the only place external integrations may attach; Enquiry and Document already model the data.
+All are additive.
+
+24. Appendix
+24.1 Reference links
+Primary: christiesrealestate.com · sothebysrealty.com · jamesedition.com/real_estate · knightfrank.com and
+knightfrank.com/wealthreport · savills.com/research · conciergeauctions.com · vladi-private-islands.de/en · privateislandsonline.com ·
+barnes-international.com · engelvoelkers.com · luxuryestate.com · lionard.com
+Patterns: airbnb.com · compass.com · rightmove.co.uk · 1stdibs.com · sothebys.com · stripe.com · linear.app · mercury.com ·
+wise.com
+
+Data sources (§13.6): agenziaentrate.gov.it (OMI) · istat.it · landregistry.data.gov.uk · data.gouv.fr (DVF) · notaires.fr · ine.es ·
+mitma.gob.es · ine.pt · bankofgreece.gr · bfs.admin.ch · fred.stlouisfed.org · redﬁn.com/news/data-center · zillow.com/research/data ·
+dubailand.gov.ae · bis.org/statistics/pp.htm · ec.europa.eu/eurostat · data.oecd.org
+Content sources (§13.2–13.5): unsplash.com/documentation · pexels.com/api · pixabay.com/api/docs · api.openverse.org ·
+geonames.org · naturalearthdata.com · overpass-turbo.eu · nominatim.org · fonts.google.com · gwfh.mranftl.com · fontsource.org ·
+lucide.dev · realfavicongenerator.net · api.frankfurter.app
+Docs: nextjs.org/docs · payloadcms.com/docs · postgis.net/documentation · typesense.org/docs · maplibre.org/maplibre-gl-js/docs ·
+docs.maptiler.com · docs.protomaps.com · developers.cloudﬂare.com/r2 · developers.cloudﬂare.com/turnstile · upstash.com/docs ·
+next-intl.dev · react-pdf.org · react.email · cal.com/docs · schema.org/RealEstateListing · schema.org/Dataset · web.dev/vitals ·
+w3.org/WAI/WCAG22/quickref · llmstxt.org
+
+24.2 Glossary
+Channel whether a listing is public or oﬀ-market · Projection the allowlist of ﬁelds serialised for a given audience · Prime entry
+price the threshold at which a market's top 5 % begins · SPV special-purpose vehicle holding a property · Share transfer selling the
+company that owns the asset rather than the asset · Requirements proﬁle a member's stated search brief · asOfDate the date a
+published statistic refers to · ISR incremental static regeneration.
+
+24.3 One-page summary for the client
+Question
+
+Answer
+
+What is it?
+
+A fast, editorially serious portal for property from €20 M, fully public, with an oﬀ-market section that opens
+with a free account
+
+What does a visitor have to do to see the
+oﬀ-market properties?
+
+Enter an email address and click a conﬁrmation link. Nothing else
+
+Why will it rank?
+
+A complete public collection plus a market-intelligence library with sourced, dated ﬁgures — the kind of
+content this audience searches for and assistants cite
+
+Why will people register?
+
+The oﬀ-market inventory and the report PDFs. Registration is the conversion event, and it produces an owned
+audience instead of rented traﬃc
+
+Why will brokers place inventory here?
+
+Control over publication per listing, and a demand report showing how many members viewed their property
+
+What is deliberately not built yet?
+
+NDA, proof of funds, vetting, watermarking, agency accounts — each with a documented seam in §23, none
+requiring a rewrite
+
+Time to live
+
+~8–9 weeks for Track A with one senior developer using Cursor + Claude; ~6 weeks with two
+
+Client eﬀort
+
+Domain, logo approval, legal entity details, legal review of the policy placeholders, staging sign-oﬀ. No photo
+or copy curation
+
+End of speciﬁcation v2.0. Every deferred feature in §23 attaches to a seam that already exists in this build.
+
+

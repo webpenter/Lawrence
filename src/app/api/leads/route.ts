@@ -119,7 +119,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     await payload.create({
-      collection: 'leads',
+      collection: 'enquiries',
       overrideAccess: true,
       data: {
         name: parsed.name,

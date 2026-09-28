@@ -90,7 +90,7 @@ export function comboToFilters(page: LandingPage): PropertyFilters {
   if (combo.country) filters.country = combo.country;
   const destination = combo.destination;
   if (destination != null) {
-    filters.destinationId = typeof destination === 'object' ? destination.id : destination;
+    filters.marketId = typeof destination === 'object' ? destination.id : destination;
   }
   return filters;
 }

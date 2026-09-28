@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
-import { adminOnly, tenant } from '@/payload/access/tenant';
+import { adminOnly, tenant, staffUser } from '@/payload/access/tenant';
 
 const FEED_FORMATS = ['native_json', 'kyero_xml', 'resales_online', 'houzez_wp', 'generic_csv'] as const;
 const AGENCY_TIERS = ['standard', 'verified', 'partner'] as const;
@@ -46,7 +46,7 @@ export const Agency: CollectionConfig = {
       name: 'verified',
       type: 'checkbox',
       defaultValue: false,
-      access: { update: ({ req }) => req.user?.role === 'admin' },
+      access: { update: ({ req }) => staffUser(req.user)?.role === 'admin' },
       admin: { position: 'sidebar' },
     },
     { name: 'verifiedAt', type: 'date', admin: { position: 'sidebar', readOnly: true } },
@@ -55,7 +55,7 @@ export const Agency: CollectionConfig = {
       type: 'select',
       defaultValue: 'standard',
       options: [...AGENCY_TIERS],
-      access: { update: ({ req }) => req.user?.role === 'admin' },
+      access: { update: ({ req }) => staffUser(req.user)?.role === 'admin' },
       admin: {
         position: 'sidebar',
         description: 'verified tier auto-approves listings that pass automated validation (§8.2).',
@@ -65,7 +65,7 @@ export const Agency: CollectionConfig = {
       name: 'listingQuota',
       type: 'number',
       min: 0,
-      access: { update: ({ req }) => req.user?.role === 'admin' },
+      access: { update: ({ req }) => staffUser(req.user)?.role === 'admin' },
       admin: { position: 'sidebar' },
     },
     {
