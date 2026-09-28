@@ -93,26 +93,28 @@ export default async function HomePage({
             <div className="absolute inset-0" style={{ background: HERO_SCRIM }} />
           </div>
           <SiteHeader onHero />
-          <div className="relative z-10 flex-1 flex flex-col justify-center px-5 md:px-6 max-w-3xl">
-            <h1 className="mb-3 font-display text-2xl font-light leading-[1.1] tracking-display md:text-3xl m-0">
-              {t('heroTitle')}
-            </h1>
-            <p className="mb-5 max-w-[56ch] text-sm text-white/80 m-0">
-              {t('heroSub')}
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/collection"
-                className="bg-white text-obsidian border border-white px-5 py-3 text-center text-[length:var(--text-xs)] uppercase tracking-label transition-colors duration-[var(--motion-base)] hover:bg-white/90"
-              >
-                {t('heroActionCollection')}
-              </Link>
-              <Link
-                href="/join"
-                className="border border-white/55 px-5 py-3 text-center text-[length:var(--text-xs)] uppercase tracking-label text-white transition-colors duration-[var(--motion-base)] hover:bg-white/10"
-              >
-                {t('heroActionOffMarket')}
-              </Link>
+          <div className="mx-auto flex w-full max-w-screen-2xl flex-1 flex-col justify-center px-5 md:px-8 lg:px-12 relative z-10">
+            <div className="max-w-3xl">
+              <h1 className="mb-4 font-display text-3xl font-light leading-[1.1] tracking-display md:text-5xl lg:text-6xl m-0">
+                {t('heroTitle')}
+              </h1>
+              <p className="mb-8 max-w-[56ch] text-base md:text-lg text-white/90 m-0 leading-relaxed">
+                {t('heroSub')}
+              </p>
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <Link
+                  href="/collection"
+                  className="bg-white text-obsidian border border-white px-8 py-3.5 text-center text-[length:var(--text-xs)] uppercase tracking-[0.14em] transition-colors duration-[var(--motion-base)] hover:bg-white/90"
+                >
+                  {t('heroActionCollection')}
+                </Link>
+                <Link
+                  href="/join"
+                  className="border border-white/55 px-8 py-3.5 text-center text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-white transition-colors duration-[var(--motion-base)] hover:bg-white/10"
+                >
+                  {t('heroActionOffMarket')}
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -120,21 +122,23 @@ export default async function HomePage({
         {/* 2 · The Collection (§11.1): 6 featured, large 4:3 cards, never more
             than three competing on desktop. */}
         {featured.length > 0 ? (
-          <section className="px-5 py-8 md:px-6 md:py-8 bg-bone">
-            <div className="mb-5 flex items-baseline justify-between border-b border-line pb-3">
-              <h2 className="m-0 font-display text-xl font-normal text-ink">{t('signatureTitle')}</h2>
-              <Link
-                href="/collection"
-                className="py-1 text-[length:var(--text-xs)] uppercase tracking-label text-graphite underline decoration-patina underline-offset-4 hover:decoration-ink"
-              >
-                {t('allProperties')} →
-              </Link>
-            </div>
-            <p className="sr-only">{t('signatureSub')}</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {featured.map((property, index) => (
-                <PropertyCard key={property.id} property={property} priority={index === 0} />
-              ))}
+          <section className="bg-bone px-5 py-12 md:px-8 lg:px-12 md:py-20">
+            <div className="mx-auto w-full max-w-screen-2xl">
+              <div className="mb-8 flex items-baseline justify-between border-b border-line pb-4">
+                <h2 className="m-0 font-display text-2xl font-normal text-ink">{t('signatureTitle')}</h2>
+                <Link
+                  href="/collection"
+                  className="py-1 text-[length:var(--text-xs)] uppercase tracking-label text-graphite underline decoration-patina underline-offset-4 hover:decoration-ink"
+                >
+                  {t('allProperties')} →
+                </Link>
+              </div>
+              <p className="sr-only">{t('signatureSub')}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {featured.map((property, index) => (
+                  <PropertyCard key={property.id} property={property} priority={index === 0} />
+                ))}
+              </div>
             </div>
           </section>
         ) : null}
@@ -160,23 +164,24 @@ export default async function HomePage({
         {/* 4 · Markets (§11.1): 8 tiles, each with one live statistic and its
             asOfDate — or the honest listing count when no stat is sourced. */}
         {markets.length > 0 ? (
-          <section className="px-5 py-10 md:px-6 md:py-10">
-            <div className="mb-6 flex items-baseline justify-between border-b border-line pb-3">
-              <h2 className="font-display text-xl text-ink">{nav('destinations')}</h2>
-              <Link
-                href="/markets"
-                className="text-[length:var(--text-xs)] uppercase tracking-label text-graphite underline decoration-patina underline-offset-4 hover:decoration-ink"
-              >
-                {nav('destinations')} →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {markets.map((market) => (
+          <section className="px-5 py-12 md:px-8 lg:px-12 md:py-20">
+            <div className="mx-auto w-full max-w-screen-2xl">
+              <div className="mb-8 flex items-baseline justify-between border-b border-line pb-4">
+                <h2 className="font-display text-2xl text-ink">{nav('destinations')}</h2>
                 <Link
-                  key={market.id}
-                  href={`/markets/${market.slug}`}
-                  className="group relative flex aspect-[4/5] items-end overflow-hidden text-vellum"
+                  href="/markets"
+                  className="text-[length:var(--text-xs)] uppercase tracking-label text-graphite underline decoration-patina underline-offset-4 hover:decoration-ink"
                 >
+                  {nav('destinations')} →
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                {markets.map((market) => (
+                  <Link
+                    key={market.id}
+                    href={`/markets/${market.slug}`}
+                    className="group relative flex aspect-[4/5] items-end overflow-hidden text-vellum"
+                  >
                   <span
                     aria-hidden="true"
                     className="absolute inset-0 transition-transform duration-[var(--motion-slow)] group-hover:scale-105"
@@ -204,29 +209,31 @@ export default async function HomePage({
                 </Link>
               ))}
             </div>
-            <p className="mt-4 text-[length:var(--text-xs)] uppercase tracking-[0.2em] text-graphite">
-              {t('sourcedNote')}
-            </p>
+              <p className="mt-6 text-[length:var(--text-xs)] uppercase tracking-[0.2em] text-graphite">
+                {t('sourcedNote')}
+              </p>
+            </div>
           </section>
         ) : null}
 
         {/* 5 · Intelligence (§11.1): the latest report with its ungated summary. */}
         {latestReport ? (
-          <section className="border-t border-line px-5 py-8 md:px-6 md:py-8">
-            <div className="mb-6 flex items-baseline justify-between border-b border-line pb-3">
-              <h2 className="font-display text-xl text-ink">{nav('intelligence')}</h2>
-              <Link
-                href="/intelligence"
-                className="text-[length:var(--text-xs)] uppercase tracking-label text-graphite underline decoration-patina underline-offset-4 hover:decoration-ink"
-              >
-                {t('allReports')} →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_1.3fr] gap-8 items-center">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0" style={{ background: horizonGradientFor('report') }} />
+          <section className="border-t border-line px-5 py-12 md:px-8 lg:px-12 md:py-20">
+            <div className="mx-auto w-full max-w-screen-2xl">
+              <div className="mb-8 flex items-baseline justify-between border-b border-line pb-4">
+                <h2 className="font-display text-2xl text-ink">{nav('intelligence')}</h2>
+                <Link
+                  href="/intelligence"
+                  className="text-[length:var(--text-xs)] uppercase tracking-label text-graphite underline decoration-patina underline-offset-4 hover:decoration-ink"
+                >
+                  {t('allReports')} →
+                </Link>
               </div>
-              <div>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1.3fr] gap-10 items-center">
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <div className="absolute inset-0" style={{ background: horizonGradientFor('report') }} />
+                </div>
+                <div>
                 <span className="text-[length:var(--text-xs)] uppercase tracking-[0.2em] text-graphite">
                   {t('reportKicker')} ·{' '}
                   {format.dateTime(new Date(latestReport.publicationDate), {
@@ -240,45 +247,50 @@ export default async function HomePage({
                 {/* The teaser stays editorial copy — the report's rich-text
                     summary renders on its own page (§11.6). */}
                 <p className="mb-4 text-sm text-graphite">{t('intelligenceTeaser')}</p>
-                <Link
-                  href={`/intelligence/${latestReport.slug}`}
-                  className="inline-block border-b border-patina pb-0.5 text-[length:var(--text-xs)] uppercase tracking-label text-ink"
-                >
-                  {t('readSummary')}
-                </Link>
+                  <Link
+                    href={`/intelligence/${latestReport.slug}`}
+                    className="inline-block border-b border-patina pb-0.5 text-[length:var(--text-xs)] uppercase tracking-label text-ink hover:opacity-70 transition-opacity"
+                  >
+                    {t('readSummary')}
+                  </Link>
+                </div>
               </div>
             </div>
           </section>
         ) : null}
 
         {/* 6 · How it works (§11.1/§12.1): three lines. */}
-        <section className="border-t border-line px-5 py-8 md:px-6 md:py-8">
-            <h2 className="mb-6 text-[length:var(--text-xs)] uppercase tracking-label text-graphite">
-            {t('howTitle')}
-          </h2>
-          <ol className="grid gap-6 md:grid-cols-3">
-            {HOW_IT_WORKS.map((key, index) => (
-              <li key={key} className="border-t border-line pt-4">
-                <span className="font-display text-xl tabular-nums text-patina">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <p className="mt-2 max-w-[40ch] text-sm leading-relaxed text-graphite">{t(key)}</p>
-              </li>
-            ))}
-          </ol>
+        <section className="border-t border-line px-5 py-12 md:px-8 lg:px-12 md:py-20">
+          <div className="mx-auto w-full max-w-screen-2xl">
+            <h2 className="mb-8 text-[length:var(--text-xs)] uppercase tracking-label text-graphite">
+              {t('howTitle')}
+            </h2>
+            <ol className="grid gap-8 md:grid-cols-3">
+              {HOW_IT_WORKS.map((key, index) => (
+                <li key={key} className="border-t border-line pt-6">
+                  <span className="font-display text-2xl tabular-nums text-patina">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <p className="mt-3 max-w-[40ch] text-base leading-relaxed text-graphite">{t(key)}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
         </section>
 
         {/* 7 · For owners and brokers (§11.1/§12.1). */}
-        <section className="border-t border-line px-5 py-8 md:px-6 md:py-8">
-          <p className="max-w-[52ch] font-display text-xl leading-snug text-ink">
-            {t('supplyCtaSub')}
-          </p>
-          <Link
-            href="/list-with-us"
-            className="mt-6 inline-block bg-obsidian px-6 py-3 text-[length:var(--text-xs)] uppercase tracking-label text-vellum transition-colors duration-[var(--motion-base)] hover:bg-ink"
-          >
-            {nav('listWithUs')}
-          </Link>
+        <section className="border-t border-line px-5 py-12 md:px-8 lg:px-12 md:py-24">
+          <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center text-center">
+            <p className="max-w-[52ch] font-display text-2xl md:text-3xl leading-snug text-ink">
+              {t('supplyCtaSub')}
+            </p>
+            <Link
+              href="/list-with-us"
+              className="mt-8 inline-block bg-obsidian px-8 py-3.5 text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-vellum transition-colors duration-[var(--motion-base)] hover:bg-ink"
+            >
+              {nav('listWithUs')}
+            </Link>
+          </div>
         </section>
       </main>
 

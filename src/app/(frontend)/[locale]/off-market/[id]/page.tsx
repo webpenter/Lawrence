@@ -1,6 +1,6 @@
-import { isActiveMember, type Viewer } from '@/lib/access/viewer';
+import type { Viewer } from '@/lib/access/viewer';
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
 import { RichText } from '@payloadcms/richtext-lexical/react';
 
@@ -23,7 +23,7 @@ import { sanitizePropertyForPublic } from '@/lib/db/sanitize';
 import { formatArea, formatPriceEur } from '@/lib/intl/format';
 import { getViewerPreferences } from '@/lib/intl/preferences';
 import { getCurrentViewer } from '@/lib/auth';
-import { soldPageIsNoindex } from '@/lib/expiry';
+import { createSignedAssetToken } from '@/lib/media/signed-url';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { breadcrumbJsonLd, realEstateListingJsonLd } from '@/lib/seo/jsonld';
 import { findFallbackProperty, sampleFallbackEnabled } from '@/lib/sample/fallback';
@@ -34,18 +34,18 @@ import type { Agency, Agent, Property } from '@/payload-types';
 export const dynamic = 'force-dynamic';
 
 interface DetailPageProps {
-  params: Promise<{ locale: string; slug: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }
 
-async function loadProperty(viewer: Viewer, slug: string, locale: string): Promise<Property | null> {
+async function loadProperty(viewer: Viewer, id: string, locale: string): Promise<Property | null> {
   try {
-    return await getOffMarketListing(viewer, slug, locale as Locale);
+    return await getOffMarketListing(viewer, id, locale as Locale);
   } catch (err) {
     console.warn('[property-page] load failed:', err);
-    // DB-error path only, demo mode only, exact slug only (§13.12).
-    const fallback = sampleFallbackEnabled() ? findFallbackProperty(slug) : null;
+    // DB-error path only, demo mode only, exact id only (§13.12).
+    const fallback = sampleFallbackEnabled() ? findFallbackProperty(id) : null;
     if (fallback) return fallback;
-    // No fallback match: this was a DB *error*, not a "slug not found". Never
+    // No fallback match: this was a DB *error*, not a "id not found". Never
     // let a transient DB failure become a notFound() — ISR caches 404s for up
     // to `stale-while-revalidate` (24h), poisoning valid listings. Re-throw so
     // Next.js keeps serving the last good cached page and retries, instead of
@@ -71,8 +71,8 @@ async function loadSimilar(property: Property): Promise<Property[]> {
 
 export async function generateMetadata({ params }: DetailPageProps): Promise<Metadata> {
   const viewer = await getCurrentViewer();
-  const { locale, slug } = await params;
-  const property = await loadProperty(viewer, slug, locale);
+  const { locale, id } = await params;
+  const property = await loadProperty(viewer, id, locale);
   if (!property) return {};
 
   // §12.4 meta template: {propertyType} for sale in {locality} — trophy property from €20M.
@@ -95,28 +95,24 @@ export async function generateMetadata({ params }: DetailPageProps): Promise<Met
     .filter(Boolean)
     .join(', ');
 
-  const noindex =
-    property.channel === 'off_market' ||
-    property.isSample ||
-    soldPageIsNoindex(property, new Date());
-
+  // §5.3/§8.2: off-market is ALWAYS noindex and never has an OG image.
   return buildPageMetadata({
     title: property.metaTitle ?? parts.join(' '),
     description: property.metaDescription ?? generatedDescription ?? property.subtitle,
-    path: `/property/${slug}`,
+    path: `/off-market/${id}`,
     locale,
-    robots: noindex ? { index: false, follow: false } : undefined,
-    ogImage: `/api/og/property/${slug}`,
+    robots: { index: false, follow: false },
   });
 }
 
 export default async function OffMarketDetailPage({ params }: DetailPageProps) {
   const viewer = await getCurrentViewer();
-  const { locale, slug } = await params;
+  const { locale, id } = await params;
   setRequestLocale(locale);
-  if (!isActiveMember(viewer) && viewer.kind !== 'staff') redirect(`/${locale}/join`);
-  
-  const property = await loadProperty(viewer, slug, locale);
+
+  // Prompt 9 gate: an anonymous request to an off-market listing is a 404 —
+  // never a redirect, never a hint that the id exists (§8.6).
+  const property = await loadProperty(viewer, id, locale);
   if (!property) notFound();
 
   const t = await getTranslations('listing');
@@ -190,12 +186,27 @@ export default async function OffMarketDetailPage({ params }: DetailPageProps) {
   const mapPoint = Array.isArray(coords) ? coords : null;
   const ts = await getTranslations('search');
 
+  // §8.6: member documents are addressed ONLY by short-lived signed URLs.
+  const signedDocuments =
+    viewer.kind === 'member'
+      ? [...(property.floorplans ?? []), ...(property.documents ?? [])]
+          .filter(
+            (docItem): docItem is Exclude<typeof docItem, number> =>
+              typeof docItem === 'object' && docItem !== null,
+          )
+          .map((docItem) => ({
+            id: docItem.id,
+            title: docItem.title ?? String(docItem.id),
+            href: `/api/secure/document/${createSignedAssetToken('document', docItem.id, viewer.id)}`,
+          }))
+      : [];
+
   const jsonLd = [
     realEstateListingJsonLd(property, locale),
     breadcrumbJsonLd(locale, [
       { name: t('breadcrumbHome'), path: '' },
       { name: t('breadcrumbSearch'), path: '/collection' },
-      { name: property.title, path: `/property/${slug}` },
+      { name: property.title, path: `/off-market/${id}` },
     ]),
   ];
 
@@ -282,6 +293,7 @@ export default async function OffMarketDetailPage({ params }: DetailPageProps) {
             <p className="font-display text-2xl tabular-nums text-ink md:text-right">{price}</p>
           ) : null}
           <SaveCta
+            propertyId={property.id}
             saveLabel={ta('savedTitle')}
             savedLabel={ta('savedTitle')}
             joinHref={`/${locale}/join`}
@@ -373,6 +385,23 @@ export default async function OffMarketDetailPage({ params }: DetailPageProps) {
         </div>
 
         <aside>
+          {signedDocuments.length > 0 ? (
+            <section className="mb-6 border border-line bg-vellum p-5">
+              <h2 className="mb-3 font-display text-lg text-ink">{t('documentsTitle')}</h2>
+              <ul className="flex flex-col gap-2">
+                {signedDocuments.map((docItem) => (
+                  <li key={docItem.id}>
+                    <a
+                      href={docItem.href}
+                      className="text-sm text-ink underline decoration-patina underline-offset-4 hover:decoration-ink"
+                    >
+                      {docItem.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
           <div className="border border-line bg-vellum p-5">
             {agency ? (
               <div className="mb-4 flex items-center gap-3">
@@ -412,14 +441,6 @@ export default async function OffMarketDetailPage({ params }: DetailPageProps) {
                 errorEmail: t('formErrorEmail'),
               }}
             />
-            <TrackedLink
-              event="brochure_downloaded"
-              eventProps={{ propertyId: property.id, locale }}
-              href={`/api/property/${slug}/brochure.pdf?locale=${locale}`}
-              className="mt-3 block border border-obsidian px-4 py-3 text-center text-xs uppercase tracking-[0.14em] text-obsidian"
-            >
-              {t('brochureCta')}
-            </TrackedLink>
             {agent?.whatsapp || agency?.whatsapp ? (
               <TrackedLink
                 event="whatsapp_clicked"

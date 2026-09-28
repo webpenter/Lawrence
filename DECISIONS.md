@@ -291,3 +291,48 @@ explained artifacts: canonical points at NEXT_PUBLIC_SITE_URL (correct in prod, 
 :3001 audit port) and the sample listing is noindex BY RULE 8. audit:exposure passes over the
 seeded site; phase-8 Playwright acceptance 10/10; 313/313 unit/int tests; bundle budgets green
 (home 109.2/110 · collection 110.8/160 · listing 127.3/130 kB).
+
+## 2026-09-28 — Phase 9: membership and the off-market layer (§8.2–§8.8)
+
+**Decision**: The member side is live end to end. Auth is Payload's members collection with
+`verify: true` and `useSessions: false` (stateless JWTs so sessions minted by our own routes
+validate), fronted by first-party routes under `/api/member/*`: join (zod + rate limit +
+optional Turnstile; duplicate addresses answer identically — no enumeration), verify-email
+redirect, login (password, or a 5-minute challenge JWT + TOTP code when 2FA is on), magic link
+(HMAC token, 15-min, always-`ok` request path), saved toggle, requirements upsert, profile
+PATCH under field access, §8.5 deletion (dependents removed, enquiries anonymised, audit
+logged). TOTP is RFC 6238 implemented on node crypto (SHA-1/6/30s, ±1 drift, base32,
+otpauth URI) and verified against the RFC test vectors — no third-party OTP dependency.
+
+Off-market surfaces: `/[locale]/off-market` redirects anonymous visitors to /join (an
+invitation, per §11.4), but the DETAIL at `/off-market/[id]` — the leakable surface — returns
+`notFound()` for anonymous requests, indistinguishable from an unknown id. Member media and
+documents flow only through `/api/secure/[kind]/[token]`: HMAC-signed (kind, asset, member,
+expiry, nonce), 15-minute TTL, single-use nonce burn, session-must-match-token re-check,
+path-traversal guard, `private, no-store` + `noindex, noimageindex`, and every failure mode is
+the same 404. The public brochure link was removed from the off-market detail in favour of
+signed document links. §8.8 matching (`matchRequirement`/`rankMatches`: budget overlap with
+±10% grace, markets, types, must-haves) fires from the publish hook and emails the §8.8
+subject line verbatim, logging `off_market_list` activity.
+
+Working notes:
+- **jose under vitest/jsdom**: jsdom's TextEncoder yields cross-realm Uint8Arrays that fail
+  jose's instanceof checks ("payload must be an instance of Uint8Array"). The int project now
+  runs `environment: 'node'` — which also cured a phantom 401-after-verify.
+- **Duplicate join detection**: Payload surfaces a duplicate email as a ValidationError
+  ("The following field is invalid: email"), not a "duplicate" message — the detector matches
+  the field-level shape over message+data.
+- The user's off-market index page (pills/sort/map) was kept as authored; the save→account
+  e2e was stabilised by driving saved-state setup through the same API the button calls
+  instead of racing the mount-time status fetch.
+- Seeds: 8 sample members (6 verified) and 3 off-market §13.10 listings (isSample, Portofino,
+  approximate_500m) so gates run against real confidential content.
+
+**Gate evidence**: join flow E2E passes and anonymous off-market requests 404 — member
+Playwright suite 7/7 (join → check-your-email, live panel count, anonymous redirect, REAL id
+404 = unknown id 404, member index with `no-store`, confidentiality notice, save → account);
+int suite 7/7 through the real route handlers against Postgres (join-blocked-until-verified,
+verify→login cookie, no-enumeration, magic-link redeem/reject, saved toggle + anonymous 401,
+TOTP enrol + challenge-gated two-step login); 331/331 unit+int; typecheck/lint clean;
+audit:exposure green over the seeded off-market content; budgets home 109.2/110 ·
+collection 110.8/160 · listing 127.5/130 kB gz.

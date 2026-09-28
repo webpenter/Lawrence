@@ -282,6 +282,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
             <p className="font-display text-2xl tabular-nums text-ink md:text-right">{price}</p>
           ) : null}
           <SaveCta
+            propertyId={property.id}
             saveLabel={ta('savedTitle')}
             savedLabel={ta('savedTitle')}
             joinHref={`/${locale}/join`}

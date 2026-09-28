@@ -154,7 +154,8 @@
     "statPrimeEntry": "Prime entry",
     "statMedianSqm": "Median €/m²",
     "statYoY": "Year on year",
-    "statDays": "Days on market"
+    "statDays": "Days on market",
+    "documentsTitle": "Documents & floor plans"
   },
   "offMarket": {
     "indexTitle": "Off-market",
@@ -181,7 +182,13 @@
     "signOut": "Sign out",
     "panelLine": "{count} properties are currently held off-market. Members see them all.",
     "genericError": "An error occurred. Please try again.",
-    "loginError": "Login failed. Please check your credentials."
+    "loginError": "Login failed. Please check your credentials.",
+    "checkEmailTitle": "Check your email",
+    "checkEmailBody": "We have sent a confirmation link. One click, and the off-market collection opens.",
+    "verifiedBanner": "Your account is open. Sign in to see the off-market collection.",
+    "totpPrompt": "Enter the code from your authenticator app.",
+    "magicLinkSent": "If that address has an account, a one-time link is on its way.",
+    "totpCode": "Code"
   },
   "account": {
     "title": "Account",
@@ -192,7 +199,28 @@
     "deleteTitle": "Delete account",
     "deleteBody": "Deleting your account removes your saved properties and requirements and anonymises your activity. This cannot be undone.",
     "requirementsSoon": "Your requirements profile arrives here shortly.",
-    "preferencesSoon": "Email preferences arrive here shortly."
+    "preferencesSoon": "Email preferences arrive here shortly.",
+    "reqBudgetMin": "Budget from (EUR)",
+    "reqBudgetMax": "Budget to (EUR)",
+    "reqTimeline": "Timeline",
+    "reqNotify": "Email me when something matches",
+    "reqSave": "Save requirements",
+    "reqSaved": "Saved.",
+    "prefMarketing": "Send me new properties matching my requirements.",
+    "prefSave": "Save preferences",
+    "totpTitle": "Two-factor authentication",
+    "totpIntro": "Optional: protect your account with an authenticator app.",
+    "totpStart": "Set up",
+    "totpSecretLabel": "Add this secret to your authenticator app, then enter a code:",
+    "totpCode": "Code",
+    "totpConfirm": "Confirm",
+    "totpEnabled": "Two-factor authentication is enabled.",
+    "deleteConfirm": "Delete my account permanently",
+    "signedInAs": "Signed in as {email}",
+    "timelineImmediate": "Immediate",
+    "timeline6Months": "Within 6 months",
+    "timeline12Months": "Within 12 months",
+    "timelineOpportunistic": "Opportunistic"
   },
   "footer": {
     "destinationsTitle": "Markets",

@@ -54,7 +54,7 @@ export async function SiteFooter() {
 
   return (
     <footer className="bg-obsidian px-7 py-7 text-xs text-vellum/70">
-      <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
+      <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-2 gap-5 md:grid-cols-4 md:px-5 lg:px-9">
         <div>
           <h2 className={heading}>{nav('collection')}</h2>
           {collectionLinks.map((link) => (

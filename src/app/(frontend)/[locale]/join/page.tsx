@@ -40,6 +40,8 @@ export default async function JoinPage(props: { params: Promise<{ locale: string
           locale={params.locale}
           labels={{
             title: t('title'),
+            checkEmailTitle: t('checkEmailTitle'),
+            checkEmailBody: t('checkEmailBody'),
             sub: t('sub'),
             fieldEmail: t('fieldEmail'),
             fieldPassword: t('fieldPassword'),

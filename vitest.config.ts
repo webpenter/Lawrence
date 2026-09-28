@@ -26,6 +26,9 @@ export default defineConfig({
         test: {
           name: 'int',
           include: ['tests/int/**/*.int.spec.ts'],
+          // Server-side flows: node realm (jsdom's TextEncoder produces
+          // cross-realm Uint8Arrays that break jose's instanceof checks).
+          environment: 'node',
           pool: 'forks',
           poolOptions: { forks: { singleFork: true } },
         },

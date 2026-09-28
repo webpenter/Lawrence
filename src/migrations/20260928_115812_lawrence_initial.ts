@@ -115,14 +115,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"lock_until" timestamp(3) with time zone
   );
   
-  CREATE TABLE "members_sessions" (
-  	"_order" integer NOT NULL,
-  	"_parent_id" integer NOT NULL,
-  	"id" varchar PRIMARY KEY NOT NULL,
-  	"created_at" timestamp(3) with time zone,
-  	"expires_at" timestamp(3) with time zone NOT NULL
-  );
-  
   CREATE TABLE "members" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"name" varchar,
@@ -139,6 +131,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"source" "enum_members_source" DEFAULT 'organic',
   	"utm" jsonb,
   	"two_factor_enabled" boolean DEFAULT false,
+  	"totp_secret" varchar,
+  	"pending_totp_secret" varchar,
   	"reserved_nda_status" varchar,
   	"reserved_nda_signed_at" timestamp(3) with time zone,
   	"reserved_capability_status" varchar,
@@ -1053,7 +1047,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "users_sessions" ADD CONSTRAINT "users_sessions_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "users" ADD CONSTRAINT "users_agency_id_agencies_id_fk" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "users" ADD CONSTRAINT "users_agent_profile_id_agents_id_fk" FOREIGN KEY ("agent_profile_id") REFERENCES "public"."agents"("id") ON DELETE set null ON UPDATE no action;
-  ALTER TABLE "members_sessions" ADD CONSTRAINT "members_sessions_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."members"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "media" ADD CONSTRAINT "media_agency_id_agencies_id_fk" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "media_locales" ADD CONSTRAINT "media_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "documents" ADD CONSTRAINT "documents_property_id_properties_id_fk" FOREIGN KEY ("property_id") REFERENCES "public"."properties"("id") ON DELETE set null ON UPDATE no action;
@@ -1165,8 +1158,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "users_updated_at_idx" ON "users" USING btree ("updated_at");
   CREATE INDEX "users_created_at_idx" ON "users" USING btree ("created_at");
   CREATE UNIQUE INDEX "users_email_idx" ON "users" USING btree ("email");
-  CREATE INDEX "members_sessions_order_idx" ON "members_sessions" USING btree ("_order");
-  CREATE INDEX "members_sessions_parent_id_idx" ON "members_sessions" USING btree ("_parent_id");
   CREATE INDEX "members_status_idx" ON "members" USING btree ("status");
   CREATE INDEX "members_last_active_at_idx" ON "members" USING btree ("last_active_at");
   CREATE INDEX "members_updated_at_idx" ON "members" USING btree ("updated_at");
@@ -1479,7 +1470,6 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   await db.execute(sql`
    DROP TABLE "users_sessions" CASCADE;
   DROP TABLE "users" CASCADE;
-  DROP TABLE "members_sessions" CASCADE;
   DROP TABLE "members" CASCADE;
   DROP TABLE "media" CASCADE;
   DROP TABLE "media_locales" CASCADE;

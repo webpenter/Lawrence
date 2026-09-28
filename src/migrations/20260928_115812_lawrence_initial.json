@@ -301,94 +301,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.members_sessions": {
-      "name": "members_sessions",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "members_sessions_order_idx": {
-          "name": "members_sessions_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "members_sessions_parent_id_idx": {
-          "name": "members_sessions_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "members_sessions_parent_id_fk": {
-          "name": "members_sessions_parent_id_fk",
-          "tableFrom": "members_sessions",
-          "tableTo": "members",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.members": {
       "name": "members",
       "schema": "",
@@ -491,6 +403,18 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
+        },
+        "totp_secret": {
+          "name": "totp_secret",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pending_totp_secret": {
+          "name": "pending_totp_secret",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "reserved_nda_status": {
           "name": "reserved_nda_status",
@@ -13122,6 +13046,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "e47716cb-249a-45ab-a23e-c1e50fee4d9b",
+  "id": "99c4864c-d7b1-4183-9a9f-b2cf7a1bc745",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

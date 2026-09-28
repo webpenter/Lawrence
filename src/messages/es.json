@@ -158,7 +158,8 @@
     "statPrimeEntry": "Umbral prime",
     "statMedianSqm": "Mediana €/m²",
     "statYoY": "Interanual",
-    "statDays": "Días en el mercado"
+    "statDays": "Días en el mercado",
+    "documentsTitle": "Documentos y planos"
   },
   "offMarket": {
     "indexTitle": "Off-market",
@@ -185,7 +186,13 @@
     "signOut": "Cerrar sesión",
     "panelLine": "{count} propiedades están actualmente reservadas off-market. Los miembros las ven todas.",
     "genericError": "Se produjo un error. Inténtelo de nuevo.",
-    "loginError": "No se pudo iniciar sesión. Compruebe sus credenciales."
+    "loginError": "No se pudo iniciar sesión. Compruebe sus credenciales.",
+    "checkEmailTitle": "Revise su correo",
+    "checkEmailBody": "Le hemos enviado un enlace de confirmación. Un clic, y la colección off-market se abre.",
+    "verifiedBanner": "Su cuenta está abierta. Inicie sesión para ver la colección off-market.",
+    "totpPrompt": "Introduzca el código de su aplicación de autenticación.",
+    "magicLinkSent": "Si esa dirección tiene una cuenta, un enlace de un solo uso está en camino.",
+    "totpCode": "Código"
   },
   "account": {
     "title": "Cuenta",
@@ -196,7 +203,28 @@
     "deleteTitle": "Eliminar cuenta",
     "deleteBody": "Eliminar su cuenta borra sus propiedades guardadas y sus criterios y anonimiza su actividad. Esta acción no puede deshacerse.",
     "requirementsSoon": "Su perfil de criterios llegará aquí en breve.",
-    "preferencesSoon": "Las preferencias de correo llegarán aquí en breve."
+    "preferencesSoon": "Las preferencias de correo llegarán aquí en breve.",
+    "reqBudgetMin": "Presupuesto desde (EUR)",
+    "reqBudgetMax": "Presupuesto hasta (EUR)",
+    "reqTimeline": "Horizonte",
+    "reqNotify": "Avisarme por correo cuando algo coincida",
+    "reqSave": "Guardar criterios",
+    "reqSaved": "Guardado.",
+    "prefMarketing": "Envíenme las nuevas propiedades que coincidan con mis criterios.",
+    "prefSave": "Guardar preferencias",
+    "totpTitle": "Autenticación en dos pasos",
+    "totpIntro": "Opcional: proteja su cuenta con una aplicación de autenticación.",
+    "totpStart": "Configurar",
+    "totpSecretLabel": "Añada este secreto a su aplicación y luego introduzca un código:",
+    "totpCode": "Código",
+    "totpConfirm": "Confirmar",
+    "totpEnabled": "La autenticación en dos pasos está activada.",
+    "deleteConfirm": "Eliminar mi cuenta definitivamente",
+    "signedInAs": "Conectado como {email}",
+    "timelineImmediate": "Inmediato",
+    "timeline6Months": "En 6 meses",
+    "timeline12Months": "En 12 meses",
+    "timelineOpportunistic": "Oportunista"
   },
   "footer": {
     "destinationsTitle": "Mercados",

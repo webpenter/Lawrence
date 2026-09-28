@@ -418,9 +418,11 @@ export interface Member {
     | boolean
     | null;
   /**
-   * Optional for members in Phase 1 (§6.6); enrolment UI lands in Prompt 9.
+   * Optional TOTP 2FA (§8.5); enrolled via /api/member/totp.
    */
   twoFactorEnabled?: boolean | null;
+  totpSecret?: string | null;
+  pendingTotpSecret?: string | null;
   /**
    * Reserved for §23 (NDA / capability gating). Never written in Phase 1.
    */
@@ -443,13 +445,6 @@ export interface Member {
   _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
   password?: string | null;
   collection: 'members';
 }
@@ -1563,6 +1558,8 @@ export interface MembersSelect<T extends boolean = true> {
   source?: T;
   utm?: T;
   twoFactorEnabled?: T;
+  totpSecret?: T;
+  pendingTotpSecret?: T;
   reserved?:
     | T
     | {
@@ -1584,13 +1581,6 @@ export interface MembersSelect<T extends boolean = true> {
   _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -158,7 +158,8 @@
     "statPrimeEntry": "Seuil prime",
     "statMedianSqm": "Médiane €/m²",
     "statYoY": "Sur un an",
-    "statDays": "Jours sur le marché"
+    "statDays": "Jours sur le marché",
+    "documentsTitle": "Documents et plans"
   },
   "offMarket": {
     "indexTitle": "Off-market",
@@ -185,7 +186,13 @@
     "signOut": "Se déconnecter",
     "panelLine": "{count} biens sont actuellement réservés off-market. Les membres les voient tous.",
     "genericError": "Une erreur est survenue. Veuillez réessayer.",
-    "loginError": "Connexion échouée. Vérifiez vos identifiants."
+    "loginError": "Connexion échouée. Vérifiez vos identifiants.",
+    "checkEmailTitle": "Vérifiez votre email",
+    "checkEmailBody": "Nous vous avons envoyé un lien de confirmation. Un clic, et la collection off-market s'ouvre.",
+    "verifiedBanner": "Votre compte est ouvert. Connectez-vous pour voir la collection off-market.",
+    "totpPrompt": "Saisissez le code de votre application d'authentification.",
+    "magicLinkSent": "Si cette adresse a un compte, un lien à usage unique est en route.",
+    "totpCode": "Code"
   },
   "account": {
     "title": "Compte",
@@ -196,7 +203,28 @@
     "deleteTitle": "Supprimer le compte",
     "deleteBody": "La suppression de votre compte retire vos biens enregistrés et vos critères et anonymise votre activité. Cette opération est irréversible.",
     "requirementsSoon": "Votre profil de critères arrivera ici prochainement.",
-    "preferencesSoon": "Les préférences email arriveront ici prochainement."
+    "preferencesSoon": "Les préférences email arriveront ici prochainement.",
+    "reqBudgetMin": "Budget à partir de (EUR)",
+    "reqBudgetMax": "Budget jusqu'à (EUR)",
+    "reqTimeline": "Horizon",
+    "reqNotify": "M'avertir par email quand un bien correspond",
+    "reqSave": "Enregistrer les critères",
+    "reqSaved": "Enregistré.",
+    "prefMarketing": "M'envoyer les nouveaux biens correspondant à mes critères.",
+    "prefSave": "Enregistrer les préférences",
+    "totpTitle": "Authentification à deux facteurs",
+    "totpIntro": "Facultatif : protégez votre compte avec une application d'authentification.",
+    "totpStart": "Configurer",
+    "totpSecretLabel": "Ajoutez ce secret à votre application, puis saisissez un code :",
+    "totpCode": "Code",
+    "totpConfirm": "Confirmer",
+    "totpEnabled": "L'authentification à deux facteurs est activée.",
+    "deleteConfirm": "Supprimer définitivement mon compte",
+    "signedInAs": "Connecté en tant que {email}",
+    "timelineImmediate": "Immédiat",
+    "timeline6Months": "Sous 6 mois",
+    "timeline12Months": "Sous 12 mois",
+    "timelineOpportunistic": "Opportuniste"
   },
   "footer": {
     "destinationsTitle": "Marchés",

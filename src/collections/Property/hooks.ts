@@ -7,6 +7,8 @@ import type {
 import { ValidationError } from 'payload';
 
 import { logAudit } from '@/lib/audit';
+import { sendEmail } from '@/lib/email/send';
+import { rankMatches } from '@/lib/match';
 import { convertToEur, getDailyRatesPerEur } from '@/lib/fx';
 import { computeFingerprint } from '@/lib/fingerprint';
 import { revalidatePaths } from '@/lib/revalidate';
@@ -304,6 +306,15 @@ export const syncAfterChange: CollectionAfterChangeHook = async ({
 
   const justPublished =
     d._status === 'published' && (previousDoc as PropertyData | undefined)?._status !== 'published';
+
+  // §8.8: a newly published off-market listing notifies matching members —
+  // one discreet email each. Never blocks the save.
+  if (justPublished && d.channel === 'off_market' && !d.isSample) {
+    void notifyMatchingMembers(req, d).catch((err) =>
+      console.error('[match] notification failed:', err),
+    );
+  }
+
   await logAudit(
     req,
     justPublished ? 'publish' : operation === 'create' ? 'create' : 'update',
@@ -331,6 +342,49 @@ export const syncAfterChange: CollectionAfterChangeHook = async ({
 
   return doc;
 };
+
+async function notifyMatchingMembers(
+  req: Parameters<CollectionAfterChangeHook>[0]['req'],
+  listing: PropertyData,
+): Promise<void> {
+  const requirements = await req.payload.find({
+    collection: 'requirements',
+    where: { and: [{ status: { equals: 'active' } }, { notifyByEmail: { equals: true } }] },
+    limit: 1000,
+    depth: 1,
+    overrideAccess: true,
+  });
+  const matches = rankMatches(
+    requirements.docs,
+    listing as unknown as Parameters<typeof rankMatches>[1],
+  );
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
+  for (const match of matches) {
+    const member =
+      typeof match.requirement.member === 'object' ? match.requirement.member : null;
+    if (!member?.email || member.status !== 'active') continue;
+    const locale = member.preferredLocale ?? 'en';
+    const url = `${base}/${locale}/off-market/${listing.id}`;
+    await sendEmail({
+      to: member.email,
+      // §12.3 match email subject, verbatim.
+      subject: 'A property matching your requirements has arrived',
+      text: `A property matching your requirements has arrived. View it (account required): ${url}`,
+      html: `<p>A property matching your requirements has arrived.</p><p><a href="${url}">${url}</a></p>`,
+    }).catch((err) => console.error('[match] email failed:', err));
+    await req.payload.create({
+      collection: 'member-activity',
+      data: {
+        member: member.id,
+        property: listing.id as number,
+        action: 'off_market_list',
+        at: new Date().toISOString(),
+      },
+      overrideAccess: true,
+    });
+  }
+}
 
 export const cleanupAfterDelete: CollectionAfterDeleteHook = async ({ doc, req }) => {
   const d = doc as PropertyData;

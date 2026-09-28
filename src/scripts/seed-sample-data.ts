@@ -296,6 +296,92 @@ async function attachGallery(
   return mediaIds;
 }
 
+/** §13.10: 8 test members — six confirmed, two pending confirmation. */
+async function seedMembers(payload: Payload): Promise<number> {
+  let count = 0;
+  for (let index = 1; index <= 8; index += 1) {
+    const email = `member${String(index).padStart(2, '0')}@sample.lawrence`;
+    const existing = await payload.find({
+      collection: 'members',
+      where: { email: { equals: email } },
+      limit: 1,
+      overrideAccess: true,
+    });
+    if (existing.docs[0]) continue;
+    await payload.create({
+      collection: 'members',
+      overrideAccess: true,
+      data: {
+        email,
+        password: 'sample-member-password',
+        name: `Sample Member ${index}`,
+        status: 'active',
+        marketingConsent: index % 2 === 0,
+        _verified: index <= 6,
+      },
+    });
+    count += 1;
+  }
+  return count;
+}
+
+/** Three discreet sample listings so the member area has inventory (§13.10). */
+async function seedOffMarket(
+  payload: Payload,
+  agencyIds: Map<string, number>,
+  marketIds: Map<string, number>,
+): Promise<number> {
+  const agencyId = [...agencyIds.values()][0];
+  const marketId = [...marketIds.values()][0];
+  if (!agencyId) return 0;
+  let count = 0;
+  for (let index = 1; index <= 3; index += 1) {
+    const reference = `WL-OFFMKT-${String(index).padStart(3, '0')}`;
+    const existing = await payload.find({
+      collection: 'properties',
+      where: { reference: { equals: reference } },
+      limit: 1,
+      overrideAccess: true,
+    });
+    if (existing.docs[0]) continue;
+    await payload.create({
+      collection: 'properties',
+      overrideAccess: true,
+      data: {
+        title: `Sample off-market residence ${index}`,
+        reference,
+        agency: agencyId,
+        isSample: true,
+        propertyType: 'villa',
+        priceType: 'fixed',
+        currency: 'EUR',
+        priceAmount: 24_000_000 + index * 3_000_000,
+        publication: 'off_market',
+        channel: 'off_market',
+        priceDisclosure: 'exact',
+        status: 'available',
+        moderation: 'approved',
+        sourceType: 'manual',
+        bedrooms: 6 + index,
+        bathrooms: 5,
+        builtAreaSqm: 900 + index * 120,
+        features: ['pool', 'helipad', 'staff_quarters'],
+        location: {
+          locality: 'Portofino',
+          region: 'Liguria',
+          country: 'IT',
+          market: marketId,
+          coordinates: [9.209 + index * 0.01, 44.303],
+          coordinatePrecision: 'approximate_500m',
+        },
+        _status: 'published',
+      },
+    });
+    count += 1;
+  }
+  return count;
+}
+
 async function main(): Promise<void> {
   const flags = parseFlags(process.argv.slice(2));
   const payload = await getPayloadClient();
@@ -308,6 +394,8 @@ async function main(): Promise<void> {
   const { marketIds } = await seedReferenceData(payload);
   const { agencyIds, agentIdsByAgency } = await seedAgencies(payload);
   await seedEditorialStubs(payload, marketIds);
+  const membersSeeded = await seedMembers(payload);
+  const offMarketSeeded = await seedOffMarket(payload, agencyIds, marketIds);
 
   let blueprints = buildAllBlueprints(60);
   if (flags.destination) {
@@ -459,6 +547,7 @@ async function main(): Promise<void> {
 
   console.log(
     `\nSeed complete: ${created} created, ${updated} updated across ${blueprints.length} listings; ` +
+      `${membersSeeded} members, ${offMarketSeeded} off-market samples; ` +
       `${SAMPLE_AGENCIES.length} agencies, ${SAMPLE_AGENTS.length} agents, 10 landing drafts, ${ARTICLE_STUBS.length} article stubs.`,
   );
   process.exit(0);

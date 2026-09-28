@@ -16,6 +16,10 @@ export default async function LoginPage(props: { params: Promise<{ locale: strin
           locale={params.locale}
           labels={{
             title: t('signInTitle'),
+            verifiedBanner: t('verifiedBanner'),
+            totpPrompt: t('totpPrompt'),
+            totpCode: t('totpCode'),
+            magicLinkSent: t('magicLinkSent'),
             fieldEmail: t('fieldEmail'),
             fieldPassword: t('fieldPassword'),
             magicLinkAlternative: t('magicLinkAlternative'),

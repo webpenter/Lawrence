@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { trackEvent } from '@/lib/analytics';
 
 interface JoinFormLabels {
   title: string;
+  checkEmailTitle: string;
+  checkEmailBody: string;
   sub: string;
   fieldEmail: string;
   fieldPassword: string;
@@ -19,8 +20,7 @@ interface JoinFormLabels {
 }
 
 export function JoinForm({ locale, labels }: { locale: string; labels: JoinFormLabels }) {
-  const router = useRouter();
-  const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'error' | 'sent'>('idle');
   const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -34,8 +34,9 @@ export function JoinForm({ locale, labels }: { locale: string; labels: JoinFormL
     
 
     try {
-      // 1. Create account
-      const createRes = await fetch('/api/members', {
+      // §8.5: join creates the account; the off-market collection opens after
+      // the one-click email confirmation — never before.
+      const createRes = await fetch('/api/member/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -43,29 +44,28 @@ export function JoinForm({ locale, labels }: { locale: string; labels: JoinFormL
           password,
           marketingConsent,
           preferredLocale: locale,
-          // Server-side siteverify arrives with the Prompt 9 join route.
           turnstileToken,
         }),
       });
       if (!createRes.ok) throw new Error('Failed to create account');
 
-      // 2. Login immediately
-      const loginRes = await fetch('/api/members/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!loginRes.ok) throw new Error('Failed to login');
-
       trackEvent('member_joined', { locale });
-      
-      // Redirect to off-market
-      router.push(`/${locale}/off-market`);
-      router.refresh();
+      setStatus('sent');
     } catch (e) {
       console.error(e);
       setStatus('error');
     }
+  }
+
+  if (status === 'sent') {
+    return (
+      <div className="flex w-full flex-col">
+        <h1 className="mb-2.5 font-display text-2xl font-light leading-[1.15] text-ink">
+          {labels.checkEmailTitle}
+        </h1>
+        <p className="max-w-[42ch] text-sm text-graphite">{labels.checkEmailBody}</p>
+      </div>
+    );
   }
 
   return (

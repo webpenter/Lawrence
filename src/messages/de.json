@@ -158,7 +158,8 @@
     "statPrimeEntry": "Prime-Einstieg",
     "statMedianSqm": "Median €/m²",
     "statYoY": "Im Jahresvergleich",
-    "statDays": "Tage am Markt"
+    "statDays": "Tage am Markt",
+    "documentsTitle": "Dokumente & Grundrisse"
   },
   "offMarket": {
     "indexTitle": "Off-Market",
@@ -185,7 +186,13 @@
     "signOut": "Abmelden",
     "panelLine": "{count} Objekte werden derzeit off-market gehalten. Mitglieder sehen sie alle.",
     "genericError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-    "loginError": "Anmeldung fehlgeschlagen. Bitte prüfen Sie Ihre Zugangsdaten."
+    "loginError": "Anmeldung fehlgeschlagen. Bitte prüfen Sie Ihre Zugangsdaten.",
+    "checkEmailTitle": "Prüfen Sie Ihre E-Mail",
+    "checkEmailBody": "Wir haben Ihnen einen Bestätigungslink gesendet. Ein Klick, und die Off-Market-Kollektion öffnet sich.",
+    "verifiedBanner": "Ihr Konto ist eröffnet. Melden Sie sich an, um die Off-Market-Kollektion zu sehen.",
+    "totpPrompt": "Geben Sie den Code aus Ihrer Authenticator-App ein.",
+    "magicLinkSent": "Wenn diese Adresse ein Konto hat, ist ein Einmal-Link unterwegs.",
+    "totpCode": "Code"
   },
   "account": {
     "title": "Konto",
@@ -196,7 +203,28 @@
     "deleteTitle": "Konto löschen",
     "deleteBody": "Das Löschen Ihres Kontos entfernt Ihre gespeicherten Objekte und Kriterien und anonymisiert Ihre Aktivität. Dies kann nicht rückgängig gemacht werden.",
     "requirementsSoon": "Ihr Kriterienprofil erscheint hier in Kürze.",
-    "preferencesSoon": "Die E-Mail-Einstellungen erscheinen hier in Kürze."
+    "preferencesSoon": "Die E-Mail-Einstellungen erscheinen hier in Kürze.",
+    "reqBudgetMin": "Budget ab (EUR)",
+    "reqBudgetMax": "Budget bis (EUR)",
+    "reqTimeline": "Zeithorizont",
+    "reqNotify": "Per E-Mail benachrichtigen, wenn etwas passt",
+    "reqSave": "Kriterien speichern",
+    "reqSaved": "Gespeichert.",
+    "prefMarketing": "Senden Sie mir neue Objekte, die meinen Kriterien entsprechen.",
+    "prefSave": "Einstellungen speichern",
+    "totpTitle": "Zwei-Faktor-Authentifizierung",
+    "totpIntro": "Optional: Schützen Sie Ihr Konto mit einer Authenticator-App.",
+    "totpStart": "Einrichten",
+    "totpSecretLabel": "Fügen Sie dieses Geheimnis Ihrer App hinzu und geben Sie dann einen Code ein:",
+    "totpCode": "Code",
+    "totpConfirm": "Bestätigen",
+    "totpEnabled": "Die Zwei-Faktor-Authentifizierung ist aktiv.",
+    "deleteConfirm": "Mein Konto endgültig löschen",
+    "signedInAs": "Angemeldet als {email}",
+    "timelineImmediate": "Sofort",
+    "timeline6Months": "Innerhalb von 6 Monaten",
+    "timeline12Months": "Innerhalb von 12 Monaten",
+    "timelineOpportunistic": "Opportunistisch"
   },
   "footer": {
     "destinationsTitle": "Märkte",

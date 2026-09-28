@@ -47,9 +47,25 @@ export default async function middleware(request: NextRequest): Promise<NextResp
   const { pathname } = request.nextUrl;
 
   // §16.1: the admin and API surfaces get the same security headers as the
-  // public pages, but none of the locale machinery below.
+  // public pages, but none of the locale machinery below. Member/secure APIs
+  // are additionally never cached anywhere (§5.3, §8.6).
   if (pathname.startsWith('/admin') || pathname.startsWith('/api')) {
-    return applySecurityHeaders(NextResponse.next());
+    const response = applySecurityHeaders(NextResponse.next());
+    if (pathname.startsWith('/api/member') || pathname.startsWith('/api/secure')) {
+      response.headers.set('Cache-Control', 'private, no-store');
+      response.headers.set('X-Robots-Tag', 'noindex, noimageindex');
+    }
+    return response;
+  }
+
+  // §5.3: member routes are dynamic, noindex and NEVER edge-cached — the
+  // header is set here so no downstream cache can ever hold a member page.
+  const MEMBER_PATH = /^\/(en|it|fr|de|es|ru)\/(off-market|account)(\/|$)/;
+  if (MEMBER_PATH.test(pathname)) {
+    const response = (await intlMiddleware(request)) as NextResponse;
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return applySecurityHeaders(response);
   }
 
   // Spec §5.1: "/" performs a 302 language-detect redirect and is never cached.

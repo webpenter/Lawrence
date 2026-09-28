@@ -30,11 +30,12 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
   return (
     <nav
       className={clsx(
-        'relative z-10 flex items-center justify-between px-5 py-4 md:px-6 md:py-4',
+        'relative z-10 w-full',
         onHero ? 'text-white' : 'border-b border-line bg-white text-ink',
       )}
     >
-      <Link
+      <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-5 py-5 md:px-8 lg:px-12">
+        <Link
         href="/"
         className="font-display text-lg uppercase tracking-[0.3em] leading-[1.1]"
       >
@@ -92,6 +93,7 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
           </Link>
         </div>
       </details>
+      </div>
     </nav>
   );
 }

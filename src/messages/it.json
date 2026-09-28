@@ -158,7 +158,8 @@
     "statPrimeEntry": "Soglia prime",
     "statMedianSqm": "Mediana €/m²",
     "statYoY": "Su base annua",
-    "statDays": "Giorni sul mercato"
+    "statDays": "Giorni sul mercato",
+    "documentsTitle": "Documenti e planimetrie"
   },
   "offMarket": {
     "indexTitle": "Off-market",
@@ -185,7 +186,13 @@
     "signOut": "Esci",
     "panelLine": "{count} proprietà sono attualmente riservate off-market. I membri le vedono tutte.",
     "genericError": "Si è verificato un errore. La preghiamo di riprovare.",
-    "loginError": "Accesso non riuscito. Verifichi le credenziali."
+    "loginError": "Accesso non riuscito. Verifichi le credenziali.",
+    "checkEmailTitle": "Controlli la sua email",
+    "checkEmailBody": "Le abbiamo inviato un link di conferma. Un clic, e la collezione off-market si apre.",
+    "verifiedBanner": "Il suo account è aperto. Acceda per vedere la collezione off-market.",
+    "totpPrompt": "Inserisca il codice della sua app di autenticazione.",
+    "magicLinkSent": "Se l'indirizzo ha un account, un link monouso è in arrivo.",
+    "totpCode": "Codice"
   },
   "account": {
     "title": "Account",
@@ -196,7 +203,28 @@
     "deleteTitle": "Elimina account",
     "deleteBody": "L'eliminazione dell'account rimuove le proprietà salvate e le richieste e rende anonima la sua attività. L'operazione non è reversibile.",
     "requirementsSoon": "Il profilo delle sue richieste arriverà qui a breve.",
-    "preferencesSoon": "Le preferenze email arriveranno qui a breve."
+    "preferencesSoon": "Le preferenze email arriveranno qui a breve.",
+    "reqBudgetMin": "Budget da (EUR)",
+    "reqBudgetMax": "Budget fino a (EUR)",
+    "reqTimeline": "Orizzonte temporale",
+    "reqNotify": "Avvisatemi via email quando qualcosa corrisponde",
+    "reqSave": "Salva le richieste",
+    "reqSaved": "Salvato.",
+    "prefMarketing": "Inviatemi le nuove proprietà corrispondenti alle mie richieste.",
+    "prefSave": "Salva le preferenze",
+    "totpTitle": "Autenticazione a due fattori",
+    "totpIntro": "Facoltativo: protegga il suo account con un'app di autenticazione.",
+    "totpStart": "Configura",
+    "totpSecretLabel": "Aggiunga questo codice segreto alla sua app, poi inserisca un codice:",
+    "totpCode": "Codice",
+    "totpConfirm": "Conferma",
+    "totpEnabled": "L'autenticazione a due fattori è attiva.",
+    "deleteConfirm": "Elimina definitivamente il mio account",
+    "signedInAs": "Connesso come {email}",
+    "timelineImmediate": "Immediato",
+    "timeline6Months": "Entro 6 mesi",
+    "timeline12Months": "Entro 12 mesi",
+    "timelineOpportunistic": "Opportunistico"
   },
   "footer": {
     "destinationsTitle": "Mercati",

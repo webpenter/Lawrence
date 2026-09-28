@@ -70,13 +70,23 @@ export const Members: CollectionConfig = {
       'End users (the off-market audience) — entirely separate from staff Users. §6.6.',
   },
   auth: {
-    // §2.3: email + password, email confirmation required, done. The magic-link
-    // and TOTP routes (§8.5, optional in Phase 1) mount in Prompt 9 on
-    // /api/member/* using src/lib/member/magic-link.ts.
-    verify: true,
+    // §2.3: email + password, email confirmation required, done. Magic-link
+    // and TOTP mount on /api/member/* (Prompt 9).
+    verify: {
+      generateEmailSubject: () => 'Confirm your email to open the off-market collection',
+      generateEmailHTML: (args) => {
+        const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+        const url = `${base}/api/member/verify?token=${args?.token ?? ''}`;
+        return `<p>Confirm your email to open the off-market collection:</p><p><a href="${url}">${url}</a></p>`;
+      },
+    },
     maxLoginAttempts: 5,
     lockTime: 10 * 60 * 1000,
     tokenExpiration: 60 * 60 * 24 * 14, // 14 days — a quiet, persistent session
+    // Stateless JWTs: the magic-link and TOTP paths mint the session cookie
+    // themselves (src/lib/member/session.ts), which server-side session ids
+    // would reject. Members carry no server-revocable sessions in Phase 1.
+    useSessions: false,
   },
   access: {
     // Isolation is the Prompt 4 gate: a member reads and edits only themselves.
@@ -149,7 +159,20 @@ export const Members: CollectionConfig = {
       name: 'twoFactorEnabled',
       type: 'checkbox',
       defaultValue: false,
-      admin: { description: 'Optional for members in Phase 1 (§6.6); enrolment UI lands in Prompt 9.' },
+      admin: { description: 'Optional TOTP 2FA (§8.5); enrolled via /api/member/totp.' },
+    },
+    {
+      // RFC 6238 secrets — never serialised to ANY client, member included.
+      name: 'totpSecret',
+      type: 'text',
+      access: { read: () => false, update: () => false },
+      admin: { hidden: true },
+    },
+    {
+      name: 'pendingTotpSecret',
+      type: 'text',
+      access: { read: () => false, update: () => false },
+      admin: { hidden: true },
     },
 
     // ---- §6.6 reserved and unused: created now, never written to, so the

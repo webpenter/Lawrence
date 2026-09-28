@@ -45,7 +45,7 @@ export async function SearchResultCard({ hit }: { hit: SearchHit }) {
 
   return (
     <Link
-      href={`/property/${hit.slug}`}
+      href={hit.slug ? `/property/${hit.slug}` : `/off-market/${hit.id}`}
       data-property-id={hit.id}
       className="group grid gap-4 border border-line bg-vellum p-3"
       style={{ gridTemplateColumns: `${layout.searchRowImageW} 1fr` }}
