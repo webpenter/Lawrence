@@ -34,19 +34,17 @@ async function topDestinations(locale: string): Promise<FooterDestination[]> {
 export async function SiteFooter() {
   const t = await getTranslations('footer');
   const nav = await getTranslations('nav');
-  const home = await getTranslations('home');
   const destinations = await topDestinations(await getLocale());
 
-  const waterLinks = [
-    { href: '/search?water=sea', label: home('waterSea') },
-    { href: '/search?water=lake', label: home('waterLake') },
-    { href: '/search?water=river,canal', label: home('waterRiverCanal') },
-    { href: '/search?type=private_island', label: home('waterPrivateIslands') },
+  const collectionLinks = [
+    { href: '/collection', label: nav('collection') },
+    { href: '/off-market', label: nav('offMarket') },
+    { href: '/collection?sort=newest', label: t('collectionRecentlyAdded') },
   ] as const;
 
   const companyLinks = [
     { href: '/about', label: nav('about') },
-    { href: '/journal', label: nav('journal') },
+    { href: '/about#discretion', label: t('companyDiscretion') },
     { href: '/list-with-us', label: nav('listWithUs') },
     { href: '/contact', label: nav('contact') },
   ] as const;
@@ -58,29 +56,10 @@ export async function SiteFooter() {
     <footer className="bg-obsidian px-7 py-7 text-xs text-vellum/70">
       <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
         <div>
-          <h2 className={heading}>{t('destinationsTitle')}</h2>
-          {destinations.length > 0 ? (
-            destinations.map((destination) => (
-              <p key={destination.slug} className="mb-1">
-                <Link href={`/markets/${destination.slug}`} className="hover:text-vellum">
-                  {destination.name}
-                </Link>
-              </p>
-            ))
-          ) : (
-            <p className="mb-1">
-              <Link href="/markets" className="hover:text-vellum">
-                {nav('destinations')}
-              </Link>
-            </p>
-          )}
-        </div>
-
-        <div>
-          <h2 className={heading}>{t('waterTitle')}</h2>
-          {waterLinks.map((link) => (
+          <h2 className={heading}>{nav('collection')}</h2>
+          {collectionLinks.map((link) => (
             <p key={link.href} className="mb-1">
-              <Link href={link.href} className="hover:text-vellum">
+              <Link href={link.href} className="inline-block py-1 hover:text-vellum">
                 {link.label}
               </Link>
             </p>
@@ -88,10 +67,29 @@ export async function SiteFooter() {
         </div>
 
         <div>
+          <h2 className={heading}>{t('destinationsTitle')}</h2>
+          {destinations.length > 0 ? (
+            destinations.map((destination) => (
+              <p key={destination.slug} className="mb-1">
+                <Link href={`/markets/${destination.slug}`} className="inline-block py-1 hover:text-vellum">
+                  {destination.name}
+                </Link>
+              </p>
+            ))
+          ) : (
+            <p className="mb-1">
+              <Link href="/markets" className="inline-block py-1 hover:text-vellum">
+                {nav('destinations')}
+              </Link>
+            </p>
+          )}
+        </div>
+
+        <div>
           <h2 className={heading}>{t('companyTitle')}</h2>
           {companyLinks.map((link) => (
             <p key={link.href} className="mb-1">
-              <Link href={link.href} className="hover:text-vellum">
+              <Link href={link.href} className="inline-block py-1 hover:text-vellum">
                 {link.label}
               </Link>
             </p>
@@ -104,15 +102,15 @@ export async function SiteFooter() {
             <PreferenceBar dark />
           </div>
           <p className="mb-1">
-            <Link href="/legal/privacy" className="hover:text-vellum">
+            <Link href="/legal/privacy" className="inline-block py-1 hover:text-vellum">
               {t('legalPrivacy')}
             </Link>
             {' · '}
-            <Link href="/legal/cookies" className="hover:text-vellum">
+            <Link href="/legal/cookies" className="inline-block py-1 hover:text-vellum">
               {t('legalCookies')}
             </Link>
             {' · '}
-            <Link href="/legal/terms" className="hover:text-vellum">
+            <Link href="/legal/terms" className="inline-block py-1 hover:text-vellum">
               {t('legalTerms')}
             </Link>
           </p>

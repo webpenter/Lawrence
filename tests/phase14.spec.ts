@@ -65,7 +65,7 @@ test.describe('sitemap index & child sitemaps verification (§14)', () => {
 
     const xml = await res.text();
     expect(xml).toContain('<urlset');
-    expect(xml).toContain('/search');
+    expect(xml).toContain('/collection');
     expect(xml).toContain('/contact');
     expect(xml).toContain('/list-with-us');
     expect(xml).toContain('/journal');

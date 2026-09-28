@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+    "@marsidev/react-turnstile": "^1.6.1",
     "@payloadcms/db-postgres": "3.90.1",
     "@payloadcms/next": "3.90.1",
     "@payloadcms/richtext-lexical": "3.90.1",

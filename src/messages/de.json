@@ -1,5 +1,8 @@
 {
-  "_meta": { "status": "translated-ui-pass", "locale": "de" },
+  "_meta": {
+    "status": "translated-ui-pass",
+    "locale": "de"
+  },
   "common": {
     "viewAll": "Alle ansehen",
     "search": "Suchen",
@@ -43,7 +46,13 @@
     "whyVerified": "Frei stöbern — die Kollektion ist öffentlich, vollständig.",
     "whyFrontage": "Konto erstellen — eine E-Mail-Adresse genügt; die Off-Market-Objekte öffnen sich sofort.",
     "whyBerth": "Mit dem Desk sprechen — wir arrangieren Besichtigungen und Vorstellungen direkt mit dem beauftragten Makler.",
-    "supplyCtaSub": "Wenn Sie verkaufen und es der Markt nicht wissen soll, sprechen Sie mit dem Desk."
+    "supplyCtaSub": "Wenn Sie verkaufen und es der Markt nicht wissen soll, sprechen Sie mit dem Desk.",
+    "allProperties": "Alle Objekte",
+    "allReports": "Alle Berichte",
+    "reportKicker": "Bericht",
+    "readSummary": "Zusammenfassung lesen",
+    "sourcedNote": "Jede Zahl trägt ihre Quelle und das Datum, auf das sie sich bezieht · siehe Intelligence",
+    "intelligenceTeaser": "Wo die obersten fünf Prozent jedes Marktes beginnen, was sich in zwölf Monaten bewegt hat und wie sich der veröffentlichte Anteil des Angebots je Land unterscheidet. Abgeleitet aus amtlichen Transaktionsregistern; Methode und Quellen vollständig ausgewiesen."
   },
   "search": {
     "fieldWater": "Wasserlage",
@@ -70,7 +79,8 @@
     "filterBedsMin": "{n}+ Schlafzimmer",
     "paginationNext": "Nächste Seite",
     "paginationPrev": "Vorherige Seite",
-    "paginationLabel": "Seite {page} von {total}"
+    "paginationLabel": "Seite {page} von {total}",
+    "metaDescription": "Die öffentliche Lawrence-Kollektion — außergewöhnliche Immobilien ab 20 Millionen Euro, vollständig veröffentlicht: Fotografie, Fakten, Provenienz und belegte Marktdaten."
   },
   "listing": {
     "enquiryCta": "Details anfragen",
@@ -142,7 +152,13 @@
     "locBathrooms": "{n} Badezimmer",
     "locPlot": "Grundstück {area}",
     "locBuilt": "Baujahr {year}",
-    "locRenovated": "renoviert {year}"
+    "locRenovated": "renoviert {year}",
+    "membersLabel": "Mitglieder",
+    "marketContextTitle": "Marktkontext",
+    "statPrimeEntry": "Prime-Einstieg",
+    "statMedianSqm": "Median €/m²",
+    "statYoY": "Im Jahresvergleich",
+    "statDays": "Tage am Markt"
   },
   "offMarket": {
     "indexTitle": "Off-Market",
@@ -166,7 +182,10 @@
     "requirementsPromptSub": "Budget, Märkte und Typ. Zwei Minuten, und Sie erfahren als Erster, wenn etwas passt.",
     "matchSubject": "Ein Objekt, das Ihren Kriterien entspricht, ist eingetroffen",
     "signInTitle": "Anmelden",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "panelLine": "{count} Objekte werden derzeit off-market gehalten. Mitglieder sehen sie alle.",
+    "genericError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "loginError": "Anmeldung fehlgeschlagen. Bitte prüfen Sie Ihre Zugangsdaten."
   },
   "account": {
     "title": "Konto",
@@ -175,7 +194,9 @@
     "requirementsTitle": "Ihre Kriterien",
     "preferencesTitle": "E-Mail-Einstellungen",
     "deleteTitle": "Konto löschen",
-    "deleteBody": "Das Löschen Ihres Kontos entfernt Ihre gespeicherten Objekte und Kriterien und anonymisiert Ihre Aktivität. Dies kann nicht rückgängig gemacht werden."
+    "deleteBody": "Das Löschen Ihres Kontos entfernt Ihre gespeicherten Objekte und Kriterien und anonymisiert Ihre Aktivität. Dies kann nicht rückgängig gemacht werden.",
+    "requirementsSoon": "Ihr Kriterienprofil erscheint hier in Kürze.",
+    "preferencesSoon": "Die E-Mail-Einstellungen erscheinen hier in Kürze."
   },
   "footer": {
     "destinationsTitle": "Märkte",
@@ -183,7 +204,9 @@
     "companyTitle": "Unternehmen",
     "legalPrivacy": "Datenschutz",
     "legalCookies": "Cookies",
-    "legalTerms": "AGB"
+    "legalTerms": "AGB",
+    "collectionRecentlyAdded": "Recently added",
+    "companyDiscretion": "Discretion"
   },
   "landing": {
     "statsAvailable": "Verfügbare Objekte",

@@ -7,18 +7,19 @@
  */
 
 export const HORIZON_GRADIENTS = [
-  'linear-gradient(180deg,#D9E6E7 0%,#AFCBD0 30%,#7FAEB8 45%,#2E6274 52%,#12394A 75%,#0B2A38 100%)',
-  'linear-gradient(180deg,#E4E9E2 0%,#C2D2CE 32%,#83A9AA 46%,#3C6C74 56%,#14323E 100%)',
-  'linear-gradient(180deg,#EDE6DA 0%,#D3C6B1 28%,#8FB0B4 44%,#2F5F70 58%,#0E2C3A 100%)',
-  'linear-gradient(180deg,#CFE1E6 0%,#9FC0C8 40%,#35657A 52%,#0B2A38 100%)',
-  'linear-gradient(180deg,#E8EDEC 0%,#B9CFD2 38%,#4B7C88 50%,#10303C 100%)',
+  'linear-gradient(160deg,#C9C2B4 0%,#9A9384 38%,#5C5A52 62%,#1D1E20 100%)',
+  'linear-gradient(170deg,#CBD2CC 0%,#9AA79F 40%,#4E5A55 70%,#14181A 100%)',
+  'linear-gradient(150deg,#D8CDBB 0%,#B0A184 42%,#6A5F4C 68%,#211E19 100%)',
+  'linear-gradient(175deg,#C3CBD4 0%,#8D97A2 42%,#4A5159 70%,#16181B 100%)',
+  'linear-gradient(155deg,#E0D8CB 0%,#BCAE97 40%,#7C6F5B 68%,#241F19 100%)',
+  'linear-gradient(165deg,#BFC7C3 0%,#8E9994 44%,#48504D 72%,#121514 100%)',
 ] as const;
 
 export const PHOTO_SCRIM =
-  'linear-gradient(180deg,rgba(8,20,28,0) 40%,rgba(8,20,28,.72) 100%)';
+  'linear-gradient(180deg,rgba(10,11,13,.5) 0%,rgba(10,11,13,.05) 40%,rgba(10,11,13,.8) 100%)';
 
 export const HERO_SCRIM =
-  'linear-gradient(180deg,rgba(8,20,28,.45) 0%,rgba(8,20,28,0) 35%,rgba(8,20,28,.78) 100%)';
+  'linear-gradient(180deg,rgba(10,11,13,.5) 0%,rgba(10,11,13,.05) 40%,rgba(10,11,13,.8) 100%)';
 
 export const HORIZON_LINE = 'rgba(255,255,255,.35)';
 

@@ -1,5 +1,8 @@
 {
-  "_meta": { "status": "translated-ui-pass", "locale": "it" },
+  "_meta": {
+    "status": "translated-ui-pass",
+    "locale": "it"
+  },
   "common": {
     "viewAll": "Vedi tutto",
     "search": "Cerca",
@@ -43,7 +46,13 @@
     "whyVerified": "Sfoglia liberamente — la collezione è pubblica, per intero.",
     "whyFrontage": "Crea un account — basta un indirizzo email; le proprietà off-market si aprono immediatamente.",
     "whyBerth": "Parla con il desk — organizziamo visite e presentazioni direttamente con l'agente incaricato.",
-    "supplyCtaSub": "Se vendete e preferite che il mercato non lo sappia, parlate con il desk."
+    "supplyCtaSub": "Se vendete e preferite che il mercato non lo sappia, parlate con il desk.",
+    "allProperties": "Tutte le proprietà",
+    "allReports": "Tutti i report",
+    "reportKicker": "Report",
+    "readSummary": "Leggi la sintesi",
+    "sourcedNote": "Ogni cifra riporta la fonte e la data a cui si riferisce · vedi Intelligence",
+    "intelligenceTeaser": "Dove inizia il cinque per cento più alto di ogni mercato, cosa è cambiato in dodici mesi e come varia per paese la quota di inventario pubblicata. Derivato dai registri ufficiali delle transazioni; metodo e fonti indicati per esteso."
   },
   "search": {
     "fieldWater": "Fronte acqua",
@@ -70,7 +79,8 @@
     "filterBedsMin": "{n}+ camere",
     "paginationNext": "Pagina successiva",
     "paginationPrev": "Pagina precedente",
-    "paginationLabel": "Pagina {page} di {total}"
+    "paginationLabel": "Pagina {page} di {total}",
+    "metaDescription": "La collezione pubblica Lawrence — immobili eccezionali da 20 milioni di euro, pubblicati per intero: fotografia, dati, provenienza e informazioni di mercato con fonti."
   },
   "listing": {
     "enquiryCta": "Richiedi dettagli",
@@ -142,7 +152,13 @@
     "locBathrooms": "{n} bagni",
     "locPlot": "terreno {area}",
     "locBuilt": "costruita nel {year}",
-    "locRenovated": "ristrutturata nel {year}"
+    "locRenovated": "ristrutturata nel {year}",
+    "membersLabel": "Membri",
+    "marketContextTitle": "Contesto di mercato",
+    "statPrimeEntry": "Soglia prime",
+    "statMedianSqm": "Mediana €/m²",
+    "statYoY": "Su base annua",
+    "statDays": "Giorni sul mercato"
   },
   "offMarket": {
     "indexTitle": "Off-market",
@@ -166,7 +182,10 @@
     "requirementsPromptSub": "Budget, mercati e tipologia. Due minuti, e sarà il primo a sapere quando qualcosa corrisponde.",
     "matchSubject": "È arrivata una proprietà corrispondente alle sue richieste",
     "signInTitle": "Accedi",
-    "signOut": "Esci"
+    "signOut": "Esci",
+    "panelLine": "{count} proprietà sono attualmente riservate off-market. I membri le vedono tutte.",
+    "genericError": "Si è verificato un errore. La preghiamo di riprovare.",
+    "loginError": "Accesso non riuscito. Verifichi le credenziali."
   },
   "account": {
     "title": "Account",
@@ -175,7 +194,9 @@
     "requirementsTitle": "Le sue richieste",
     "preferencesTitle": "Preferenze email",
     "deleteTitle": "Elimina account",
-    "deleteBody": "L'eliminazione dell'account rimuove le proprietà salvate e le richieste e rende anonima la sua attività. L'operazione non è reversibile."
+    "deleteBody": "L'eliminazione dell'account rimuove le proprietà salvate e le richieste e rende anonima la sua attività. L'operazione non è reversibile.",
+    "requirementsSoon": "Il profilo delle sue richieste arriverà qui a breve.",
+    "preferencesSoon": "Le preferenze email arriveranno qui a breve."
   },
   "footer": {
     "destinationsTitle": "Mercati",
@@ -183,7 +204,9 @@
     "companyTitle": "Società",
     "legalPrivacy": "Privacy",
     "legalCookies": "Cookie",
-    "legalTerms": "Termini"
+    "legalTerms": "Termini",
+    "collectionRecentlyAdded": "Recently added",
+    "companyDiscretion": "Discretion"
   },
   "landing": {
     "statsAvailable": "Proprietà disponibili",

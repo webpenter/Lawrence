@@ -42,7 +42,13 @@
     "whyVerified": "Browse openly — the collection is public, in full.",
     "whyFrontage": "Create an account — an email address is all it takes; the off-market properties open immediately.",
     "whyBerth": "Speak to the desk — we arrange viewings and introductions directly with the listing agent.",
-    "supplyCtaSub": "If you are selling and would prefer the market not to know, speak to the desk."
+    "supplyCtaSub": "If you are selling and would prefer the market not to know, speak to the desk.",
+    "allProperties": "All properties",
+    "allReports": "All reports",
+    "reportKicker": "Report",
+    "readSummary": "Read the summary",
+    "sourcedNote": "Every figure carries its source and the date it refers to · see Intelligence",
+    "intelligenceTeaser": "Where the top five per cent of each market begins, what has moved in twelve months, and how the published share of inventory differs by country. Derived from official transaction registries; method and sources stated in full."
   },
   "search": {
     "fieldWater": "Waterfront",
@@ -69,7 +75,8 @@
     "filterBedsMin": "{n}+ bed",
     "paginationNext": "Next page",
     "paginationPrev": "Previous page",
-    "paginationLabel": "Page {page} of {total}"
+    "paginationLabel": "Page {page} of {total}",
+    "metaDescription": "The public Lawrence collection — exceptional property from €20 million, published in full: photography, facts, provenance and sourced market data."
   },
   "listing": {
     "enquiryCta": "Request details",
@@ -141,7 +148,13 @@
     "locBathrooms": "{n} bathrooms",
     "locPlot": "plot {area}",
     "locBuilt": "built {year}",
-    "locRenovated": "renovated {year}"
+    "locRenovated": "renovated {year}",
+    "membersLabel": "Members",
+    "marketContextTitle": "Market context",
+    "statPrimeEntry": "Prime entry",
+    "statMedianSqm": "Median €/m²",
+    "statYoY": "Year on year",
+    "statDays": "Days on market"
   },
   "offMarket": {
     "indexTitle": "Off-market",
@@ -165,7 +178,10 @@
     "requirementsPromptSub": "Budget, markets and type. Two minutes, and you will hear first when something matches.",
     "matchSubject": "A property matching your requirements has arrived",
     "signInTitle": "Sign in",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "panelLine": "{count} properties are currently held off-market. Members see them all.",
+    "genericError": "An error occurred. Please try again.",
+    "loginError": "Login failed. Please check your credentials."
   },
   "account": {
     "title": "Account",
@@ -174,7 +190,9 @@
     "requirementsTitle": "Your requirements",
     "preferencesTitle": "Email preferences",
     "deleteTitle": "Delete account",
-    "deleteBody": "Deleting your account removes your saved properties and requirements and anonymises your activity. This cannot be undone."
+    "deleteBody": "Deleting your account removes your saved properties and requirements and anonymises your activity. This cannot be undone.",
+    "requirementsSoon": "Your requirements profile arrives here shortly.",
+    "preferencesSoon": "Email preferences arrive here shortly."
   },
   "footer": {
     "destinationsTitle": "Markets",
@@ -182,7 +200,9 @@
     "companyTitle": "Company",
     "legalPrivacy": "Privacy",
     "legalCookies": "Cookies",
-    "legalTerms": "Terms"
+    "legalTerms": "Terms",
+    "collectionRecentlyAdded": "Recently added",
+    "companyDiscretion": "Discretion"
   },
   "landing": {
     "statsAvailable": "Properties available",

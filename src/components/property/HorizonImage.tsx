@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
 
 import type { Media } from '@/payload-types';
-import { HORIZON_LINE, horizonGradientFor, PHOTO_SCRIM } from '@/tokens/placeholders';
+import { horizonGradientFor, PHOTO_SCRIM } from '@/tokens/placeholders';
 
 import { MediaImage } from './MediaImage';
 
@@ -45,12 +45,7 @@ export function HorizonImage({
           aria-hidden="true"
           className="absolute inset-0"
           style={{ background: horizonGradientFor(seed) }}
-        >
-          <div
-            className="absolute inset-x-0 top-[46%] h-px"
-            style={{ background: HORIZON_LINE }}
-          />
-        </div>
+        />
       )}
       {scrim ? (
         <div aria-hidden="true" className="absolute inset-0" style={{ background: PHOTO_SCRIM }} />

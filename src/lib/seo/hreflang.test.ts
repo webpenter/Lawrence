@@ -4,12 +4,12 @@ import { hreflangAlternates } from './hreflang';
 
 describe('hreflangAlternates (Prompt 6 acceptance)', () => {
   it('emits all six locales plus x-default on every page', () => {
-    const alternates = hreflangAlternates('/search');
+    const alternates = hreflangAlternates('/collection');
     const languages = alternates.languages as Record<string, string>;
     for (const locale of ['en', 'it', 'fr', 'de', 'es', 'ru']) {
-      expect(languages[locale]).toMatch(new RegExp(`/${locale}/search$`));
+      expect(languages[locale]).toMatch(new RegExp(`/${locale}/collection$`));
     }
-    expect(languages['x-default']).toMatch(/\/en\/search$/);
+    expect(languages['x-default']).toMatch(/\/en\/collection$/);
   });
 
   it('handles the home path without a trailing slash', () => {

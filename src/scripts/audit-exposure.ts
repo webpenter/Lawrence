@@ -186,8 +186,8 @@ async function main(): Promise<void> {
     const routes = [
       '/',
       '/en',
-      '/en/search',
-      '/en/search?country=IT',
+      '/en/collection',
+      '/en/collection?country=IT',
       `/en/property/${canaries.publicSlug}`,
       '/en/markets',
       '/en/journal',
@@ -226,9 +226,9 @@ async function main(): Promise<void> {
     }
 
     // The public search surface must not return the off-market canary.
-    const searchBody = await crawl(`${BASE}/en/search?sort=newest`, canaries);
+    const searchBody = await crawl(`${BASE}/en/collection?sort=newest`, canaries);
     if (searchBody?.includes(MARKERS.offMarketTitle)) {
-      findings.push({ url: '/en/search', marker: 'off-market listing in public search' });
+      findings.push({ url: '/en/collection', marker: 'off-market listing in public search' });
     }
   } finally {
     await removeCanaries(payload, canaries);

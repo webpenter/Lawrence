@@ -1,7 +1,7 @@
 import { getPayload, type Payload, type Where } from 'payload';
 
 import config from '@payload-config';
-import type { Property } from '@/payload-types';
+import type { Property, Report } from '@/payload-types';
 import { isTypesenseHealthy, searchWithTypesense, type SearchResult } from '@/lib/search/client';
 import { toSearchDocument } from '@/lib/search/document';
 
@@ -404,6 +404,88 @@ export interface MarketCount {
   name: string;
   slug: string;
   count: number;
+}
+
+/**
+ * §11.1 block 3 / §10.4 — the REAL live off-market count. The number itself
+ * is deliberately public ("41 properties are held off-market"); the listings
+ * are not. Never fails a page render: unknown counts read as zero.
+ */
+export async function countOffMarketListings(): Promise<number> {
+  try {
+    const payload = await getPayloadClient();
+    const { totalDocs } = await payload.count({
+      collection: 'properties',
+      where: offMarketPredicate(),
+      overrideAccess: true,
+    });
+    return totalDocs;
+  } catch {
+    return 0;
+  }
+}
+
+/** §11.1 block 5 — the latest published report with its ungated summary. */
+export async function getLatestReport(locale: Locale = 'en'): Promise<Report | null> {
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: 'reports',
+      where: { _status: { equals: 'published' } },
+      sort: '-publicationDate',
+      locale,
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    return res.docs[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export interface MarketTile {
+  id: number;
+  name: string;
+  slug: string;
+  count: number;
+  /** §11.1 block 4: one live statistic with its asOfDate — or null when unsourced. */
+  stat: { label: 'primeEntryEur' | 'medianPriceEurPerSqm'; value: number; asOfDate: string } | null;
+}
+
+/**
+ * §11.1 block 4 — market tiles, each carrying one live statistic and its
+ * asOfDate (§15.4 discipline: a number without a source and date does not
+ * publish; tiles fall back to the listing count).
+ */
+export async function getMarketTiles(locale: Locale = 'en', limit = 8): Promise<MarketTile[]> {
+  const counts = await getMarketCounts(locale);
+  const payload = await getPayloadClient();
+  const tiles: MarketTile[] = [];
+  for (const market of counts.slice(0, limit)) {
+    let stat: MarketTile['stat'] = null;
+    try {
+      const doc = await payload.findByID({
+        collection: 'markets',
+        id: market.id,
+        depth: 0,
+        locale,
+        overrideAccess: true,
+      });
+      const stats = doc.stats;
+      for (const label of ['primeEntryEur', 'medianPriceEurPerSqm'] as const) {
+        const entry = stats?.[label];
+        if (entry?.value != null && entry.source && entry.asOfDate) {
+          stat = { label, value: entry.value, asOfDate: entry.asOfDate };
+          break;
+        }
+      }
+    } catch {
+      // tile falls back to the count
+    }
+    tiles.push({ ...market, stat });
+  }
+  return tiles;
 }
 
 export async function getMarketCounts(locale: Locale = 'en'): Promise<MarketCount[]> {

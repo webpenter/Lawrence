@@ -24,7 +24,7 @@ const VIEWPORTS: Array<{ name: string; width: number; height: number }> = [
 
 const PAGES: Array<{ name: string; path: string }> = [
   { name: 'home', path: '/en' },
-  { name: 'search', path: '/en/search?water=sea' },
+  { name: 'search', path: '/en/collection?water=sea' },
   { name: 'listing', path: '/en/property/sample-wl-sample-001' },
 ];
 

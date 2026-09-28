@@ -54,15 +54,13 @@ export async function PropertyCard({
 
   const body = (
     <>
-      <h3 className="font-display text-base text-ink group-hover:text-patina">
+      <h3 className="mb-1.5 mt-3 font-display text-lg font-normal leading-[1.25] text-ink group-hover:text-patina">
         {property.title}
       </h3>
-      <div className="flex flex-wrap gap-x-3 text-xs text-graphite">
-        {meta.map((item) => (
-          <span key={item}>{item}</span>
-        ))}
+      <div className="text-[length:var(--text-xs)] tracking-[0.02em] text-graphite">
+        {meta.join(' · ')}
       </div>
-      <div className="mt-1 text-sm tabular-nums text-ink">{price}</div>
+      <div className="mt-2 text-sm tracking-[0.02em] text-ink tabular-nums">{price}</div>
     </>
   );
 
@@ -79,8 +77,8 @@ export async function PropertyCard({
   }
 
   return (
-    <Link href={`/property/${property.slug}`} className="group flex flex-col gap-1">
-      <AspectBox ratio="card" className="mb-2">
+    <Link href={`/property/${property.slug}`} className="group flex flex-col no-underline">
+      <AspectBox ratio="card" className="relative overflow-hidden">
         {image}
       </AspectBox>
       {body}

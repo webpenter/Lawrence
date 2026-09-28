@@ -86,7 +86,7 @@ export async function FilterPills({ params }: { params: SearchParams }) {
       {pills.map((pill) => (
         <Link
           key={pill.label}
-          href={`/search${queryWithout(params, pill.removes)}`}
+          href={`/collection${queryWithout(params, pill.removes)}`}
           aria-label={t('removeFilterLabel', { filter: pill.label })}
           className={
             pill.key
@@ -98,7 +98,7 @@ export async function FilterPills({ params }: { params: SearchParams }) {
         </Link>
       ))}
       <Link
-        href="/search"
+        href="/collection"
         className="ml-auto py-1.5 text-xs text-patina underline-offset-2 hover:underline"
       >
         {t('clearFilters')}

@@ -9,6 +9,10 @@ interface SiteHeaderProps {
   onHero?: boolean;
 }
 
+// The wordmark is the brand constant split for display — never a literal.
+const [WORDMARK_TOP, ...rest] = brand.name.split(' ');
+const WORDMARK_SUB = rest.join(' ');
+
 /** Top navigation per the design preview: serif wordmark, uppercase links, bordered CTA.
  *  Desktop shows the full link row + CTA; mobile collapses to a native <details>
  *  menu (no client JS) so the four sections stay reachable on small screens. */
@@ -16,27 +20,31 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
   const t = await getTranslations('nav');
 
   const links = [
-    { href: '/search', label: t('collection') },
+    { href: '/collection', label: t('collection') },
+    { href: '/off-market', label: t('offMarket') },
     { href: '/markets', label: t('destinations') },
+    { href: '/intelligence', label: t('intelligence') },
     { href: '/journal', label: t('journal') },
-    { href: '/about', label: t('about') },
   ] as const;
 
   return (
     <nav
       className={clsx(
-        'relative z-header flex items-center justify-between gap-3 px-5 py-4 sm:px-7',
-        onHero ? 'text-vellum' : 'border-b border-line bg-vellum text-obsidian',
+        'relative z-10 flex items-center justify-between px-5 py-4 md:px-6 md:py-4',
+        onHero ? 'text-white' : 'border-b border-line bg-white text-ink',
       )}
     >
       <Link
         href="/"
-        className="whitespace-nowrap font-display text-base uppercase tracking-[0.16em] sm:text-lg sm:tracking-[0.22em]"
+        className="font-display text-lg uppercase tracking-[0.3em] leading-[1.1]"
       >
-        {brand.name}
+        {WORDMARK_TOP}
+        <small className="block font-body text-[length:var(--text-xs)] uppercase tracking-[0.42em] opacity-75 mt-1">
+          {WORDMARK_SUB}
+        </small>
       </Link>
 
-      <ul className="hidden items-center gap-6 text-xs uppercase tracking-[0.12em] md:flex">
+      <ul className="hidden items-center gap-5 text-[length:var(--text-xs)] uppercase tracking-label md:flex">
         {links.map((link) => (
           <li key={link.href}>
             <Link href={link.href} className="hover:opacity-70">
@@ -48,10 +56,10 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
 
       {/* Desktop CTA */}
       <Link
-        href="/list-with-us"
-        className="hidden whitespace-nowrap border border-current px-4 py-2 text-xs uppercase tracking-[0.14em] hover:opacity-70 md:inline-block"
+        href="/join"
+        className="hidden py-1 md:inline-block text-[length:var(--text-xs)] uppercase tracking-label border-b border-current hover:opacity-70"
       >
-        {t('listWithUs')}
+        {t('join')}
       </Link>
 
       {/* Mobile menu — native <details>, no client JS. */}

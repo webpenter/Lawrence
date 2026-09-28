@@ -67,11 +67,12 @@ export async function generateMetadata({ params, searchParams }: SearchPageProps
 
   return {
     title: t('pageTitle'),
-    // §5.5: only landing pages are indexable representations of filtered
-    // inventory; filtered/paginated search is noindex,follow with the
-    // canonical pointing at page 1 of the same filter set.
+    description: t('metaDescription'),
+    // §15.3: only canonical-path pages are indexable representations of
+    // filtered inventory; filtered/paginated browse is noindex,follow with
+    // the canonical pointing at page 1 of the same filter set.
     robots: filtered || page > 1 ? { index: false, follow: true } : undefined,
-    alternates: hreflangAlternates('/search'),
+    alternates: hreflangAlternates('/collection'),
   };
 }
 
@@ -183,13 +184,13 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               </p>
               {narrowest ? (
                 <Link
-                  href={`/search${queryWithout(sp, narrowest.params)}`}
+                  href={`/collection${queryWithout(sp, narrowest.params)}`}
                   className="bg-obsidian px-4 py-2 text-xs uppercase tracking-[0.14em] text-vellum"
                 >
                   {t('emptyStateRelax', { filter: narrowest.params[0] ?? '' })}
                 </Link>
               ) : (
-                <Link href="/search" className="text-xs text-patina underline-offset-2 hover:underline">
+                <Link href="/collection" className="text-xs text-patina underline-offset-2 hover:underline">
                   {t('clearFilters')}
                 </Link>
               )}
@@ -203,8 +204,8 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
             >
               {page > 1 ? (
                 <Link
-                  href={`/search${queryWithout({ ...sp, page: String(page - 1) }, [])}`}
-                  className="border border-line px-3 py-1.5 text-graphite hover:bg-vellum"
+                  href={`/collection${queryWithout({ ...sp, page: String(page - 1) }, [])}`}
+                  className="inline-block border border-line px-4 py-2.5 text-graphite hover:bg-vellum"
                 >
                   {t('paginationPrev')}
                 </Link>
@@ -214,8 +215,8 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               <span className="text-graphite">{t('paginationLabel', { page, total: totalPages })}</span>
               {page < totalPages ? (
                 <Link
-                  href={`/search${queryWithout({ ...sp, page: String(page + 1) }, [])}`}
-                  className="border border-line px-3 py-1.5 text-graphite hover:bg-vellum"
+                  href={`/collection${queryWithout({ ...sp, page: String(page + 1) }, [])}`}
+                  className="inline-block border border-line px-4 py-2.5 text-graphite hover:bg-vellum"
                 >
                   {t('paginationNext')}
                 </Link>

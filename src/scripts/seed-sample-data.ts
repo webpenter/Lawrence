@@ -333,6 +333,7 @@ async function main(): Promise<void> {
 
     const baseData: Record<string, unknown> = {
       title: titleEn,
+      slug: `sample-${blueprint.reference.toLowerCase()}`,
       reference: blueprint.reference,
       agency: agencyId,
       agent: agentId,
@@ -376,7 +377,8 @@ async function main(): Promise<void> {
         region: SAMPLE_DESTINATION_BY_SLUG.get(blueprint.destinationSlug)?.region,
         country: SAMPLE_DESTINATION_BY_SLUG.get(blueprint.destinationSlug)?.country,
         coordinates: blueprint.coordinates,
-        coordinatePrecision: blueprint.coordinatePrecision,
+        coordinatePrecision:
+          blueprint.coordinatePrecision === 'hidden' ? 'locality_only' : blueprint.coordinatePrecision,
         destination: marketIds.get(blueprint.destinationSlug),
       },
       _status: 'published',

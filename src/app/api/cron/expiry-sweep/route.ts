@@ -124,7 +124,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const combo = page.combo?.destination;
       return (typeof combo === 'object' ? combo?.id : combo) === marketId;
     });
-    const to = parent ? `/waterfront/${parent.slug}` : '/search';
+    const to = parent ? `/waterfront/${parent.slug}` : '/collection';
 
     await payload.update({
       collection: 'properties',

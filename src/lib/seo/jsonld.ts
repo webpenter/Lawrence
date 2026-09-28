@@ -119,7 +119,7 @@ export function webSiteJsonLd(): Json {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${siteUrl()}/en/search?q={search_term_string}`,
+        urlTemplate: `${siteUrl()}/en/collection?q={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },

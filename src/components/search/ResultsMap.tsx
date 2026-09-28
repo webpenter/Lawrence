@@ -153,7 +153,7 @@ export function ResultsMap({ markers, panelLabel, unavailableNote }: ResultsMapP
                 className={
                   marker.approximate
                     ? 'absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-sm border border-patina bg-patina/20'
-                    : 'absolute -translate-x-1/2 -translate-y-full rounded-sm bg-vellum px-2 py-1 text-xs font-medium tabular-nums text-obsidian shadow-card'
+                    : 'absolute min-h-6 -translate-x-1/2 -translate-y-full rounded-sm bg-vellum px-2.5 py-1.5 text-xs font-medium tabular-nums text-obsidian shadow-card'
                 }
               >
                 {marker.approximate ? null : marker.label}

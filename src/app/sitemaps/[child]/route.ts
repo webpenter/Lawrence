@@ -75,7 +75,7 @@ async function articleEntries(): Promise<SitemapEntry[]> {
 function staticEntries(): SitemapEntry[] {
   return [
     { path: '/' },
-    { path: '/search' },
+    { path: '/collection' },
     { path: '/contact' },
     { path: '/list-with-us' },
     { path: '/journal' },

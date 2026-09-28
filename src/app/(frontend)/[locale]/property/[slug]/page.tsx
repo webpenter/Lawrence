@@ -9,6 +9,10 @@ import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { EnquiryForm } from '@/components/property/EnquiryForm';
+import { MapLocality } from '@/components/property/MapLocality';
+import { MarketStatStrip } from '@/components/property/MarketStatStrip';
+import { SaveCta } from '@/components/property/SaveCta';
+import { OffMarketInvite } from '@/components/ui/OffMarketInvite';
 import { GalleryGrid } from '@/components/property/GalleryGrid';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { ViewBeacon } from '@/components/property/ViewBeacon';
@@ -23,6 +27,7 @@ import { soldPageIsNoindex } from '@/lib/expiry';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { breadcrumbJsonLd, realEstateListingJsonLd } from '@/lib/seo/jsonld';
 import { findFallbackProperty, sampleFallbackEnabled } from '@/lib/sample/fallback';
+import { listingPrice } from '@/lib/intl/listing-price';
 import { rankSimilar, similarCandidatesWhere } from '@/lib/similar';
 import type { Agency, Agent, Property } from '@/payload-types';
 
@@ -119,6 +124,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
 
   const t = await getTranslations('listing');
   const tc = await getTranslations('common');
+  const ta = await getTranslations('account');
   const viewerLocale = await getLocale();
   const { currency, units } = await getViewerPreferences();
   const similar = await loadSimilar(property);
@@ -132,10 +138,15 @@ export default async function PropertyPage({ params }: DetailPageProps) {
       ? (property.agent as Agent)
       : null;
 
+  const priced = listingPrice(property);
   const price =
-    property.priceType === 'fixed' && property.priceEur != null
-      ? formatPriceEur(property.priceEur, currency, viewerLocale)
-      : tc('priceOnRequest');
+    priced.kind === 'exact'
+      ? formatPriceEur(priced.priceEur, currency, viewerLocale)
+      : priced.kind === 'band'
+        ? tc('priceGuideBand', { min: priced.minM, max: priced.maxM })
+        : property.status === 'sold'
+          ? null
+          : tc('priceOnRequest');
 
   const locality = [
     property.location?.locality,
@@ -148,6 +159,8 @@ export default async function PropertyPage({ params }: DetailPageProps) {
   const facts: Array<[string, string]> = [];
   if (property.bedrooms != null) facts.push([t('factBedrooms'), String(property.bedrooms)]);
   if (property.bathrooms != null) facts.push([t('factBathrooms'), String(property.bathrooms)]);
+  if (property.receptionRooms != null)
+    facts.push([t('factReceptions'), String(property.receptionRooms)]);
   if (property.builtAreaSqm != null)
     facts.push([t('factBuiltArea'), formatArea(property.builtAreaSqm, units, viewerLocale)]);
   if (property.plotAreaSqm != null)
@@ -157,6 +170,9 @@ export default async function PropertyPage({ params }: DetailPageProps) {
   if (property.yearBuilt != null) facts.push([t('factYearBuilt'), String(property.yearBuilt)]);
   if (property.renovatedYear != null)
     facts.push([t('factRenovated'), String(property.renovatedYear)]);
+  if (property.architect) facts.push([t('factArchitect'), property.architect]);
+  if (property.heritageStatus && property.heritageStatus !== 'none')
+    facts.push([t('factHeritage'), humanizeEnum(property.heritageStatus)]);
   if (property.condition) facts.push([t('factCondition'), humanizeEnum(property.condition)]);
   if (property.tenure) facts.push([t('factTenure'), humanizeEnum(property.tenure)]);
 
@@ -169,11 +185,21 @@ export default async function PropertyPage({ params }: DetailPageProps) {
           ? t('underOfferNotice')
           : null;
 
+  const market =
+    typeof property.location?.market === 'object' && property.location?.market !== null
+      ? property.location.market
+      : null;
+  const coords = property.location?.coordinates as [number, number] | null | undefined;
+  const mapPoint = Array.isArray(coords) ? coords : null;
+  const memberExtrasCount =
+    (property as unknown as { memberExtrasCount?: number }).memberExtrasCount ?? 0;
+  const ts = await getTranslations('search');
+
   const jsonLd = [
     realEstateListingJsonLd(property, locale),
     breadcrumbJsonLd(locale, [
       { name: t('breadcrumbHome'), path: '' },
-      { name: t('breadcrumbSearch'), path: '/search' },
+      { name: t('breadcrumbSearch'), path: '/collection' },
       { name: property.title, path: `/property/${slug}` },
     ]),
   ];
@@ -251,7 +277,16 @@ export default async function PropertyPage({ params }: DetailPageProps) {
               .join(' · ')}
           </p>
         </div>
-        <p className="font-display text-2xl tabular-nums text-ink md:text-right">{price}</p>
+        <div className="flex items-center gap-4 md:justify-end">
+          {price ? (
+            <p className="font-display text-2xl tabular-nums text-ink md:text-right">{price}</p>
+          ) : null}
+          <SaveCta
+            saveLabel={ta('savedTitle')}
+            savedLabel={ta('savedTitle')}
+            joinHref={`/${locale}/join`}
+          />
+        </div>
       </header>
 
       <div className="grid gap-8 px-4 py-6 sm:px-7 lg:grid-cols-[1.5fr_1fr]">
@@ -289,6 +324,26 @@ export default async function PropertyPage({ params }: DetailPageProps) {
             </section>
           ) : null}
 
+          {property.provenance ? (
+            <section className="mt-6">
+              <h2 className="mb-3 font-display text-lg text-ink">{t('provenanceTitle')}</h2>
+              <div className="prose-waterline max-w-prose text-sm text-graphite">
+                <RichText data={property.provenance} />
+              </div>
+            </section>
+          ) : null}
+
+          {mapPoint ? (
+            <MapLocality
+              lng={mapPoint[0]}
+              lat={mapPoint[1]}
+              approximate={property.location?.coordinatePrecision !== 'exact'}
+              label={locality || null}
+              panelLabel={ts('mapPanelLabel')}
+              unavailableNote={ts('mapUnavailable')}
+            />
+          ) : null}
+
           {property.features?.length ? (
             <section className="mt-6">
               <h2 className="mb-3 font-display text-lg text-ink">{t('featuresTitle')}</h2>
@@ -300,6 +355,29 @@ export default async function PropertyPage({ params }: DetailPageProps) {
                 ))}
               </div>
             </section>
+          ) : null}
+
+          {market ? (
+            <MarketStatStrip
+              market={market}
+              heading={t('marketContextTitle')}
+              labels={{
+                primeEntryEur: t('statPrimeEntry'),
+                medianPriceEurPerSqm: t('statMedianSqm'),
+                yoyChangePct: t('statYoY'),
+                avgDaysOnMarket: t('statDays'),
+              }}
+            />
+          ) : null}
+
+          {memberExtrasCount > 0 ? (
+            <OffMarketInvite
+              className="mt-8"
+              label={t('membersLabel')}
+              message={t('memberExtras', { n: memberExtrasCount })}
+              ctaLabel={t('memberExtrasCta')}
+              href={`/${locale}/join`}
+            />
           ) : null}
         </div>
 
@@ -384,7 +462,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
           {t('breadcrumbHome')}
         </Link>
         {' / '}
-        <Link href="/search" className="hover:text-patina">
+        <Link href="/collection" className="hover:text-patina">
           {t('breadcrumbSearch')}
         </Link>
         {' / '}

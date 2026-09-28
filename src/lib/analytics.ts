@@ -11,6 +11,9 @@ export type AnalyticsEventMap = {
     resultCount: number;
     sort?: string;
   };
+  /** §8.5 registration funnel. */
+  member_joined: { locale?: string };
+  member_login: { locale?: string };
   filter_applied: {
     filterName: string;
     filterValue: string | number;

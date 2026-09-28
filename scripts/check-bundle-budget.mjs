@@ -10,7 +10,7 @@ import { gzipSync } from 'node:zlib';
  */
 export const BUDGETS_KB = {
   '/(frontend)/[locale]/page': { label: 'home', budget: 110 },
-  '/(frontend)/[locale]/search/page': { label: 'search', budget: 160 },
+  '/(frontend)/[locale]/collection/page': { label: 'collection', budget: 160 },
   '/(frontend)/[locale]/property/[slug]/page': { label: 'listing', budget: 130 },
 };
 

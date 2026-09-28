@@ -28,7 +28,7 @@ export default async function GonePage({
         <h1 className="font-display text-2xl text-ink">{t('expiredNotice')}</h1>
         <p className="text-sm text-graphite">{t('similarTitle')}:</p>
         <Link
-          href="/search"
+          href="/collection"
           className="bg-obsidian px-5 py-3 text-xs uppercase tracking-[0.14em] text-vellum"
         >
           {ts('pageTitle')}

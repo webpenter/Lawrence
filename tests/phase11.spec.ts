@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * Phase 11 (Prompt 16) — WCAG 2.2 AA behaviours beyond what axe can see:
@@ -7,48 +7,20 @@ import { expect, test, type Page } from '@playwright/test';
  * the 8-route axe sweep (journal, landing fallback).
  */
 
-interface ActiveElementInfo {
-  tag: string;
-  name: string;
-  type: string;
-}
 
-async function tabTo(
-  page: Page,
-  match: (info: ActiveElementInfo) => boolean,
-  maxTabs = 40,
-): Promise<boolean> {
-  for (let i = 0; i < maxTabs; i += 1) {
-    await page.keyboard.press('Tab');
-    const info = await page.evaluate((): ActiveElementInfo | null => {
-      const el = document.activeElement as HTMLInputElement | null;
-      return el ? { tag: el.tagName, name: el.name ?? '', type: el.type ?? '' } : null;
-    });
-    if (info && match(info)) return true;
-  }
-  return false;
-}
 
-test.describe('keyboard-only search (§15 acceptance)', () => {
-  test('a keyboard user reaches the water filter, picks Sea and gets results', async ({
-    page,
-  }) => {
-    await page.goto('/en');
+test.describe('keyboard-only browse (§15 acceptance)', () => {
+  test('a keyboard user removes a filter pill and the URL updates', async ({ page }) => {
+    await page.goto('/en/collection?tier=trophy&beds=6');
 
-    const reached = await tabTo(page, (el) => el.tag === 'SELECT' && el.name === 'water');
-    expect(reached).toBe(true);
-
-    // Closed-select keyboard selection: ArrowDown moves to "Sea".
-    await page.keyboard.press('ArrowDown');
-    await expect(page.locator('select[name="water"]')).toHaveValue('sea');
-
-    const submitReached = await tabTo(page, (el) => el.tag === 'BUTTON' && el.type === 'submit', 10);
-    expect(submitReached).toBe(true);
+    const pill = page.getByRole('link', { name: /6\+ bed/ });
+    await pill.waitFor({ state: 'visible' });
+    await pill.focus();
     await page.keyboard.press('Enter');
 
-    await page.waitForURL(/\/en\/search\?/);
-    expect(new URL(page.url()).searchParams.get('water')).toBe('sea');
-    await expect(page.getByRole('heading', { level: 2 }).first()).toBeVisible();
+    await page.waitForURL('**/en/collection?tier=trophy');
+    expect(new URL(page.url()).searchParams.get('beds')).toBeNull();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 });
 

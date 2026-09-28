@@ -239,6 +239,18 @@ export function projectProperty<T extends AnyDoc>(viewer: Viewer, doc: T): AnyDo
   projectLocation(doc, audience, out);
   projectMedia(doc, audience, out);
 
+  // §11.3 member-extras teaser: the COUNT of member-only assets (+ floor
+  // plans) is deliberately public — "12 further images and the floor plans
+  // are available to members" — while the assets themselves are not.
+  if (audience !== 'staff') {
+    const media = Array.isArray(doc.media) ? doc.media : [];
+    const memberOnly = media.filter(
+      (item) => item && typeof item === 'object' && (item as MediaLike).visibility === 'members',
+    ).length;
+    const floorplans = Array.isArray(doc.floorplans) ? doc.floorplans.length : 0;
+    out.memberExtrasCount = memberOnly + floorplans;
+  }
+
   if (audience === 'anonymous') {
     // Documents and floor plans are not granted; even their ids are omitted
     // by the allowlist. Nothing to do — stated here because it is the row

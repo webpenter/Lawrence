@@ -15,15 +15,15 @@ describe('Phase 12 (Prompt 17) — Performance budgets & JS discipline', () => {
 
     const { passed, results, offenders } = checkBudgets();
     const home = results.find((r) => r.label === 'home');
-    const search = results.find((r) => r.label === 'search');
+    const collection = results.find((r) => r.label === 'collection');
     const listing = results.find((r) => r.label === 'listing');
 
     if (
       !home ||
-      !search ||
+      !collection ||
       !listing ||
       home.size === null ||
-      search.size === null ||
+      collection.size === null ||
       listing.size === null ||
       home.size > 300
     ) {
@@ -34,8 +34,8 @@ describe('Phase 12 (Prompt 17) — Performance budgets & JS discipline', () => {
     expect(home?.ok).toBe(true);
     expect(home?.size).toBeLessThanOrEqual(BUDGETS_KB['/(frontend)/[locale]/page'].budget);
 
-    expect(search?.ok).toBe(true);
-    expect(search?.size).toBeLessThanOrEqual(BUDGETS_KB['/(frontend)/[locale]/search/page'].budget);
+    expect(collection?.ok).toBe(true);
+    expect(collection?.size).toBeLessThanOrEqual(BUDGETS_KB['/(frontend)/[locale]/collection/page'].budget);
 
     expect(listing?.ok).toBe(true);
     expect(listing?.size).toBeLessThanOrEqual(BUDGETS_KB['/(frontend)/[locale]/property/[slug]/page'].budget);
@@ -77,7 +77,7 @@ describe('Phase 12 (Prompt 17) — Performance budgets & JS discipline', () => {
     const manifest = getManifest();
     const checkedChunks = [
       ...(manifest.pages['/(frontend)/[locale]/page'] ?? []),
-      ...(manifest.pages['/(frontend)/[locale]/search/page'] ?? []),
+      ...(manifest.pages['/(frontend)/[locale]/collection/page'] ?? []),
       ...(manifest.pages['/(frontend)/[locale]/property/[slug]/page'] ?? []),
     ];
 

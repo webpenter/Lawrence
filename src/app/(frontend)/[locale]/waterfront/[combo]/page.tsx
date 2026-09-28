@@ -232,7 +232,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
               ))}
             </div>
             <Link
-              href={`/search${comboToSearchQuery(page)}`}
+              href={`/collection${comboToSearchQuery(page)}`}
               className="mt-5 inline-block bg-obsidian px-5 py-3 text-xs uppercase tracking-[0.14em] text-vellum"
             >
               {t('viewAllCta', { count: aggregates.count })}

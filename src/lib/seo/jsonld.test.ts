@@ -100,7 +100,7 @@ describe('breadcrumbJsonLd', () => {
   it('numbers the trail and prefixes the locale', () => {
     const jsonLd = breadcrumbJsonLd('en', [
       { name: 'Home', path: '' },
-      { name: 'Search', path: '/search' },
+      { name: 'Search', path: '/collection' },
       { name: 'Villa', path: '/property/villa' },
     ]);
     const items = jsonLd.itemListElement as Array<{ position: number; item: string }>;

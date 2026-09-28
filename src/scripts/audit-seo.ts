@@ -110,7 +110,7 @@ async function main(): Promise<void> {
   }
 
   const seenTitles = new Map<string, string>();
-  const pages = new Set<string>([`${BASE}/en`, `${BASE}/en/search`, ...sample]);
+  const pages = new Set<string>([`${BASE}/en`, `${BASE}/en/collection`, ...sample]);
   for (const url of pages) {
     try {
       await auditPage(url, seenTitles);

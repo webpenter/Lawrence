@@ -44,7 +44,7 @@ test.describe('security headers (§16.1)', () => {
         );
       });
     });
-    for (const path of ['/en', '/en/search?water=sea', '/en/property/sample-wl-sample-001']) {
+    for (const path of ['/en', '/en/collection?water=sea', '/en/property/sample-wl-sample-001']) {
       await page.goto(path);
       await page.waitForLoadState('networkidle');
       const found = await page.evaluate(

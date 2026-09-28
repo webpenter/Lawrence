@@ -10,6 +10,18 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Audit/CI builds can isolate their output (NEXT_DIST_DIR=.next-audit) so a
+  // running dev server's .next is never shared with a production build.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+  async redirects() {
+    return [
+      {
+        source: '/:locale(en|it|fr|de|es|ru)/search',
+        destination: '/:locale/collection',
+        permanent: true,
+      },
+    ];
+  },
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
