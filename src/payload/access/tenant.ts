@@ -1,4 +1,4 @@
-import type { Access, Where } from 'payload';
+import type { Access, FieldAccess, Where } from 'payload';
 
 export type Role = 'admin' | 'editor' | 'agency_admin' | 'agency_agent';
 
@@ -83,6 +83,12 @@ export const adminOnly: Access = ({ req }) =>
 
 /** Admin or editor (content roles per §8.1: landing pages, journal, taxonomy). */
 export const adminOrEditor: Access = ({ req }) => {
+  const role = (req.user as TenantUser | null)?.role;
+  return role === 'admin' || role === 'editor';
+};
+
+/** Field-level staff gate (§6.2/§6.4: internalValueEur, commissionTerms, addressLine). */
+export const staffOnlyFieldAccess: FieldAccess = ({ req }) => {
   const role = (req.user as TenantUser | null)?.role;
   return role === 'admin' || role === 'editor';
 };

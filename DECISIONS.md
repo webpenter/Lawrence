@@ -73,3 +73,50 @@ external dependency for local work), reusing the Waterline database (explicitly 
 
 **Reversibility**: full — the stack is a disposable directory; the compose file remains the
 canonical definition for machines that have Docker.
+
+## 2026-09-28 — Phase 3: the Lawrence Property model (§6.1–6.5)
+
+**Decision**: Transformed the inherited collection in place rather than rewriting from zero:
+shared fields kept their names, Waterline's deep water/nautical model was deleted, and the §6.3
+waterfront sub-block (`waterfront.{waterAccess,waterBodyType,waterFrontageM,mooringType,
+maxBoatLoaM,berthCount}`) is the only bridge left to the sister portal. Water-specific components
+(WaterChips, WaterCredentialsTable, NauticalPanel, BoatFitStrip) were deleted; the public pages
+compile and render on Lawrence fields and get their §11 redesign in Prompt 8.
+
+Notable calls, all reversible:
+- **§8.4 publication control**: a required `publication` select
+  (published_openly / published_without_price / published_as_band / off_market) derives `channel`
+  and `priceDisclosure` in a beforeValidate hook, so contradictory states cannot be saved.
+  Off-market disclosure falls back to `exact` — members see exact or band, never "on request" (§8.3).
+- **valueTier derivation**: trophy (€20–50M) and signature (€50M+) always derive from the
+  enforceable EUR value (internalValueEur ?? priceEur); `prime` never derives — it is only ever an
+  explicit admin choice for €10–20M, and the 10% cap is enforced at publish time with a floor of
+  one so the first prime listing on an empty site is possible.
+- **Moderation dormant in Phase 1**: the public predicate excludes `rejected`/`changes_requested`
+  rather than requiring `approved`, so single-team staff entries (default `unreviewed`) go live
+  without a queue. Track B flips this by routing agency saves to the review queue (§9.4).
+- **Typesense**: two aliases, `public_listings` and `member_listings`; every upsert into one side
+  deletes from the other, so a channel flip can never leave a stale off-market document public.
+  Search documents obey priceDisclosure on both surfaces (exact → priceEur; band → EUR band;
+  on_request → nothing) and never carry internalValueEur or addressLine.
+- **Migration squash**: Lawrence has no deployment yet, so the Waterline initial migration was
+  replaced by a single `lawrence_initial` migration and the dev database was recreated.
+  `migrate:create` also cannot answer drizzle's interactive enum-rename prompts headlessly —
+  a fresh baseline avoids that entire class of problem until production exists.
+- **Fonts self-hosted (§10.3)**: Cormorant Garamond + Inter as two variable-weight latin woff2
+  subsets under `src/tokens/fonts/`, served via next/font/local. This is the spec's own rule and
+  it removes the Google Fonts fetch that made offline/sandboxed builds fail. Cyrillic subsets
+  join with the §13.9 translation pass.
+- **Left as-is until their owning prompt**: `location.destination` remains the Market relation
+  name (renamed in Prompt 4 with the collection rework); the sample generator got a minimal
+  vocabulary/price bridge so `pnpm seed` still works (fully rebuilt in Prompt 12); `condition`
+  enum values (new/renovated/good/to_renovate/shell) chosen since §6.3 names the enum without
+  fixing values.
+- **FX (§7.3)**: keyless Frankfurter/ECB via FX_API_URL, HKD added; AED derives from its USD peg
+  (3.6725) because the ECB does not publish it.
+
+**Gate evidence**: 242/242 tests green including 10 new integration acceptance tests against real
+Postgres+PostGIS and Typesense — the €20M block, prime override + €10M absolute floor,
+internalValueEur enforcement, USD→EUR conversion, tier derivation, off-market null slug,
+public/member index routing on publish, channel flip and unpublish cleanup. Bundle budgets pass
+(home 109.0/110 kB, listing 124.9/130 kB). /api/health ok; home and search render 200.

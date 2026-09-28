@@ -24,7 +24,7 @@ export interface AgencyDashboard {
   feed: { feedUrl?: string | null; feedLastRunAt?: string | null; feedLastStatus?: string | null } | null;
 }
 
-const STATUSES = ['draft', 'pending_review', 'in_market', 'under_offer', 'sold', 'expired', 'withdrawn'];
+const STATUSES = ['draft', 'available', 'reserved', 'under_offer', 'sold', 'expired', 'withdrawn'];
 
 export async function getAgencyDashboard(agencyId: number): Promise<AgencyDashboard> {
   const payload = await getPayloadClient();
@@ -46,7 +46,7 @@ export async function getAgencyDashboard(agencyId: number): Promise<AgencyDashbo
     where: {
       and: [
         { agency: { equals: agencyId } },
-        { status: { in: ['in_market', 'under_offer', 'pending_review', 'draft'] } },
+        { status: { in: ['available', 'reserved', 'under_offer', 'draft'] } },
       ],
     },
     limit: 200,
@@ -55,11 +55,12 @@ export async function getAgencyDashboard(agencyId: number): Promise<AgencyDashbo
       title: true,
       status: true,
       moderation: true,
-      waterFrontageM: true,
-      maxBoatLoaM: true,
       expiresAt: true,
       viewCount: true,
-      leadCount: true,
+      enquiryCount: true,
+      location: true,
+      priceEur: true,
+      internalValueEur: true,
     },
     overrideAccess: true,
   });
@@ -68,7 +69,17 @@ export async function getAgencyDashboard(agencyId: number): Promise<AgencyDashbo
     .map((listing) => ({
       id: listing.id,
       title: listing.title,
-      reasons: classifyAttention(listing, now),
+      reasons: classifyAttention(
+        {
+          ...listing,
+          marketId:
+            typeof listing.location?.destination === 'object'
+              ? (listing.location?.destination?.id ?? null)
+              : (listing.location?.destination ?? null),
+          hasValue: listing.priceEur != null || listing.internalValueEur != null,
+        },
+        now,
+      ),
     }))
     .filter((entry) => entry.reasons.length > 0)
     .slice(0, 12);
@@ -80,7 +91,7 @@ export async function getAgencyDashboard(agencyId: number): Promise<AgencyDashbo
       id: listing.id,
       title: listing.title,
       viewCount: listing.viewCount ?? 0,
-      leadCount: listing.leadCount ?? 0,
+      leadCount: listing.enquiryCount ?? 0,
     }));
 
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 3600_000).toISOString();
@@ -154,14 +165,27 @@ export async function getAdminDashboard(): Promise<AdminDashboard> {
   ).filter((entry) => entry.count > 0);
 
   const [missingFrontage, missingNautical] = await Promise.all([
+    // §9.2 data-quality panel: live listings without a market assignment.
     payload.count({
       collection: 'properties',
-      where: { and: [{ status: { in: ['in_market', 'under_offer'] } }, { waterFrontageM: { equals: null } }] },
+      where: {
+        and: [
+          { status: { in: ['available', 'reserved', 'under_offer'] } },
+          { 'location.destination': { equals: null } },
+        ],
+      },
       overrideAccess: true,
     }),
+    // Live listings without an enforceable value (no price and no internal value).
     payload.count({
       collection: 'properties',
-      where: { and: [{ status: { in: ['in_market', 'under_offer'] } }, { maxBoatLoaM: { equals: null } }] },
+      where: {
+        and: [
+          { status: { in: ['available', 'reserved', 'under_offer'] } },
+          { priceEur: { equals: null } },
+          { internalValueEur: { equals: null } },
+        ],
+      },
       overrideAccess: true,
     }),
   ]);
@@ -223,9 +247,8 @@ export async function getAdminDashboard(): Promise<AdminDashboard> {
       where: {
         and: [
           { isSample: { equals: true } },
-          { status: { in: ['in_market', 'under_offer'] } },
-          { visibility: { equals: 'public' } },
-          { moderation: { equals: 'approved' } },
+          { status: { in: ['available', 'reserved', 'under_offer'] } },
+          { channel: { equals: 'public' } },
         ],
       },
       overrideAccess: true,

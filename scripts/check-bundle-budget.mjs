@@ -131,7 +131,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 
   console.log('\n========================================================================');
-  console.log('WATERLINE — §12.1 Performance Budgets (First-Load JS Gzipped)');
+  console.log('LAWRENCE — §10.2 Performance Budgets (First-Load JS Gzipped)');
   console.log('========================================================================');
   console.log(
     'Route'.padEnd(12) +

@@ -13,7 +13,7 @@ import {
   type AdminDashboard,
   type AgencyDashboard,
 } from '@/lib/db/dashboard';
-import { humanizeEnum } from '@/components/property/WaterChips';
+import { humanizeEnum } from '@/lib/humanize';
 import { relationId } from '@/payload/access/tenant';
 
 // Prompt 15 B/C: read-only backoffice dashboards, role-gated via the Payload
@@ -64,8 +64,8 @@ async function AgencyView({ agencyId }: { agencyId: number }) {
   }
 
   const reasonLabel: Record<string, string> = {
-    missing_frontage: t('reasonMissingFrontage'),
-    missing_nautical: t('reasonMissingNautical'),
+    missing_market: t('reasonMissingMarket'),
+    missing_value: t('reasonMissingValue'),
     expiring: t('reasonExpiring'),
     changes_requested: t('reasonChangesRequested'),
   };

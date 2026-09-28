@@ -206,8 +206,6 @@
     "listingsByStatus": "Inserate nach Status",
     "attentionTitle": "Braucht Aufmerksamkeit",
     "attentionEmpty": "Nichts braucht Aufmerksamkeit.",
-    "reasonMissingFrontage": "Uferfront fehlt",
-    "reasonMissingNautical": "keine nautischen Daten",
     "reasonExpiring": "läuft bald ab",
     "reasonChangesRequested": "Änderungen angefragt",
     "topListingsTitle": "Meistgesehene Inserate",
@@ -227,7 +225,9 @@
     "editInAdmin": "Im Backoffice prüfen",
     "leaderboardTitle": "Agentur-Rangliste",
     "sampleLeakWarning": "Musterinserate sind öffentlich sichtbar, obwohl der Demomodus AUS ist — vor dem Launch entfernen.",
-    "sampleLeakOk": "Keine Musterinserate öffentlich sichtbar."
+    "sampleLeakOk": "Keine Musterinserate öffentlich sichtbar.",
+    "reasonMissingMarket": "no market assigned",
+    "reasonMissingValue": "no enforceable value"
   },
   "journal": {
     "title": "Das Journal",

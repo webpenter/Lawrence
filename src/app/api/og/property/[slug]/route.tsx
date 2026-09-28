@@ -28,13 +28,12 @@ export async function GET(
         .filter(Boolean)
         .join(' · ');
       const price =
-        property.priceType === 'fixed' && property.priceEur != null
+        property.priceDisclosure === 'exact' && property.priceEur != null
           ? formatPriceEur(property.priceEur, 'EUR', 'en')
           : 'Price on request';
-      const frontage =
-        property.waterFrontageM != null ? `${property.waterFrontageM} m frontage` : null;
-      const berth = property.maxBoatLoaM != null ? `berth ${property.maxBoatLoaM} m` : null;
-      credential = [price, frontage ?? berth].filter(Boolean).join('  ·  ');
+      const beds = property.bedrooms != null ? `${property.bedrooms} bedrooms` : null;
+      const built = property.builtAreaSqm != null ? `${property.builtAreaSqm} m²` : null;
+      credential = [price, beds ?? built].filter(Boolean).join('  ·  ');
     }
   } catch {
     // brand fallback card

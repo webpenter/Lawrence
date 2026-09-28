@@ -6,54 +6,83 @@ import { breadcrumbJsonLd, realEstateListingJsonLd } from './jsonld';
 
 const property = {
   id: 1,
-  slug: 'villa-private-dock-portofino',
-  title: 'Villa with private dock and 38 m of sea frontage',
-  propertyType: 'villa',
+  slug: 'palazzo-private-dock-portofino',
+  title: 'Palazzo with private dock and 38 m of sea frontage',
+  propertyType: 'palazzo',
   priceType: 'fixed',
   currency: 'EUR',
-  priceEur: 14_500_000,
-  status: 'in_market',
-  waterBodyType: 'sea',
-  waterAccessType: ['private_dock', 'direct_shore'],
-  waterFrontageM: 38,
-  distanceToWaterM: 0,
-  maxBoatLoaM: 26,
-  waterDepthAtBerthM: 3.2,
-  navigableToOpenSea: true,
-  mooringType: 'fixed_dock',
+  priceDisclosure: 'exact',
+  priceEur: 34_500_000,
+  valueTier: 'trophy',
+  channel: 'public',
+  status: 'available',
+  features: ['helipad', 'wine_cellar'],
+  heritageStatus: 'listed',
+  waterfront: {
+    waterAccess: true,
+    waterBodyType: 'sea',
+    waterFrontageM: 38,
+    mooringType: 'fixed_dock',
+    maxBoatLoaM: 26,
+    berthCount: 2,
+  },
   publishedAt: '2026-09-21T00:00:00.000Z',
   location: { locality: 'Portofino', region: 'Liguria', country: 'IT' },
 } as unknown as Property;
 
-describe('realEstateListingJsonLd (§14.3)', () => {
+describe('realEstateListingJsonLd (§15.4)', () => {
   const jsonLd = realEstateListingJsonLd(property, 'en');
 
   it('emits RealEstateListing with an Offer in EUR', () => {
     expect(jsonLd['@type']).toBe('RealEstateListing');
     expect(jsonLd.offers).toMatchObject({
       '@type': 'Offer',
-      price: 14_500_000,
+      price: 34_500_000,
       priceCurrency: 'EUR',
       availability: 'https://schema.org/InStock',
     });
   });
 
-  it('maps water and nautical fields into LocationFeatureSpecification', () => {
+  it('maps features and the waterfront sub-block into LocationFeatureSpecification', () => {
     const features = jsonLd.amenityFeature as Array<{ name: string; value: unknown }>;
     const names = features.map((f) => f.name);
+    expect(names).toContain('helipad');
+    expect(names).toContain('wine cellar');
+    expect(names).toContain('Heritage status');
     expect(names).toContain('Private water frontage (m)');
     expect(names).toContain('Max boat length (m)');
-    expect(names).toContain('Water depth at berth (m)');
-    expect(names).toContain('Navigable to open sea');
     expect(features.find((f) => f.name === 'Private water frontage (m)')?.value).toBe(38);
   });
 
-  it('omits the offer entirely for price-on-request listings', () => {
+  it('omits the offer entirely for price-on-request listings (audit:exposure rule)', () => {
     const porJsonLd = realEstateListingJsonLd(
-      { ...property, priceType: 'on_request', priceEur: null } as unknown as Property,
+      {
+        ...property,
+        priceDisclosure: 'on_request',
+        // Even a stale computed priceEur must not leak when disclosure forbids it.
+        priceEur: 34_500_000,
+      } as unknown as Property,
       'en',
     );
     expect(porJsonLd.offers).toBeUndefined();
+  });
+
+  it('emits an AggregateOffer band for band-disclosed listings', () => {
+    const bandJsonLd = realEstateListingJsonLd(
+      {
+        ...property,
+        priceDisclosure: 'band',
+        priceEur: null,
+        priceBandMinEur: 30_000_000,
+        priceBandMaxEur: 40_000_000,
+      } as unknown as Property,
+      'en',
+    );
+    expect(bandJsonLd.offers).toMatchObject({
+      '@type': 'AggregateOffer',
+      lowPrice: 30_000_000,
+      highPrice: 40_000_000,
+    });
   });
 
   it('marks under-offer listings as LimitedAvailability', () => {

@@ -74,12 +74,10 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
         propertyType: 'villa',
         priceType: 'fixed',
         currency: 'EUR',
-        waterBodyType: 'sea',
-        waterAccessType: ['private_dock'],
-        distanceToWaterM: 0,
+        priceAmount: 25_000_000,
+        publication: 'published_openly',
         status: 'draft',
         moderation: 'unreviewed',
-        visibility: 'public',
         sourceType: 'manual',
         _status: 'draft',
       },
@@ -149,7 +147,7 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
     expect(ids).not.toContain(agencyA.id);
   });
 
-  it('an agency_agent cannot publish: the attempt lands in pending_review as a draft', async () => {
+  it('an agency_agent cannot publish: the attempt stays a draft awaiting review', async () => {
     const user = await payload.findByID({
       collection: 'users',
       id: agentAUser.id,
@@ -160,11 +158,11 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
       id: listingA.id,
       overrideAccess: false,
       user,
-      data: { status: 'in_market', _status: 'published' },
+      data: { status: 'available', _status: 'published' },
       draft: true,
     });
-    expect(updated.status).toBe('pending_review');
     expect(updated._status).not.toBe('published');
+    expect(updated.moderation).toBe('unreviewed');
   });
 
   it('an editor can publish directly', async () => {
@@ -178,9 +176,9 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
       id: listingA.id,
       overrideAccess: false,
       user,
-      data: { status: 'in_market', moderation: 'approved', _status: 'published' },
+      data: { status: 'available', moderation: 'approved', _status: 'published' },
     });
-    expect(updated.status).toBe('in_market');
+    expect(updated.status).toBe('available');
   });
 
   it('audit log entries were written and are invisible to agents', async () => {

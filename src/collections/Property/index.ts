@@ -1,47 +1,67 @@
 import type { CollectionConfig } from 'payload';
 
-import { adminOnly, anyLoggedIn, tenant } from '@/payload/access/tenant';
+import { adminOnly, anyLoggedIn, staffOnlyFieldAccess, tenant } from '@/payload/access/tenant';
 
 import {
-  BEACH_TYPES,
+  CHANNELS,
   CONDITIONS,
   COORDINATE_PRECISIONS,
   CURRENCIES,
   FEATURES,
-  MAX_DISTANCE_TO_WATER_M,
+  HERITAGE_STATUSES,
+  MANDATE_TYPES,
   MODERATION_STATES,
   MOORING_TYPES,
-  ORIENTATIONS,
-  PRICE_QUALIFIERS,
+  OWNERSHIP_STRUCTURES,
+  PRICE_DISCLOSURES,
   PRICE_TYPES,
   PROPERTY_STATUSES,
   PROPERTY_TYPES,
-  SHORELINE_TENURES,
+  PUBLIC_GEOGRAPHIES,
+  SALE_STRUCTURES,
   SOURCE_TYPES,
   TENURES,
-  VISIBILITIES,
-  WATERFRONT_PROTECTIONS,
-  WATER_ACCESS_TYPES,
+  VALUE_TIERS,
   WATER_BODY_TYPES,
 } from './enums';
 import {
+  applyPublicationControl,
   cleanupAfterDelete,
   computeDerivedFields,
-  enforceWaterRule,
+  enforceAdmission,
   sanitizeAgencySubmission,
   syncAfterChange,
 } from './hooks';
+
+/** §8.4 — the single required publication control. */
+const PUBLICATIONS = [
+  'published_openly',
+  'published_without_price',
+  'published_as_band',
+  'off_market',
+] as const;
+
+const staffOnlyField = {
+  read: staffOnlyFieldAccess,
+  update: staffOnlyFieldAccess,
+};
 
 export const Property: CollectionConfig = {
   slug: 'properties',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'moderation', 'agency', 'priceEur', 'waterFrontageM'],
+    defaultColumns: ['title', 'channel', 'valueTier', 'status', 'agency', 'priceEur'],
     description:
-      'A listing publishes only with at least one water access type and distance to water ≤ 50 m. This rule is the brand. Brochure PDF for any published listing: /api/property/{slug}/brochure.pdf?locale=en',
+      'Lawrence lists property from €20M (€10–20M only on the prime exception track, an admin decision). Off-market listings never have a slug, never appear in sitemaps, feeds or the public search collection.',
+    livePreview: {
+      url: ({ data }) =>
+        data?.channel === 'off_market'
+          ? `/en/off-market/${data?.id ?? ''}`
+          : `/en/property/${data?.slug ?? ''}`,
+    },
   },
   access: {
-    // §8.1: admin/editor see all; agency_admin own agency; agency_agent own listings only.
+    // §8.1: staff see all; agency roles (Track B) are scoped by tenant().
     read: tenant({ agentField: 'agent' }),
     create: anyLoggedIn,
     update: tenant({ agentField: 'agent' }),
@@ -52,14 +72,14 @@ export const Property: CollectionConfig = {
     maxPerDoc: 25,
   },
   hooks: {
-    beforeValidate: [enforceWaterRule],
+    beforeValidate: [applyPublicationControl, enforceAdmission],
     beforeChange: [sanitizeAgencySubmission, computeDerivedFields],
     afterChange: [syncAfterChange],
     afterDelete: [cleanupAfterDelete],
   },
   indexes: [
-    // The hot public query: status + visibility + isSample (spec §6.9).
-    { fields: ['status', 'visibility', 'isSample'] },
+    // The hot public query (§6.8): channel + status + isSample.
+    { fields: ['channel', 'status', 'isSample'] },
     // Agency's own listing reference, unique within that agency.
     { fields: ['agency', 'reference'], unique: true },
   ],
@@ -84,6 +104,13 @@ export const Property: CollectionConfig = {
               index: true,
               options: [...PROPERTY_TYPES],
             },
+            { name: 'availableFrom', type: 'date' },
+          ],
+        },
+        {
+          label: 'Commercial',
+          description: 'Price per §6.2. internalValueEur is the enforcement value and never leaves the CMS.',
+          fields: [
             {
               type: 'row',
               fields: [
@@ -98,7 +125,7 @@ export const Property: CollectionConfig = {
                   name: 'priceAmount',
                   type: 'number',
                   min: 0,
-                  admin: { condition: (data) => data?.priceType === 'fixed' },
+                  admin: { condition: (data) => data?.priceType !== 'price_band' },
                 },
                 {
                   name: 'currency',
@@ -107,198 +134,111 @@ export const Property: CollectionConfig = {
                   defaultValue: 'EUR',
                   options: [...CURRENCIES],
                 },
-                {
-                  name: 'priceQualifier',
-                  type: 'select',
-                  options: [...PRICE_QUALIFIERS],
-                },
               ],
+            },
+            {
+              type: 'row',
+              admin: { condition: (data) => data?.priceType === 'price_band' },
+              fields: [
+                { name: 'priceBandMin', type: 'number', min: 0 },
+                { name: 'priceBandMax', type: 'number', min: 0 },
+              ],
+            },
+            {
+              name: 'internalValueEur',
+              type: 'number',
+              min: 0,
+              access: staffOnlyField,
+              admin: {
+                description:
+                  'Admin-only, never serialised to any audience. Required to publish a listing without an exact public price — the €20M threshold is enforced on it.',
+              },
             },
             {
               type: 'row',
               fields: [
                 { name: 'tenure', type: 'select', options: [...TENURES] },
-                {
-                  name: 'leaseYearsRemaining',
-                  type: 'number',
-                  min: 0,
-                  admin: { condition: (data) => data?.tenure === 'leasehold' },
-                },
-                { name: 'serviceChargeAnnual', type: 'number', min: 0 },
-                { name: 'propertyTaxAnnual', type: 'number', min: 0 },
+                { name: 'ownershipStructure', type: 'select', options: [...OWNERSHIP_STRUCTURES] },
+                { name: 'saleStructure', type: 'select', options: [...SALE_STRUCTURES] },
               ],
             },
-            { name: 'availableFrom', type: 'date' },
-          ],
-        },
-        {
-          label: 'Water credentials',
-          description: 'The differentiator — mandatory before publishing (spec §6.4).',
-          fields: [
             {
-              name: 'waterBodyType',
-              type: 'select',
-              required: true,
-              index: true,
-              options: [...WATER_BODY_TYPES],
-            },
-            {
-              name: 'waterBody',
-              type: 'relationship',
-              relationTo: 'water-bodies',
-              admin: { description: 'Controlled name: "Ligurian Sea", "Lake Como", …' },
-            },
-            {
-              name: 'waterAccessType',
-              type: 'select',
-              hasMany: true,
-              index: true,
-              options: [...WATER_ACCESS_TYPES],
-              admin: {
-                description:
-                  'At least one is required to publish. "Sea view" and "near the beach" do not qualify.',
-              },
-            },
-            {
-              name: 'distanceToWaterM',
+              name: 'annualRunningCostEur',
               type: 'number',
               min: 0,
-              admin: {
-                description: `Metres from the property boundary to the waterline. Above ${MAX_DISTANCE_TO_WATER_M} m the listing cannot publish.`,
-              },
+              admin: { description: 'Members-only extra (§8.3).' },
             },
             {
-              name: 'waterFrontageM',
-              type: 'number',
-              min: 0,
-              index: true,
-              admin: {
-                description:
-                  '⚠ Linear metres of private shoreline — the headline card stat. Cards and ranking suffer without it; fill it whenever the shoreline is private.',
-              },
+              name: 'taxNotes',
+              type: 'richText',
+              localized: true,
+              admin: { description: 'Factual, sourced — never advice.' },
             },
             {
               type: 'row',
               fields: [
-                { name: 'beachType', type: 'select', options: [...BEACH_TYPES] },
-                { name: 'orientation', type: 'select', options: [...ORIENTATIONS] },
-                { name: 'swimmableFromProperty', type: 'checkbox' },
-              ],
-            },
-            {
-              type: 'row',
-              fields: [
-                { name: 'tidal', type: 'checkbox' },
+                { name: 'mandateType', type: 'select', options: [...MANDATE_TYPES] },
                 {
-                  name: 'tideRangeM',
-                  type: 'number',
-                  min: 0,
-                  admin: { condition: (data) => data?.tidal === true },
+                  name: 'commissionTerms',
+                  type: 'text',
+                  access: staffOnlyField,
+                  admin: { description: 'Staff-only.' },
                 },
-                {
-                  name: 'waterfrontProtection',
-                  type: 'select',
-                  options: [...WATERFRONT_PROTECTIONS],
-                },
-              ],
-            },
-            {
-              name: 'floodZone',
-              type: 'text',
-              admin: { description: 'Local designation verbatim; shown with a disclaimer.' },
-            },
-            {
-              name: 'shorelineTenure',
-              type: 'select',
-              options: [...SHORELINE_TENURES],
-              admin: {
-                description:
-                  'In Italy this is the demanio marittimo question — it materially changes value.',
-              },
-            },
-            {
-              name: 'concessionExpiry',
-              type: 'date',
-              admin: {
-                condition: (data) => data?.shorelineTenure === 'state_concession',
-              },
-            },
-          ],
-        },
-        {
-          label: 'Nautical',
-          description: 'The "fits my boat" engine (spec §6.5) — no competitor can answer this search.',
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                { name: 'mooringType', type: 'select', options: [...MOORING_TYPES] },
-                { name: 'berthCount', type: 'number', min: 0 },
-                { name: 'maxBoatLoaM', type: 'number', min: 0, index: true },
-                { name: 'maxBoatBeamM', type: 'number', min: 0 },
-              ],
-            },
-            {
-              type: 'row',
-              fields: [
-                { name: 'waterDepthAtBerthM', type: 'number', min: 0, index: true },
-                { name: 'navigableToOpenSea', type: 'checkbox', index: true },
-                { name: 'fixedBridgesToOpenSea', type: 'checkbox' },
-                {
-                  name: 'minBridgeClearanceM',
-                  type: 'number',
-                  min: 0,
-                  admin: { condition: (data) => data?.fixedBridgesToOpenSea === true },
-                },
-              ],
-            },
-            {
-              type: 'row',
-              fields: [
-                { name: 'nearestMarinaName', type: 'text' },
-                { name: 'nearestMarinaDistanceKm', type: 'number', min: 0 },
-              ],
-            },
-            {
-              type: 'row',
-              fields: [
-                { name: 'shorePower', type: 'checkbox' },
-                { name: 'freshWaterAtDock', type: 'checkbox' },
-                { name: 'fuelDockNearby', type: 'checkbox' },
-                { name: 'helipad', type: 'checkbox' },
-                { name: 'seaplaneAccess', type: 'checkbox' },
               ],
             },
           ],
         },
         {
-          label: 'Physical',
+          label: 'Physical & provenance',
           fields: [
             {
               type: 'row',
               fields: [
                 { name: 'bedrooms', type: 'number', min: 0 },
                 { name: 'bathrooms', type: 'number', min: 0 },
+                { name: 'receptionRooms', type: 'number', min: 0 },
+                { name: 'staffAccommodation', type: 'number', min: 0 },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
                 { name: 'builtAreaSqm', type: 'number', min: 0 },
                 { name: 'plotAreaSqm', type: 'number', min: 0 },
+                { name: 'plotAreaHa', type: 'number', min: 0 },
                 { name: 'terraceAreaSqm', type: 'number', min: 0 },
               ],
             },
             {
               type: 'row',
               fields: [
+                { name: 'floors', type: 'number', min: 0 },
                 { name: 'yearBuilt', type: 'number' },
                 { name: 'renovatedYear', type: 'number' },
-                { name: 'floors', type: 'number', min: 0 },
                 { name: 'parkingSpaces', type: 'number', min: 0 },
               ],
             },
             {
               type: 'row',
               fields: [
+                { name: 'architect', type: 'text' },
+                {
+                  name: 'heritageStatus',
+                  type: 'select',
+                  defaultValue: 'none',
+                  options: [...HERITAGE_STATUSES],
+                },
                 { name: 'condition', type: 'select', options: [...CONDITIONS] },
                 { name: 'energyRating', type: 'text' },
               ],
+            },
+            {
+              name: 'provenance',
+              type: 'richText',
+              localized: true,
+              admin: {
+                description: 'How a €60M estate is narrated — history, architecture, land (§3.2).',
+              },
             },
             {
               name: 'features',
@@ -306,20 +246,43 @@ export const Property: CollectionConfig = {
               hasMany: true,
               options: [...FEATURES],
             },
+            {
+              name: 'waterfront',
+              type: 'group',
+              admin: {
+                description:
+                  'Optional §6.3 sub-block — valuable at this level, and the bridge to the sister portal.',
+              },
+              fields: [
+                { name: 'waterAccess', type: 'checkbox', defaultValue: false },
+                { name: 'waterBodyType', type: 'select', options: [...WATER_BODY_TYPES] },
+                { name: 'waterFrontageM', type: 'number', min: 0 },
+                { name: 'mooringType', type: 'select', options: [...MOORING_TYPES] },
+                { name: 'maxBoatLoaM', type: 'number', min: 0 },
+                { name: 'berthCount', type: 'number', min: 0 },
+              ],
+            },
           ],
         },
         {
           label: 'Location',
+          description:
+            '§6.4 disclosure control: the serialiser shows each audience an allowlist, never a denylist.',
           fields: [
             {
               name: 'location',
               type: 'group',
               fields: [
-                { name: 'label', type: 'text' },
+                {
+                  name: 'label',
+                  type: 'text',
+                  admin: { description: 'Audience-aware display string, e.g. "Cap Ferrat, Côte d\'Azur".' },
+                },
                 {
                   name: 'addressLine',
                   type: 'text',
-                  admin: { description: 'Admin-only. Never rendered publicly.' },
+                  access: staffOnlyField,
+                  admin: { description: 'Staff-only. Never serialised to any audience.' },
                 },
                 { name: 'locality', type: 'text' },
                 { name: 'province', type: 'text' },
@@ -332,22 +295,32 @@ export const Property: CollectionConfig = {
                   admin: { description: 'ISO-3166-1 alpha-2, e.g. IT, FR, US.' },
                 },
                 { name: 'continent', type: 'text' },
-                { name: 'coordinates', type: 'point', index: true },
-                {
-                  name: 'coordinatePrecision',
-                  type: 'select',
-                  defaultValue: 'exact',
-                  options: [...COORDINATE_PRECISIONS],
-                  admin: {
-                    description:
-                      'approximate_500m renders a jittered circle publicly; exact coordinates never reach the client for those listings.',
-                  },
-                },
                 {
                   name: 'destination',
                   type: 'relationship',
                   relationTo: 'destinations',
                   index: true,
+                  admin: { description: 'The Market this listing belongs to (renamed in Prompt 4).' },
+                },
+                { name: 'coordinates', type: 'point', index: true },
+                {
+                  name: 'coordinatePrecision',
+                  type: 'select',
+                  defaultValue: 'approximate_500m',
+                  options: [...COORDINATE_PRECISIONS],
+                  admin: {
+                    description:
+                      'Exact pins only where the seller permits (§4.8). approximate_500m renders a jittered circle publicly; locality_only sends no coordinates at all.',
+                  },
+                },
+                {
+                  name: 'publicGeography',
+                  type: 'select',
+                  defaultValue: 'locality',
+                  options: [...PUBLIC_GEOGRAPHIES],
+                  admin: {
+                    description: 'The coarsest truthful label shown to anonymous visitors.',
+                  },
                 },
               ],
             },
@@ -370,13 +343,14 @@ export const Property: CollectionConfig = {
               type: 'relationship',
               relationTo: 'media',
               hasMany: true,
+              admin: { description: 'Members-only by default (§6.5).' },
             },
             {
               name: 'documents',
               type: 'relationship',
               relationTo: 'media',
               hasMany: true,
-              admin: { description: 'Private — admin and owning agency only. Never public.' },
+              admin: { description: 'Private — staff and owning agency only. Never public.' },
             },
             { name: 'description', type: 'richText', localized: true },
             {
@@ -393,7 +367,56 @@ export const Property: CollectionConfig = {
       ],
     },
 
-    // ---- Sidebar: identity, ownership, lifecycle (spec §6.1) ----
+    // ---- Sidebar: publication, identity, lifecycle (§6.1, §8.4) ----
+    {
+      name: 'publication',
+      type: 'select',
+      required: true,
+      defaultValue: 'published_openly',
+      options: [...PUBLICATIONS],
+      admin: {
+        position: 'sidebar',
+        description:
+          '"How should this property be published?" — the one required control (§8.4). It sets channel and price disclosure.',
+      },
+    },
+    {
+      name: 'channel',
+      type: 'select',
+      required: true,
+      defaultValue: 'public',
+      index: true,
+      options: [...CHANNELS],
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Derived from the publication control — the single routing decision.',
+      },
+    },
+    {
+      name: 'priceDisclosure',
+      type: 'select',
+      required: true,
+      defaultValue: 'exact',
+      index: true,
+      options: [...PRICE_DISCLOSURES],
+      admin: {
+        position: 'sidebar',
+        description:
+          'Derived for public listings; for off-market listings members see exact or band (§8.3).',
+      },
+    },
+    {
+      name: 'valueTier',
+      type: 'select',
+      index: true,
+      options: [...VALUE_TIERS],
+      admin: {
+        position: 'sidebar',
+        description:
+          'trophy/signature derive from the EUR value automatically. prime (€10–20M) is an explicit admin decision, capped at 10% of published inventory.',
+      },
+    },
     {
       name: 'slug',
       type: 'text',
@@ -402,7 +425,8 @@ export const Property: CollectionConfig = {
       admin: {
         position: 'sidebar',
         readOnly: true,
-        description: 'Generated on first publish. Immutable — changes create a Redirect.',
+        description:
+          'Generated on first publish; always null for off-market listings (addressed by id). Changes create a Redirect.',
       },
     },
     {
@@ -417,7 +441,7 @@ export const Property: CollectionConfig = {
       name: 'agent',
       type: 'relationship',
       relationTo: 'agents',
-      admin: { position: 'sidebar', description: 'Lead routing target.' },
+      admin: { position: 'sidebar', description: 'Enquiry routing target.' },
     },
     {
       name: 'status',
@@ -440,24 +464,12 @@ export const Property: CollectionConfig = {
       defaultValue: 'unreviewed',
       index: true,
       options: [...MODERATION_STATES],
-      admin: { position: 'sidebar' },
+      admin: { position: 'sidebar', description: 'Dormant in Phase 1; Track B turns the queue on.' },
     },
     {
       name: 'moderationNote',
       type: 'textarea',
-      admin: { position: 'sidebar', description: 'Shown to the agency. Not public.' },
-    },
-    {
-      name: 'visibility',
-      type: 'select',
-      required: true,
-      defaultValue: 'public',
-      index: true,
-      options: [...VISIBILITIES],
-      admin: {
-        position: 'sidebar',
-        description: 'unlisted = link-only, noindex, out of sitemap.',
-      },
+      admin: { position: 'sidebar', description: 'Shown to the submitter. Not public.' },
     },
     {
       name: 'featured',
@@ -484,6 +496,16 @@ export const Property: CollectionConfig = {
       },
     },
     {
+      name: 'priceBandMinEur',
+      type: 'number',
+      admin: { position: 'sidebar', readOnly: true, hidden: true },
+    },
+    {
+      name: 'priceBandMaxEur',
+      type: 'number',
+      admin: { position: 'sidebar', readOnly: true, hidden: true },
+    },
+    {
       name: 'publishedAt',
       type: 'date',
       admin: { position: 'sidebar', readOnly: true },
@@ -494,13 +516,13 @@ export const Property: CollectionConfig = {
       index: true,
       admin: {
         position: 'sidebar',
-        description: 'publishedAt + 180 days unless the agency reconfirms availability.',
+        description: 'publishedAt + 120 days unless availability is reconfirmed (§9.3).',
       },
     },
     {
       name: 'lastVerifiedAt',
       type: 'date',
-      admin: { position: 'sidebar', description: 'Set when the agency confirms the listing is still available.' },
+      admin: { position: 'sidebar', description: 'Set when availability is confirmed still current.' },
     },
     {
       name: 'expiryReminderSentAt',
@@ -508,7 +530,7 @@ export const Property: CollectionConfig = {
       admin: {
         position: 'sidebar',
         readOnly: true,
-        description: 'When the §8.7 T-14 confirmation email last went out.',
+        description: 'When the §9.3 T-14 confirmation email last went out.',
       },
     },
     {
@@ -523,7 +545,7 @@ export const Property: CollectionConfig = {
       name: 'duplicateOf',
       type: 'relationship',
       relationTo: 'properties',
-      admin: { position: 'sidebar', description: 'Set by duplicate detection (§8.8).' },
+      admin: { position: 'sidebar', description: 'Set by duplicate detection (§6.1).' },
     },
     {
       name: 'fingerprint',
@@ -532,6 +554,17 @@ export const Property: CollectionConfig = {
       admin: { position: 'sidebar', readOnly: true },
     },
     { name: 'viewCount', type: 'number', defaultValue: 0, admin: { position: 'sidebar', readOnly: true } },
-    { name: 'leadCount', type: 'number', defaultValue: 0, admin: { position: 'sidebar', readOnly: true } },
+    {
+      name: 'memberViewCount',
+      type: 'number',
+      defaultValue: 0,
+      admin: { position: 'sidebar', readOnly: true, description: 'Off-market views counted separately (§6.1).' },
+    },
+    {
+      name: 'enquiryCount',
+      type: 'number',
+      defaultValue: 0,
+      admin: { position: 'sidebar', readOnly: true },
+    },
   ],
 };

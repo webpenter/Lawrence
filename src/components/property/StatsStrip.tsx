@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 
-import { humanizeEnum } from '@/components/property/WaterChips';
+import { humanizeEnum } from '@/lib/humanize';
 import type { ScopeAggregates } from '@/lib/db';
 import { formatLength, formatPriceEur } from '@/lib/intl/format';
 import { getViewerPreferences } from '@/lib/intl/preferences';

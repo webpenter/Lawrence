@@ -206,8 +206,6 @@
     "listingsByStatus": "Listings by status",
     "attentionTitle": "Needs attention",
     "attentionEmpty": "Nothing needs attention.",
-    "reasonMissingFrontage": "missing frontage",
-    "reasonMissingNautical": "no nautical data",
     "reasonExpiring": "expiring soon",
     "reasonChangesRequested": "changes requested",
     "topListingsTitle": "Most viewed listings",
@@ -227,7 +225,9 @@
     "editInAdmin": "Review in the backoffice",
     "leaderboardTitle": "Agency leaderboard",
     "sampleLeakWarning": "Sample listings are publicly live while demo mode is OFF — purge them before launch.",
-    "sampleLeakOk": "No sample listings are publicly exposed."
+    "sampleLeakOk": "No sample listings are publicly exposed.",
+    "reasonMissingMarket": "no market assigned",
+    "reasonMissingValue": "no enforceable value"
   },
   "journal": {
     "title": "The Journal",

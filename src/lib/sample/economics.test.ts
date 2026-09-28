@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import { checkWaterRule } from '@/collections/Property/validation';
 
 import { SAMPLE_DESTINATION_BY_SLUG } from './destinations';
 import { buildAllBlueprints, buildBlueprint } from './economics';
@@ -30,17 +29,7 @@ describe('blueprint determinism (§13.10 "deterministic seed")', () => {
   });
 });
 
-describe('the water rule holds for every sample listing (§13.12)', () => {
-  it('all 60 pass admission', () => {
-    for (const b of blueprints) {
-      const result = checkWaterRule({
-        waterAccessType: b.waterAccessType,
-        distanceToWaterM: b.distanceToWaterM,
-      });
-      expect(result.ok, `${b.reference}: ${result.reason}`).toBe(true);
-    }
-  });
-
+describe('sample geodata stays plausible (§13.12)', () => {
   it('coordinates stay inside their destination shoreline box', () => {
     for (const b of blueprints) {
       const destination = SAMPLE_DESTINATION_BY_SLUG.get(b.destinationSlug);

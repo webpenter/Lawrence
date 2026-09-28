@@ -21,9 +21,9 @@ async function propertyEntries(): Promise<SitemapEntry[]> {
     where: {
       and: [
         { _status: { equals: 'published' } },
-        { moderation: { equals: 'approved' } },
-        { visibility: { equals: 'public' } },
-        { status: { in: ['in_market', 'under_offer'] } },
+        { moderation: { not_in: ['rejected', 'changes_requested'] } },
+        { channel: { equals: 'public' } },
+        { status: { in: ['available', 'reserved', 'under_offer'] } },
         { isSample: { not_equals: true } },
       ],
     },

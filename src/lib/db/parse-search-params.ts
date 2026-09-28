@@ -1,9 +1,8 @@
 import {
-  BEACH_TYPES,
-  ORIENTATIONS,
+  FEATURES,
   PROPERTY_TYPES,
   TENURES,
-  WATER_ACCESS_TYPES,
+  VALUE_TIERS,
   WATER_BODY_TYPES,
 } from '@/collections/Property/enums';
 
@@ -11,7 +10,7 @@ import type { PropertyFilters } from './filters';
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
-const SORTS = ['price_asc', 'price_desc', 'frontage_desc', 'newest'] as const;
+const SORTS = ['price_asc', 'price_desc', 'newest'] as const;
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -39,34 +38,13 @@ function bool(value: string | string[] | undefined): boolean {
 }
 
 /**
- * The §5.5 search URL contract → PropertyFilters. Filter state lives in the
+ * The §11.2 search URL contract → PropertyFilters. Filter state lives in the
  * URL and is shareable; every value is validated against its controlled enum
  * and silently dropped when invalid — a hand-edited URL can never break the
  * page or smuggle arbitrary values into a query.
  */
 export function parseSearchParams(params: SearchParams): PropertyFilters {
   const filters: PropertyFilters = {};
-
-  const water = csvOf(params.water, WATER_BODY_TYPES);
-  if (water.length) filters.waterBodyTypes = water;
-
-  const access = csvOf(params.access, WATER_ACCESS_TYPES);
-  if (access.length) filters.waterAccessTypes = access;
-
-  const minFrontage = num(params.minFrontage);
-  if (minFrontage !== undefined) filters.minFrontageM = minFrontage;
-
-  const boatLoa = num(params.boatLoa);
-  if (boatLoa !== undefined) filters.boatLoaM = boatLoa;
-  const draft = num(params.draft);
-  if (draft !== undefined) filters.boatDraftM = draft;
-  const beam = num(params.beam);
-  if (beam !== undefined) filters.boatBeamM = beam;
-
-  if (bool(params.openSea)) filters.navigableToOpenSea = true;
-  if (bool(params.noBridges)) filters.noFixedBridges = true;
-  const clearance = num(params.clearance);
-  if (clearance !== undefined) filters.minBridgeClearanceM = clearance;
 
   const price = first(params.price);
   if (price) {
@@ -77,8 +55,14 @@ export function parseSearchParams(params: SearchParams): PropertyFilters {
     if (maxParsed !== undefined) filters.priceMaxEur = maxParsed;
   }
 
+  const tiers = csvOf(params.tier, VALUE_TIERS);
+  if (tiers.length) filters.valueTiers = tiers;
+
   const types = csvOf(params.type, PROPERTY_TYPES);
   if (types.length) filters.propertyTypes = types;
+
+  const features = csvOf(params.features, FEATURES);
+  if (features.length) filters.features = features;
 
   const beds = num(params.beds);
   if (beds !== undefined) filters.bedsMin = beds;
@@ -89,12 +73,14 @@ export function parseSearchParams(params: SearchParams): PropertyFilters {
   const minPlot = num(params.minPlot);
   if (minPlot !== undefined) filters.minPlotSqm = minPlot;
 
-  const orientations = csvOf(params.orientation, ORIENTATIONS);
-  if (orientations.length) filters.orientations = orientations;
-  const beaches = csvOf(params.beach, BEACH_TYPES);
-  if (beaches.length) filters.beachTypes = beaches;
   const tenures = csvOf(params.tenure, TENURES);
   if (tenures.length) filters.tenures = tenures;
+
+  if (bool(params.waterfront)) filters.waterAccess = true;
+  const water = csvOf(params.water, WATER_BODY_TYPES);
+  if (water.length) filters.waterBodyTypes = water;
+  const minFrontage = num(params.minFrontage);
+  if (minFrontage !== undefined) filters.minFrontageM = minFrontage;
 
   const country = first(params.country);
   if (country && /^[A-Za-z]{2}$/.test(country)) filters.country = country.toUpperCase();
@@ -119,24 +105,18 @@ export function parseSearchParams(params: SearchParams): PropertyFilters {
 /** Names of the URL params that carry an active filter (for pills + empty state). */
 export function activeFilterParams(params: SearchParams): string[] {
   const filterKeys = [
-    'water',
-    'access',
-    'minFrontage',
-    'boatLoa',
-    'draft',
-    'beam',
-    'openSea',
-    'noBridges',
-    'clearance',
     'price',
+    'tier',
     'type',
+    'features',
     'beds',
     'baths',
     'minBuilt',
     'minPlot',
-    'orientation',
-    'beach',
     'tenure',
+    'waterfront',
+    'water',
+    'minFrontage',
     'country',
     'bbox',
   ];
@@ -151,7 +131,6 @@ export function queryWithout(params: SearchParams, remove: string[]): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (remove.includes(key) || value === undefined) continue;
-    // boatLoa and draft travel together: relaxing the boat filter drops both.
     query.set(key, Array.isArray(value) ? value.join(',') : value);
   }
   query.delete('page');

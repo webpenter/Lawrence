@@ -29,7 +29,7 @@ export type AnalyticsEventMap = {
     propertyId: string | number;
     destination?: string;
     priceBand?: string;
-    waterType?: string;
+    valueTier?: string;
   };
   gallery_opened: {
     propertyId: string | number;

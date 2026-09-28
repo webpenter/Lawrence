@@ -20,12 +20,14 @@ export default defineConfig({
       },
       {
         // Each int file boots its own Payload + pg pool; running them in
-        // parallel starves small dev machines and flakes on timeouts.
+        // parallel starves small dev machines and flakes on timeouts, so the
+        // int project runs every file sequentially in a single fork.
         extends: true,
         test: {
           name: 'int',
           include: ['tests/int/**/*.int.spec.ts'],
-          fileParallelism: false,
+          pool: 'forks',
+          poolOptions: { forks: { singleFork: true } },
         },
       },
     ],

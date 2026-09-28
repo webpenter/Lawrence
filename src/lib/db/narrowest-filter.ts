@@ -1,12 +1,12 @@
 import { activeFilterParams, parseSearchParams, type SearchParams } from './parse-search-params';
 import type { PropertyFilters } from './filters';
 
-// boatLoa and draft describe one boat — they relax together (§11.3 shows a
-// single "Fits 24 m · draft 2.5 m" pill).
+// waterfront params describe one thing — the waterfront ask — so they relax
+// together as a single "relax waterfront" link.
 const LINKED: Record<string, string[]> = {
-  boatLoa: ['boatLoa', 'draft', 'beam'],
-  draft: ['boatLoa', 'draft', 'beam'],
-  beam: ['boatLoa', 'draft', 'beam'],
+  waterfront: ['waterfront', 'water', 'minFrontage'],
+  water: ['waterfront', 'water', 'minFrontage'],
+  minFrontage: ['waterfront', 'water', 'minFrontage'],
 };
 
 export interface NarrowestFilterResult {
@@ -17,7 +17,7 @@ export interface NarrowestFilterResult {
 }
 
 /**
- * The computed empty state (§4 decision 10, §11.3): never generic — find the
+ * The computed empty state (§4 decision 10): never generic — find the
  * most restrictive filter by counting what each one's removal would unlock,
  * and offer one click to relax it. `countFn` is injected so the heuristic is
  * unit-testable and engine-agnostic.

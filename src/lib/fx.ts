@@ -3,8 +3,10 @@ import type { Currency } from '@/collections/Property/enums';
 export type FxRates = Record<Currency, number>;
 
 /**
- * Units of each currency per 1 EUR. Used as the offline fallback when no FX API
- * is configured or the daily fetch fails; refreshed rates overwrite these at runtime.
+ * Units of each currency per 1 EUR. Used as the offline fallback when the FX
+ * fetch fails; refreshed rates overwrite these at runtime. AED is pegged to
+ * the USD (3.6725/USD) and is not published by the ECB, so its fallback is
+ * derived and only ever replaced by another source if one is configured.
  * Snapshot dated 2026-09-21 (approximate — the daily fetch is the source of truth).
  */
 export const FALLBACK_RATES_PER_EUR: FxRates = {
@@ -14,6 +16,7 @@ export const FALLBACK_RATES_PER_EUR: FxRates = {
   CHF: 0.94,
   AED: 3.97,
   SGD: 1.45,
+  HKD: 8.42,
 };
 
 /**
@@ -45,41 +48,38 @@ function todayKey(): string {
 }
 
 /**
- * Daily FX snapshot: fetches once per calendar day per server process, falls back
- * to the static table when no FX_API_KEY is set or the fetch fails. Never throws.
+ * Daily FX snapshot (§7.3): ECB reference rates via the keyless Frankfurter API
+ * (FX_API_URL, default https://api.frankfurter.app). Fetched once per calendar
+ * day per server process; falls back to the static table per currency (the ECB
+ * does not publish AED — its USD-pegged fallback always applies). Never throws.
  */
 export async function getDailyRatesPerEur(): Promise<FxRates> {
   const today = todayKey();
   if (cache && cache.date === today) return cache.rates;
 
-  const apiKey = process.env.FX_API_KEY;
-  if (apiKey) {
-    try {
-      const res = await fetch(
-        `https://api.exchangerate.host/live?access_key=${apiKey}&source=EUR&currencies=USD,GBP,CHF,AED,SGD`,
-        { signal: AbortSignal.timeout(4000) },
-      );
-      if (res.ok) {
-        const data = (await res.json()) as {
-          success?: boolean;
-          quotes?: Record<string, number>;
+  const baseUrl = process.env.FX_API_URL || 'https://api.frankfurter.app';
+  try {
+    const res = await fetch(`${baseUrl}/latest?from=EUR&to=USD,GBP,CHF,SGD,HKD`, {
+      signal: AbortSignal.timeout(4000),
+    });
+    if (res.ok) {
+      const data = (await res.json()) as { rates?: Record<string, number> };
+      if (data.rates) {
+        const rates: FxRates = {
+          EUR: 1,
+          USD: data.rates.USD ?? FALLBACK_RATES_PER_EUR.USD,
+          GBP: data.rates.GBP ?? FALLBACK_RATES_PER_EUR.GBP,
+          CHF: data.rates.CHF ?? FALLBACK_RATES_PER_EUR.CHF,
+          AED: (data.rates.USD ?? FALLBACK_RATES_PER_EUR.USD) * 3.6725,
+          SGD: data.rates.SGD ?? FALLBACK_RATES_PER_EUR.SGD,
+          HKD: data.rates.HKD ?? FALLBACK_RATES_PER_EUR.HKD,
         };
-        if (data.success && data.quotes) {
-          const rates: FxRates = {
-            EUR: 1,
-            USD: data.quotes.EURUSD ?? FALLBACK_RATES_PER_EUR.USD,
-            GBP: data.quotes.EURGBP ?? FALLBACK_RATES_PER_EUR.GBP,
-            CHF: data.quotes.EURCHF ?? FALLBACK_RATES_PER_EUR.CHF,
-            AED: data.quotes.EURAED ?? FALLBACK_RATES_PER_EUR.AED,
-            SGD: data.quotes.EURSGD ?? FALLBACK_RATES_PER_EUR.SGD,
-          };
-          cache = { date: today, rates };
-          return rates;
-        }
+        cache = { date: today, rates };
+        return rates;
       }
-    } catch {
-      // fall through to the static snapshot
     }
+  } catch {
+    // fall through to the static snapshot
   }
 
   cache = { date: today, rates: FALLBACK_RATES_PER_EUR };

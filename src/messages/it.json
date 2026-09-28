@@ -206,8 +206,6 @@
     "listingsByStatus": "Annunci per stato",
     "attentionTitle": "Richiede attenzione",
     "attentionEmpty": "Niente richiede attenzione.",
-    "reasonMissingFrontage": "fronte acqua mancante",
-    "reasonMissingNautical": "dati nautici assenti",
     "reasonExpiring": "in scadenza",
     "reasonChangesRequested": "modifiche richieste",
     "topListingsTitle": "Annunci più visti",
@@ -227,7 +225,9 @@
     "editInAdmin": "Rivedi nel backoffice",
     "leaderboardTitle": "Classifica agenzie",
     "sampleLeakWarning": "Annunci dimostrativi pubblicamente visibili con la modalità demo DISATTIVA — rimuoverli prima del lancio.",
-    "sampleLeakOk": "Nessun annuncio dimostrativo esposto pubblicamente."
+    "sampleLeakOk": "Nessun annuncio dimostrativo esposto pubblicamente.",
+    "reasonMissingMarket": "no market assigned",
+    "reasonMissingValue": "no enforceable value"
   },
   "journal": {
     "title": "Il Journal",

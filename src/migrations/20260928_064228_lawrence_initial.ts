@@ -4,59 +4,63 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "public"."_locales" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
   CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'editor', 'agency_admin', 'agency_agent');
-  CREATE TYPE "public"."enum_properties_water_access_type" AS ENUM('private_beach', 'shared_beach', 'direct_shore', 'private_dock', 'private_mooring', 'marina_berth_included', 'boathouse', 'slipway', 'seawall_quay', 'rock_platform', 'riparian_access', 'whole_island');
-  CREATE TYPE "public"."enum_properties_features" AS ENUM('pool', 'infinity_pool', 'heated_pool', 'gym', 'spa', 'sauna', 'staff_quarters', 'helipad', 'tennis', 'vineyard', 'olive_grove', 'solar', 'geothermal', 'elevator', 'gated', 'smart_home', 'guest_house', 'garage', 'wine_cellar', 'cinema');
-  CREATE TYPE "public"."enum_properties_property_type" AS ENUM('villa', 'apartment', 'penthouse', 'estate', 'farmhouse', 'chalet', 'townhouse', 'castle', 'lighthouse', 'boathouse', 'private_island', 'land_plot', 'marina_residence', 'development_project', 'hotel_resort');
-  CREATE TYPE "public"."enum_properties_price_type" AS ENUM('fixed', 'on_request', 'auction', 'poa');
-  CREATE TYPE "public"."enum_properties_currency" AS ENUM('EUR', 'USD', 'GBP', 'CHF', 'AED', 'SGD');
-  CREATE TYPE "public"."enum_properties_price_qualifier" AS ENUM('guide', 'asking', 'offers_over', 'reduced');
-  CREATE TYPE "public"."enum_properties_tenure" AS ENUM('freehold', 'leasehold', 'concession', 'fractional', 'share_transfer');
-  CREATE TYPE "public"."enum_properties_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary', 'reservoir', 'marina_basin');
-  CREATE TYPE "public"."enum_properties_beach_type" AS ENUM('sand', 'pebble', 'rock', 'mixed', 'none');
-  CREATE TYPE "public"."enum_properties_orientation" AS ENUM('N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW');
-  CREATE TYPE "public"."enum_properties_waterfront_protection" AS ENUM('natural', 'seawall', 'riprap', 'breakwater', 'pier_only');
-  CREATE TYPE "public"."enum_properties_shoreline_tenure" AS ENUM('private_to_waterline', 'private_to_high_water', 'public_easement', 'state_concession', 'riparian_rights');
-  CREATE TYPE "public"."enum_properties_mooring_type" AS ENUM('none', 'buoy', 'jetty', 'pontoon', 'fixed_dock', 'floating_dock', 'boat_lift', 'dry_dock', 'marina_berth');
+  CREATE TYPE "public"."enum_properties_features" AS ENUM('pool', 'indoor_pool', 'spa', 'gym', 'cinema', 'wine_cellar', 'ballroom', 'library', 'chapel', 'helipad', 'tennis', 'padel', 'golf_hole', 'equestrian', 'vineyard', 'olive_grove', 'beach', 'private_dock', 'marina_berth', 'ski_in_ski_out', 'gatehouse', 'staff_quarters', 'guest_houses', 'generator', 'geothermal', 'solar', 'smart_home', 'car_gallery', 'panic_room');
+  CREATE TYPE "public"."enum_properties_property_type" AS ENUM('villa', 'estate', 'penthouse', 'townhouse', 'chalet', 'castle', 'palazzo', 'private_island', 'vineyard_estate', 'equestrian_estate', 'hotel_resort', 'development_site', 'apartment', 'lodge', 'ranch');
+  CREATE TYPE "public"."enum_properties_price_type" AS ENUM('fixed', 'on_request', 'price_band', 'auction');
+  CREATE TYPE "public"."enum_properties_currency" AS ENUM('EUR', 'USD', 'GBP', 'CHF', 'AED', 'SGD', 'HKD');
+  CREATE TYPE "public"."enum_properties_tenure" AS ENUM('freehold', 'leasehold', 'usufruct', 'concession');
+  CREATE TYPE "public"."enum_properties_ownership_structure" AS ENUM('direct', 'spv', 'trust', 'foundation', 'company');
+  CREATE TYPE "public"."enum_properties_sale_structure" AS ENUM('asset_sale', 'share_transfer', 'fractional', 'auction');
+  CREATE TYPE "public"."enum_properties_mandate_type" AS ENUM('exclusive', 'open', 'introduction_only');
+  CREATE TYPE "public"."enum_properties_heritage_status" AS ENUM('none', 'listed', 'protected', 'unesco_area');
   CREATE TYPE "public"."enum_properties_condition" AS ENUM('new', 'renovated', 'good', 'to_renovate', 'shell');
-  CREATE TYPE "public"."enum_properties_location_coordinate_precision" AS ENUM('exact', 'approximate_500m', 'hidden');
-  CREATE TYPE "public"."listing_status" AS ENUM('draft', 'pending_review', 'in_market', 'under_offer', 'sold', 'withdrawn', 'expired', 'archived');
+  CREATE TYPE "public"."enum_properties_waterfront_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary');
+  CREATE TYPE "public"."enum_properties_waterfront_mooring_type" AS ENUM('none', 'buoy', 'jetty', 'pontoon', 'fixed_dock', 'floating_dock', 'boat_lift', 'marina_berth');
+  CREATE TYPE "public"."enum_properties_location_coordinate_precision" AS ENUM('exact', 'approximate_500m', 'locality_only');
+  CREATE TYPE "public"."enum_properties_location_public_geography" AS ENUM('country', 'region', 'market', 'locality');
+  CREATE TYPE "public"."enum_properties_publication" AS ENUM('published_openly', 'published_without_price', 'published_as_band', 'off_market');
+  CREATE TYPE "public"."enum_properties_channel" AS ENUM('public', 'off_market');
+  CREATE TYPE "public"."enum_properties_price_disclosure" AS ENUM('exact', 'band', 'on_request');
+  CREATE TYPE "public"."enum_properties_value_tier" AS ENUM('prime', 'trophy', 'signature');
+  CREATE TYPE "public"."listing_status" AS ENUM('draft', 'available', 'reserved', 'under_offer', 'sold', 'withdrawn', 'expired', 'archived');
   CREATE TYPE "public"."enum_properties_moderation" AS ENUM('unreviewed', 'approved', 'rejected', 'changes_requested');
-  CREATE TYPE "public"."enum_properties_visibility" AS ENUM('public', 'unlisted', 'private');
-  CREATE TYPE "public"."enum_properties_source_type" AS ENUM('manual', 'csv_import', 'xml_feed', 'api');
+  CREATE TYPE "public"."enum_properties_source_type" AS ENUM('manual', 'csv_import', 'feed', 'owner_submission');
   CREATE TYPE "public"."enum_properties_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum__properties_v_version_water_access_type" AS ENUM('private_beach', 'shared_beach', 'direct_shore', 'private_dock', 'private_mooring', 'marina_berth_included', 'boathouse', 'slipway', 'seawall_quay', 'rock_platform', 'riparian_access', 'whole_island');
-  CREATE TYPE "public"."enum__properties_v_version_features" AS ENUM('pool', 'infinity_pool', 'heated_pool', 'gym', 'spa', 'sauna', 'staff_quarters', 'helipad', 'tennis', 'vineyard', 'olive_grove', 'solar', 'geothermal', 'elevator', 'gated', 'smart_home', 'guest_house', 'garage', 'wine_cellar', 'cinema');
-  CREATE TYPE "public"."enum__properties_v_version_property_type" AS ENUM('villa', 'apartment', 'penthouse', 'estate', 'farmhouse', 'chalet', 'townhouse', 'castle', 'lighthouse', 'boathouse', 'private_island', 'land_plot', 'marina_residence', 'development_project', 'hotel_resort');
-  CREATE TYPE "public"."enum__properties_v_version_price_type" AS ENUM('fixed', 'on_request', 'auction', 'poa');
-  CREATE TYPE "public"."enum__properties_v_version_currency" AS ENUM('EUR', 'USD', 'GBP', 'CHF', 'AED', 'SGD');
-  CREATE TYPE "public"."enum__properties_v_version_price_qualifier" AS ENUM('guide', 'asking', 'offers_over', 'reduced');
-  CREATE TYPE "public"."enum__properties_v_version_tenure" AS ENUM('freehold', 'leasehold', 'concession', 'fractional', 'share_transfer');
-  CREATE TYPE "public"."enum__properties_v_version_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary', 'reservoir', 'marina_basin');
-  CREATE TYPE "public"."enum__properties_v_version_beach_type" AS ENUM('sand', 'pebble', 'rock', 'mixed', 'none');
-  CREATE TYPE "public"."enum__properties_v_version_orientation" AS ENUM('N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW');
-  CREATE TYPE "public"."enum__properties_v_version_waterfront_protection" AS ENUM('natural', 'seawall', 'riprap', 'breakwater', 'pier_only');
-  CREATE TYPE "public"."enum__properties_v_version_shoreline_tenure" AS ENUM('private_to_waterline', 'private_to_high_water', 'public_easement', 'state_concession', 'riparian_rights');
-  CREATE TYPE "public"."enum__properties_v_version_mooring_type" AS ENUM('none', 'buoy', 'jetty', 'pontoon', 'fixed_dock', 'floating_dock', 'boat_lift', 'dry_dock', 'marina_berth');
+  CREATE TYPE "public"."enum__properties_v_version_features" AS ENUM('pool', 'indoor_pool', 'spa', 'gym', 'cinema', 'wine_cellar', 'ballroom', 'library', 'chapel', 'helipad', 'tennis', 'padel', 'golf_hole', 'equestrian', 'vineyard', 'olive_grove', 'beach', 'private_dock', 'marina_berth', 'ski_in_ski_out', 'gatehouse', 'staff_quarters', 'guest_houses', 'generator', 'geothermal', 'solar', 'smart_home', 'car_gallery', 'panic_room');
+  CREATE TYPE "public"."enum__properties_v_version_property_type" AS ENUM('villa', 'estate', 'penthouse', 'townhouse', 'chalet', 'castle', 'palazzo', 'private_island', 'vineyard_estate', 'equestrian_estate', 'hotel_resort', 'development_site', 'apartment', 'lodge', 'ranch');
+  CREATE TYPE "public"."enum__properties_v_version_price_type" AS ENUM('fixed', 'on_request', 'price_band', 'auction');
+  CREATE TYPE "public"."enum__properties_v_version_currency" AS ENUM('EUR', 'USD', 'GBP', 'CHF', 'AED', 'SGD', 'HKD');
+  CREATE TYPE "public"."enum__properties_v_version_tenure" AS ENUM('freehold', 'leasehold', 'usufruct', 'concession');
+  CREATE TYPE "public"."enum__properties_v_version_ownership_structure" AS ENUM('direct', 'spv', 'trust', 'foundation', 'company');
+  CREATE TYPE "public"."enum__properties_v_version_sale_structure" AS ENUM('asset_sale', 'share_transfer', 'fractional', 'auction');
+  CREATE TYPE "public"."enum__properties_v_version_mandate_type" AS ENUM('exclusive', 'open', 'introduction_only');
+  CREATE TYPE "public"."enum__properties_v_version_heritage_status" AS ENUM('none', 'listed', 'protected', 'unesco_area');
   CREATE TYPE "public"."enum__properties_v_version_condition" AS ENUM('new', 'renovated', 'good', 'to_renovate', 'shell');
-  CREATE TYPE "public"."enum__properties_v_version_location_coordinate_precision" AS ENUM('exact', 'approximate_500m', 'hidden');
+  CREATE TYPE "public"."enum__properties_v_version_waterfront_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary');
+  CREATE TYPE "public"."enum__properties_v_version_waterfront_mooring_type" AS ENUM('none', 'buoy', 'jetty', 'pontoon', 'fixed_dock', 'floating_dock', 'boat_lift', 'marina_berth');
+  CREATE TYPE "public"."enum__properties_v_version_location_coordinate_precision" AS ENUM('exact', 'approximate_500m', 'locality_only');
+  CREATE TYPE "public"."enum__properties_v_version_location_public_geography" AS ENUM('country', 'region', 'market', 'locality');
+  CREATE TYPE "public"."enum__properties_v_version_publication" AS ENUM('published_openly', 'published_without_price', 'published_as_band', 'off_market');
+  CREATE TYPE "public"."enum__properties_v_version_channel" AS ENUM('public', 'off_market');
+  CREATE TYPE "public"."enum__properties_v_version_price_disclosure" AS ENUM('exact', 'band', 'on_request');
+  CREATE TYPE "public"."enum__properties_v_version_value_tier" AS ENUM('prime', 'trophy', 'signature');
   CREATE TYPE "public"."enum__properties_v_version_moderation" AS ENUM('unreviewed', 'approved', 'rejected', 'changes_requested');
-  CREATE TYPE "public"."enum__properties_v_version_visibility" AS ENUM('public', 'unlisted', 'private');
-  CREATE TYPE "public"."enum__properties_v_version_source_type" AS ENUM('manual', 'csv_import', 'xml_feed', 'api');
+  CREATE TYPE "public"."enum__properties_v_version_source_type" AS ENUM('manual', 'csv_import', 'feed', 'owner_submission');
   CREATE TYPE "public"."enum__properties_v_version_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__properties_v_published_locale" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
   CREATE TYPE "public"."enum_agencies_languages" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
   CREATE TYPE "public"."enum_agencies_tier" AS ENUM('standard', 'verified', 'partner');
   CREATE TYPE "public"."enum_agencies_feed_feed_format" AS ENUM('native_json', 'kyero_xml', 'resales_online', 'houzez_wp', 'generic_csv');
   CREATE TYPE "public"."enum_agents_languages" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
-  CREATE TYPE "public"."enum_water_bodies_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary', 'reservoir', 'marina_basin');
+  CREATE TYPE "public"."enum_water_bodies_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary');
   CREATE TYPE "public"."enum_leads_locale" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
   CREATE TYPE "public"."enum_leads_source" AS ENUM('contact', 'property', 'landing', 'boat_filter', 'whatsapp', 'list_with_us');
   CREATE TYPE "public"."enum_leads_status" AS ENUM('new', 'sent', 'viewed', 'qualified', 'spam');
-  CREATE TYPE "public"."enum_landing_pages_combo_property_type" AS ENUM('villa', 'apartment', 'penthouse', 'estate', 'farmhouse', 'chalet', 'townhouse', 'castle', 'lighthouse', 'boathouse', 'private_island', 'land_plot', 'marina_residence', 'development_project', 'hotel_resort');
-  CREATE TYPE "public"."enum_landing_pages_combo_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary', 'reservoir', 'marina_basin');
+  CREATE TYPE "public"."enum_landing_pages_combo_property_type" AS ENUM('villa', 'estate', 'penthouse', 'townhouse', 'chalet', 'castle', 'palazzo', 'private_island', 'vineyard_estate', 'equestrian_estate', 'hotel_resort', 'development_site', 'apartment', 'lodge', 'ranch');
+  CREATE TYPE "public"."enum_landing_pages_combo_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary');
   CREATE TYPE "public"."enum_landing_pages_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum__landing_pages_v_version_combo_property_type" AS ENUM('villa', 'apartment', 'penthouse', 'estate', 'farmhouse', 'chalet', 'townhouse', 'castle', 'lighthouse', 'boathouse', 'private_island', 'land_plot', 'marina_residence', 'development_project', 'hotel_resort');
-  CREATE TYPE "public"."enum__landing_pages_v_version_combo_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary', 'reservoir', 'marina_basin');
+  CREATE TYPE "public"."enum__landing_pages_v_version_combo_property_type" AS ENUM('villa', 'estate', 'penthouse', 'townhouse', 'chalet', 'castle', 'palazzo', 'private_island', 'vineyard_estate', 'equestrian_estate', 'hotel_resort', 'development_site', 'apartment', 'lodge', 'ranch');
+  CREATE TYPE "public"."enum__landing_pages_v_version_combo_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary');
   CREATE TYPE "public"."enum__landing_pages_v_version_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__landing_pages_v_published_locale" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
   CREATE TYPE "public"."enum_taxonomies_group" AS ENUM('lifestyle', 'style', 'collection');
@@ -161,13 +165,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_parent_id" integer NOT NULL
   );
   
-  CREATE TABLE "properties_water_access_type" (
-  	"order" integer NOT NULL,
-  	"parent_id" integer NOT NULL,
-  	"value" "enum_properties_water_access_type",
-  	"id" serial PRIMARY KEY NOT NULL
-  );
-  
   CREATE TABLE "properties_features" (
   	"order" integer NOT NULL,
   	"parent_id" integer NOT NULL,
@@ -187,54 +184,41 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"id" serial PRIMARY KEY NOT NULL,
   	"reference" varchar,
   	"property_type" "enum_properties_property_type",
+  	"available_from" timestamp(3) with time zone,
   	"price_type" "enum_properties_price_type" DEFAULT 'fixed',
   	"price_amount" numeric,
   	"currency" "enum_properties_currency" DEFAULT 'EUR',
-  	"price_qualifier" "enum_properties_price_qualifier",
+  	"price_band_min" numeric,
+  	"price_band_max" numeric,
+  	"internal_value_eur" numeric,
   	"tenure" "enum_properties_tenure",
-  	"lease_years_remaining" numeric,
-  	"service_charge_annual" numeric,
-  	"property_tax_annual" numeric,
-  	"available_from" timestamp(3) with time zone,
-  	"water_body_type" "enum_properties_water_body_type",
-  	"water_body_id" integer,
-  	"distance_to_water_m" numeric,
-  	"water_frontage_m" numeric,
-  	"beach_type" "enum_properties_beach_type",
-  	"orientation" "enum_properties_orientation",
-  	"swimmable_from_property" boolean,
-  	"tidal" boolean,
-  	"tide_range_m" numeric,
-  	"waterfront_protection" "enum_properties_waterfront_protection",
-  	"flood_zone" varchar,
-  	"shoreline_tenure" "enum_properties_shoreline_tenure",
-  	"concession_expiry" timestamp(3) with time zone,
-  	"mooring_type" "enum_properties_mooring_type",
-  	"berth_count" numeric,
-  	"max_boat_loa_m" numeric,
-  	"max_boat_beam_m" numeric,
-  	"water_depth_at_berth_m" numeric,
-  	"navigable_to_open_sea" boolean,
-  	"fixed_bridges_to_open_sea" boolean,
-  	"min_bridge_clearance_m" numeric,
-  	"nearest_marina_name" varchar,
-  	"nearest_marina_distance_km" numeric,
-  	"shore_power" boolean,
-  	"fresh_water_at_dock" boolean,
-  	"fuel_dock_nearby" boolean,
-  	"helipad" boolean,
-  	"seaplane_access" boolean,
+  	"ownership_structure" "enum_properties_ownership_structure",
+  	"sale_structure" "enum_properties_sale_structure",
+  	"annual_running_cost_eur" numeric,
+  	"mandate_type" "enum_properties_mandate_type",
+  	"commission_terms" varchar,
   	"bedrooms" numeric,
   	"bathrooms" numeric,
+  	"reception_rooms" numeric,
+  	"staff_accommodation" numeric,
   	"built_area_sqm" numeric,
   	"plot_area_sqm" numeric,
+  	"plot_area_ha" numeric,
   	"terrace_area_sqm" numeric,
+  	"floors" numeric,
   	"year_built" numeric,
   	"renovated_year" numeric,
-  	"floors" numeric,
   	"parking_spaces" numeric,
+  	"architect" varchar,
+  	"heritage_status" "enum_properties_heritage_status" DEFAULT 'none',
   	"condition" "enum_properties_condition",
   	"energy_rating" varchar,
+  	"waterfront_water_access" boolean DEFAULT false,
+  	"waterfront_water_body_type" "enum_properties_waterfront_water_body_type",
+  	"waterfront_water_frontage_m" numeric,
+  	"waterfront_mooring_type" "enum_properties_waterfront_mooring_type",
+  	"waterfront_max_boat_loa_m" numeric,
+  	"waterfront_berth_count" numeric,
   	"location_label" varchar,
   	"location_address_line" varchar,
   	"location_locality" varchar,
@@ -242,21 +226,27 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"location_region" varchar,
   	"location_country" varchar,
   	"location_continent" varchar,
-  	"location_coordinates" geometry(Point),
-  	"location_coordinate_precision" "enum_properties_location_coordinate_precision" DEFAULT 'exact',
   	"location_destination_id" integer,
+  	"location_coordinates" geometry(Point),
+  	"location_coordinate_precision" "enum_properties_location_coordinate_precision" DEFAULT 'approximate_500m',
+  	"location_public_geography" "enum_properties_location_public_geography" DEFAULT 'locality',
   	"video_url" varchar,
   	"virtual_tour_url" varchar,
+  	"publication" "enum_properties_publication" DEFAULT 'published_openly',
+  	"channel" "enum_properties_channel" DEFAULT 'public',
+  	"price_disclosure" "enum_properties_price_disclosure" DEFAULT 'exact',
+  	"value_tier" "enum_properties_value_tier",
   	"slug" varchar,
   	"agency_id" integer,
   	"agent_id" integer,
   	"status" "listing_status" DEFAULT 'draft',
   	"moderation" "enum_properties_moderation" DEFAULT 'unreviewed',
   	"moderation_note" varchar,
-  	"visibility" "enum_properties_visibility" DEFAULT 'public',
   	"featured" boolean DEFAULT false,
   	"is_sample" boolean DEFAULT false,
   	"price_eur" numeric,
+  	"price_band_min_eur" numeric,
+  	"price_band_max_eur" numeric,
   	"published_at" timestamp(3) with time zone,
   	"expires_at" timestamp(3) with time zone,
   	"last_verified_at" timestamp(3) with time zone,
@@ -265,7 +255,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"duplicate_of_id" integer,
   	"fingerprint" varchar,
   	"view_count" numeric DEFAULT 0,
-  	"lead_count" numeric DEFAULT 0,
+  	"member_view_count" numeric DEFAULT 0,
+  	"enquiry_count" numeric DEFAULT 0,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"_status" "enum_properties_status" DEFAULT 'draft'
@@ -274,6 +265,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "properties_locales" (
   	"title" varchar,
   	"subtitle" varchar,
+  	"tax_notes" jsonb,
+  	"provenance" jsonb,
   	"description" jsonb,
   	"meta_title" varchar,
   	"meta_description" varchar,
@@ -288,13 +281,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"parent_id" integer NOT NULL,
   	"path" varchar NOT NULL,
   	"media_id" integer
-  );
-  
-  CREATE TABLE "_properties_v_version_water_access_type" (
-  	"order" integer NOT NULL,
-  	"parent_id" integer NOT NULL,
-  	"value" "enum__properties_v_version_water_access_type",
-  	"id" serial PRIMARY KEY NOT NULL
   );
   
   CREATE TABLE "_properties_v_version_features" (
@@ -318,54 +304,41 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"parent_id" integer,
   	"version_reference" varchar,
   	"version_property_type" "enum__properties_v_version_property_type",
+  	"version_available_from" timestamp(3) with time zone,
   	"version_price_type" "enum__properties_v_version_price_type" DEFAULT 'fixed',
   	"version_price_amount" numeric,
   	"version_currency" "enum__properties_v_version_currency" DEFAULT 'EUR',
-  	"version_price_qualifier" "enum__properties_v_version_price_qualifier",
+  	"version_price_band_min" numeric,
+  	"version_price_band_max" numeric,
+  	"version_internal_value_eur" numeric,
   	"version_tenure" "enum__properties_v_version_tenure",
-  	"version_lease_years_remaining" numeric,
-  	"version_service_charge_annual" numeric,
-  	"version_property_tax_annual" numeric,
-  	"version_available_from" timestamp(3) with time zone,
-  	"version_water_body_type" "enum__properties_v_version_water_body_type",
-  	"version_water_body_id" integer,
-  	"version_distance_to_water_m" numeric,
-  	"version_water_frontage_m" numeric,
-  	"version_beach_type" "enum__properties_v_version_beach_type",
-  	"version_orientation" "enum__properties_v_version_orientation",
-  	"version_swimmable_from_property" boolean,
-  	"version_tidal" boolean,
-  	"version_tide_range_m" numeric,
-  	"version_waterfront_protection" "enum__properties_v_version_waterfront_protection",
-  	"version_flood_zone" varchar,
-  	"version_shoreline_tenure" "enum__properties_v_version_shoreline_tenure",
-  	"version_concession_expiry" timestamp(3) with time zone,
-  	"version_mooring_type" "enum__properties_v_version_mooring_type",
-  	"version_berth_count" numeric,
-  	"version_max_boat_loa_m" numeric,
-  	"version_max_boat_beam_m" numeric,
-  	"version_water_depth_at_berth_m" numeric,
-  	"version_navigable_to_open_sea" boolean,
-  	"version_fixed_bridges_to_open_sea" boolean,
-  	"version_min_bridge_clearance_m" numeric,
-  	"version_nearest_marina_name" varchar,
-  	"version_nearest_marina_distance_km" numeric,
-  	"version_shore_power" boolean,
-  	"version_fresh_water_at_dock" boolean,
-  	"version_fuel_dock_nearby" boolean,
-  	"version_helipad" boolean,
-  	"version_seaplane_access" boolean,
+  	"version_ownership_structure" "enum__properties_v_version_ownership_structure",
+  	"version_sale_structure" "enum__properties_v_version_sale_structure",
+  	"version_annual_running_cost_eur" numeric,
+  	"version_mandate_type" "enum__properties_v_version_mandate_type",
+  	"version_commission_terms" varchar,
   	"version_bedrooms" numeric,
   	"version_bathrooms" numeric,
+  	"version_reception_rooms" numeric,
+  	"version_staff_accommodation" numeric,
   	"version_built_area_sqm" numeric,
   	"version_plot_area_sqm" numeric,
+  	"version_plot_area_ha" numeric,
   	"version_terrace_area_sqm" numeric,
+  	"version_floors" numeric,
   	"version_year_built" numeric,
   	"version_renovated_year" numeric,
-  	"version_floors" numeric,
   	"version_parking_spaces" numeric,
+  	"version_architect" varchar,
+  	"version_heritage_status" "enum__properties_v_version_heritage_status" DEFAULT 'none',
   	"version_condition" "enum__properties_v_version_condition",
   	"version_energy_rating" varchar,
+  	"version_waterfront_water_access" boolean DEFAULT false,
+  	"version_waterfront_water_body_type" "enum__properties_v_version_waterfront_water_body_type",
+  	"version_waterfront_water_frontage_m" numeric,
+  	"version_waterfront_mooring_type" "enum__properties_v_version_waterfront_mooring_type",
+  	"version_waterfront_max_boat_loa_m" numeric,
+  	"version_waterfront_berth_count" numeric,
   	"version_location_label" varchar,
   	"version_location_address_line" varchar,
   	"version_location_locality" varchar,
@@ -373,21 +346,27 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_location_region" varchar,
   	"version_location_country" varchar,
   	"version_location_continent" varchar,
-  	"version_location_coordinates" geometry(Point),
-  	"version_location_coordinate_precision" "enum__properties_v_version_location_coordinate_precision" DEFAULT 'exact',
   	"version_location_destination_id" integer,
+  	"version_location_coordinates" geometry(Point),
+  	"version_location_coordinate_precision" "enum__properties_v_version_location_coordinate_precision" DEFAULT 'approximate_500m',
+  	"version_location_public_geography" "enum__properties_v_version_location_public_geography" DEFAULT 'locality',
   	"version_video_url" varchar,
   	"version_virtual_tour_url" varchar,
+  	"version_publication" "enum__properties_v_version_publication" DEFAULT 'published_openly',
+  	"version_channel" "enum__properties_v_version_channel" DEFAULT 'public',
+  	"version_price_disclosure" "enum__properties_v_version_price_disclosure" DEFAULT 'exact',
+  	"version_value_tier" "enum__properties_v_version_value_tier",
   	"version_slug" varchar,
   	"version_agency_id" integer,
   	"version_agent_id" integer,
   	"version_status" "listing_status" DEFAULT 'draft',
   	"version_moderation" "enum__properties_v_version_moderation" DEFAULT 'unreviewed',
   	"version_moderation_note" varchar,
-  	"version_visibility" "enum__properties_v_version_visibility" DEFAULT 'public',
   	"version_featured" boolean DEFAULT false,
   	"version_is_sample" boolean DEFAULT false,
   	"version_price_eur" numeric,
+  	"version_price_band_min_eur" numeric,
+  	"version_price_band_max_eur" numeric,
   	"version_published_at" timestamp(3) with time zone,
   	"version_expires_at" timestamp(3) with time zone,
   	"version_last_verified_at" timestamp(3) with time zone,
@@ -396,7 +375,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_duplicate_of_id" integer,
   	"version_fingerprint" varchar,
   	"version_view_count" numeric DEFAULT 0,
-  	"version_lead_count" numeric DEFAULT 0,
+  	"version_member_view_count" numeric DEFAULT 0,
+  	"version_enquiry_count" numeric DEFAULT 0,
   	"version_updated_at" timestamp(3) with time zone,
   	"version_created_at" timestamp(3) with time zone,
   	"version__status" "enum__properties_v_version_status" DEFAULT 'draft',
@@ -411,6 +391,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "_properties_v_locales" (
   	"version_title" varchar,
   	"version_subtitle" varchar,
+  	"version_tax_notes" jsonb,
+  	"version_provenance" jsonb,
   	"version_description" jsonb,
   	"version_meta_title" varchar,
   	"version_meta_description" varchar,
@@ -838,10 +820,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "users" ADD CONSTRAINT "users_agent_profile_id_agents_id_fk" FOREIGN KEY ("agent_profile_id") REFERENCES "public"."agents"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "media" ADD CONSTRAINT "media_agency_id_agencies_id_fk" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "media_locales" ADD CONSTRAINT "media_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "properties_water_access_type" ADD CONSTRAINT "properties_water_access_type_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."properties"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "properties_features" ADD CONSTRAINT "properties_features_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."properties"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "properties_highlights" ADD CONSTRAINT "properties_highlights_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."properties"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "properties" ADD CONSTRAINT "properties_water_body_id_water_bodies_id_fk" FOREIGN KEY ("water_body_id") REFERENCES "public"."water_bodies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "properties" ADD CONSTRAINT "properties_location_destination_id_destinations_id_fk" FOREIGN KEY ("location_destination_id") REFERENCES "public"."destinations"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "properties" ADD CONSTRAINT "properties_agency_id_agencies_id_fk" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "properties" ADD CONSTRAINT "properties_agent_id_agents_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."agents"("id") ON DELETE set null ON UPDATE no action;
@@ -849,11 +829,9 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "properties_locales" ADD CONSTRAINT "properties_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."properties"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "properties_rels" ADD CONSTRAINT "properties_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."properties"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "properties_rels" ADD CONSTRAINT "properties_rels_media_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "_properties_v_version_water_access_type" ADD CONSTRAINT "_properties_v_version_water_access_type_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."_properties_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_properties_v_version_features" ADD CONSTRAINT "_properties_v_version_features_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."_properties_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_properties_v_version_highlights" ADD CONSTRAINT "_properties_v_version_highlights_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_properties_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_properties_v" ADD CONSTRAINT "_properties_v_parent_id_properties_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."properties"("id") ON DELETE set null ON UPDATE no action;
-  ALTER TABLE "_properties_v" ADD CONSTRAINT "_properties_v_version_water_body_id_water_bodies_id_fk" FOREIGN KEY ("version_water_body_id") REFERENCES "public"."water_bodies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "_properties_v" ADD CONSTRAINT "_properties_v_version_location_destination_id_destinations_id_fk" FOREIGN KEY ("version_location_destination_id") REFERENCES "public"."destinations"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "_properties_v" ADD CONSTRAINT "_properties_v_version_agency_id_agencies_id_fk" FOREIGN KEY ("version_agency_id") REFERENCES "public"."agencies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "_properties_v" ADD CONSTRAINT "_properties_v_version_agent_id_agents_id_fk" FOREIGN KEY ("version_agent_id") REFERENCES "public"."agents"("id") ON DELETE set null ON UPDATE no action;
@@ -932,30 +910,23 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "media_sizes_w1920_sizes_w1920_filename_idx" ON "media" USING btree ("sizes_w1920_filename");
   CREATE INDEX "media_sizes_w2560_sizes_w2560_filename_idx" ON "media" USING btree ("sizes_w2560_filename");
   CREATE UNIQUE INDEX "media_locales_locale_parent_id_unique" ON "media_locales" USING btree ("_locale","_parent_id");
-  CREATE INDEX "properties_water_access_type_order_idx" ON "properties_water_access_type" USING btree ("order");
-  CREATE INDEX "properties_water_access_type_parent_idx" ON "properties_water_access_type" USING btree ("parent_id");
-  CREATE INDEX "properties_water_access_type_value_idx" ON "properties_water_access_type" USING btree ("value");
   CREATE INDEX "properties_features_order_idx" ON "properties_features" USING btree ("order");
   CREATE INDEX "properties_features_parent_idx" ON "properties_features" USING btree ("parent_id");
   CREATE INDEX "properties_highlights_order_idx" ON "properties_highlights" USING btree ("_order");
   CREATE INDEX "properties_highlights_parent_id_idx" ON "properties_highlights" USING btree ("_parent_id");
   CREATE INDEX "properties_highlights_locale_idx" ON "properties_highlights" USING btree ("_locale");
   CREATE INDEX "properties_property_type_idx" ON "properties" USING btree ("property_type");
-  CREATE INDEX "properties_water_body_type_idx" ON "properties" USING btree ("water_body_type");
-  CREATE INDEX "properties_water_body_idx" ON "properties" USING btree ("water_body_id");
-  CREATE INDEX "properties_water_frontage_m_idx" ON "properties" USING btree ("water_frontage_m");
-  CREATE INDEX "properties_max_boat_loa_m_idx" ON "properties" USING btree ("max_boat_loa_m");
-  CREATE INDEX "properties_water_depth_at_berth_m_idx" ON "properties" USING btree ("water_depth_at_berth_m");
-  CREATE INDEX "properties_navigable_to_open_sea_idx" ON "properties" USING btree ("navigable_to_open_sea");
   CREATE INDEX "properties_location_location_country_idx" ON "properties" USING btree ("location_country");
-  CREATE INDEX "properties_location_location_coordinates_idx" ON "properties" USING btree ("location_coordinates");
   CREATE INDEX "properties_location_location_destination_idx" ON "properties" USING btree ("location_destination_id");
+  CREATE INDEX "properties_location_location_coordinates_idx" ON "properties" USING btree ("location_coordinates");
+  CREATE INDEX "properties_channel_idx" ON "properties" USING btree ("channel");
+  CREATE INDEX "properties_price_disclosure_idx" ON "properties" USING btree ("price_disclosure");
+  CREATE INDEX "properties_value_tier_idx" ON "properties" USING btree ("value_tier");
   CREATE UNIQUE INDEX "properties_slug_idx" ON "properties" USING btree ("slug");
   CREATE INDEX "properties_agency_idx" ON "properties" USING btree ("agency_id");
   CREATE INDEX "properties_agent_idx" ON "properties" USING btree ("agent_id");
   CREATE INDEX "properties_status_idx" ON "properties" USING btree ("status");
   CREATE INDEX "properties_moderation_idx" ON "properties" USING btree ("moderation");
-  CREATE INDEX "properties_visibility_idx" ON "properties" USING btree ("visibility");
   CREATE INDEX "properties_featured_idx" ON "properties" USING btree ("featured");
   CREATE INDEX "properties_is_sample_idx" ON "properties" USING btree ("is_sample");
   CREATE INDEX "properties_price_eur_idx" ON "properties" USING btree ("price_eur");
@@ -965,16 +936,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "properties_updated_at_idx" ON "properties" USING btree ("updated_at");
   CREATE INDEX "properties_created_at_idx" ON "properties" USING btree ("created_at");
   CREATE INDEX "properties__status_idx" ON "properties" USING btree ("_status");
-  CREATE INDEX "status_visibility_isSample_idx" ON "properties" USING btree ("status","visibility","is_sample");
+  CREATE INDEX "channel_status_isSample_idx" ON "properties" USING btree ("channel","status","is_sample");
   CREATE UNIQUE INDEX "agency_reference_idx" ON "properties" USING btree ("agency_id","reference");
   CREATE UNIQUE INDEX "properties_locales_locale_parent_id_unique" ON "properties_locales" USING btree ("_locale","_parent_id");
   CREATE INDEX "properties_rels_order_idx" ON "properties_rels" USING btree ("order");
   CREATE INDEX "properties_rels_parent_idx" ON "properties_rels" USING btree ("parent_id");
   CREATE INDEX "properties_rels_path_idx" ON "properties_rels" USING btree ("path");
   CREATE INDEX "properties_rels_media_id_idx" ON "properties_rels" USING btree ("media_id");
-  CREATE INDEX "_properties_v_version_water_access_type_order_idx" ON "_properties_v_version_water_access_type" USING btree ("order");
-  CREATE INDEX "_properties_v_version_water_access_type_parent_idx" ON "_properties_v_version_water_access_type" USING btree ("parent_id");
-  CREATE INDEX "_properties_v_version_water_access_type_value_idx" ON "_properties_v_version_water_access_type" USING btree ("value");
   CREATE INDEX "_properties_v_version_features_order_idx" ON "_properties_v_version_features" USING btree ("order");
   CREATE INDEX "_properties_v_version_features_parent_idx" ON "_properties_v_version_features" USING btree ("parent_id");
   CREATE INDEX "_properties_v_version_highlights_order_idx" ON "_properties_v_version_highlights" USING btree ("_order");
@@ -982,21 +950,17 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_properties_v_version_highlights_locale_idx" ON "_properties_v_version_highlights" USING btree ("_locale");
   CREATE INDEX "_properties_v_parent_idx" ON "_properties_v" USING btree ("parent_id");
   CREATE INDEX "_properties_v_version_version_property_type_idx" ON "_properties_v" USING btree ("version_property_type");
-  CREATE INDEX "_properties_v_version_version_water_body_type_idx" ON "_properties_v" USING btree ("version_water_body_type");
-  CREATE INDEX "_properties_v_version_version_water_body_idx" ON "_properties_v" USING btree ("version_water_body_id");
-  CREATE INDEX "_properties_v_version_version_water_frontage_m_idx" ON "_properties_v" USING btree ("version_water_frontage_m");
-  CREATE INDEX "_properties_v_version_version_max_boat_loa_m_idx" ON "_properties_v" USING btree ("version_max_boat_loa_m");
-  CREATE INDEX "_properties_v_version_version_water_depth_at_berth_m_idx" ON "_properties_v" USING btree ("version_water_depth_at_berth_m");
-  CREATE INDEX "_properties_v_version_version_navigable_to_open_sea_idx" ON "_properties_v" USING btree ("version_navigable_to_open_sea");
   CREATE INDEX "_properties_v_version_location_version_location_country_idx" ON "_properties_v" USING btree ("version_location_country");
-  CREATE INDEX "_properties_v_version_location_version_location_coordina_idx" ON "_properties_v" USING btree ("version_location_coordinates");
   CREATE INDEX "_properties_v_version_location_version_location_destinat_idx" ON "_properties_v" USING btree ("version_location_destination_id");
+  CREATE INDEX "_properties_v_version_location_version_location_coordina_idx" ON "_properties_v" USING btree ("version_location_coordinates");
+  CREATE INDEX "_properties_v_version_version_channel_idx" ON "_properties_v" USING btree ("version_channel");
+  CREATE INDEX "_properties_v_version_version_price_disclosure_idx" ON "_properties_v" USING btree ("version_price_disclosure");
+  CREATE INDEX "_properties_v_version_version_value_tier_idx" ON "_properties_v" USING btree ("version_value_tier");
   CREATE INDEX "_properties_v_version_version_slug_idx" ON "_properties_v" USING btree ("version_slug");
   CREATE INDEX "_properties_v_version_version_agency_idx" ON "_properties_v" USING btree ("version_agency_id");
   CREATE INDEX "_properties_v_version_version_agent_idx" ON "_properties_v" USING btree ("version_agent_id");
   CREATE INDEX "_properties_v_version_version_status_idx" ON "_properties_v" USING btree ("version_status");
   CREATE INDEX "_properties_v_version_version_moderation_idx" ON "_properties_v" USING btree ("version_moderation");
-  CREATE INDEX "_properties_v_version_version_visibility_idx" ON "_properties_v" USING btree ("version_visibility");
   CREATE INDEX "_properties_v_version_version_featured_idx" ON "_properties_v" USING btree ("version_featured");
   CREATE INDEX "_properties_v_version_version_is_sample_idx" ON "_properties_v" USING btree ("version_is_sample");
   CREATE INDEX "_properties_v_version_version_price_eur_idx" ON "_properties_v" USING btree ("version_price_eur");
@@ -1012,7 +976,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_properties_v_published_locale_idx" ON "_properties_v" USING btree ("published_locale");
   CREATE INDEX "_properties_v_latest_idx" ON "_properties_v" USING btree ("latest");
   CREATE INDEX "_properties_v_autosave_idx" ON "_properties_v" USING btree ("autosave");
-  CREATE INDEX "version_status_version_visibility_version_isSample_idx" ON "_properties_v" USING btree ("version_status","version_visibility","version_is_sample");
+  CREATE INDEX "version_channel_version_status_version_isSample_idx" ON "_properties_v" USING btree ("version_channel","version_status","version_is_sample");
   CREATE INDEX "version_agency_version_reference_idx" ON "_properties_v" USING btree ("version_agency_id","version_reference");
   CREATE UNIQUE INDEX "_properties_v_locales_locale_parent_id_unique" ON "_properties_v_locales" USING btree ("_locale","_parent_id");
   CREATE INDEX "_properties_v_rels_order_idx" ON "_properties_v_rels" USING btree ("order");
@@ -1172,13 +1136,11 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "users" CASCADE;
   DROP TABLE "media" CASCADE;
   DROP TABLE "media_locales" CASCADE;
-  DROP TABLE "properties_water_access_type" CASCADE;
   DROP TABLE "properties_features" CASCADE;
   DROP TABLE "properties_highlights" CASCADE;
   DROP TABLE "properties" CASCADE;
   DROP TABLE "properties_locales" CASCADE;
   DROP TABLE "properties_rels" CASCADE;
-  DROP TABLE "_properties_v_version_water_access_type" CASCADE;
   DROP TABLE "_properties_v_version_features" CASCADE;
   DROP TABLE "_properties_v_version_highlights" CASCADE;
   DROP TABLE "_properties_v" CASCADE;
@@ -1222,43 +1184,47 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "payload_migrations" CASCADE;
   DROP TYPE "public"."_locales";
   DROP TYPE "public"."enum_users_role";
-  DROP TYPE "public"."enum_properties_water_access_type";
   DROP TYPE "public"."enum_properties_features";
   DROP TYPE "public"."enum_properties_property_type";
   DROP TYPE "public"."enum_properties_price_type";
   DROP TYPE "public"."enum_properties_currency";
-  DROP TYPE "public"."enum_properties_price_qualifier";
   DROP TYPE "public"."enum_properties_tenure";
-  DROP TYPE "public"."enum_properties_water_body_type";
-  DROP TYPE "public"."enum_properties_beach_type";
-  DROP TYPE "public"."enum_properties_orientation";
-  DROP TYPE "public"."enum_properties_waterfront_protection";
-  DROP TYPE "public"."enum_properties_shoreline_tenure";
-  DROP TYPE "public"."enum_properties_mooring_type";
+  DROP TYPE "public"."enum_properties_ownership_structure";
+  DROP TYPE "public"."enum_properties_sale_structure";
+  DROP TYPE "public"."enum_properties_mandate_type";
+  DROP TYPE "public"."enum_properties_heritage_status";
   DROP TYPE "public"."enum_properties_condition";
+  DROP TYPE "public"."enum_properties_waterfront_water_body_type";
+  DROP TYPE "public"."enum_properties_waterfront_mooring_type";
   DROP TYPE "public"."enum_properties_location_coordinate_precision";
+  DROP TYPE "public"."enum_properties_location_public_geography";
+  DROP TYPE "public"."enum_properties_publication";
+  DROP TYPE "public"."enum_properties_channel";
+  DROP TYPE "public"."enum_properties_price_disclosure";
+  DROP TYPE "public"."enum_properties_value_tier";
   DROP TYPE "public"."listing_status";
   DROP TYPE "public"."enum_properties_moderation";
-  DROP TYPE "public"."enum_properties_visibility";
   DROP TYPE "public"."enum_properties_source_type";
   DROP TYPE "public"."enum_properties_status";
-  DROP TYPE "public"."enum__properties_v_version_water_access_type";
   DROP TYPE "public"."enum__properties_v_version_features";
   DROP TYPE "public"."enum__properties_v_version_property_type";
   DROP TYPE "public"."enum__properties_v_version_price_type";
   DROP TYPE "public"."enum__properties_v_version_currency";
-  DROP TYPE "public"."enum__properties_v_version_price_qualifier";
   DROP TYPE "public"."enum__properties_v_version_tenure";
-  DROP TYPE "public"."enum__properties_v_version_water_body_type";
-  DROP TYPE "public"."enum__properties_v_version_beach_type";
-  DROP TYPE "public"."enum__properties_v_version_orientation";
-  DROP TYPE "public"."enum__properties_v_version_waterfront_protection";
-  DROP TYPE "public"."enum__properties_v_version_shoreline_tenure";
-  DROP TYPE "public"."enum__properties_v_version_mooring_type";
+  DROP TYPE "public"."enum__properties_v_version_ownership_structure";
+  DROP TYPE "public"."enum__properties_v_version_sale_structure";
+  DROP TYPE "public"."enum__properties_v_version_mandate_type";
+  DROP TYPE "public"."enum__properties_v_version_heritage_status";
   DROP TYPE "public"."enum__properties_v_version_condition";
+  DROP TYPE "public"."enum__properties_v_version_waterfront_water_body_type";
+  DROP TYPE "public"."enum__properties_v_version_waterfront_mooring_type";
   DROP TYPE "public"."enum__properties_v_version_location_coordinate_precision";
+  DROP TYPE "public"."enum__properties_v_version_location_public_geography";
+  DROP TYPE "public"."enum__properties_v_version_publication";
+  DROP TYPE "public"."enum__properties_v_version_channel";
+  DROP TYPE "public"."enum__properties_v_version_price_disclosure";
+  DROP TYPE "public"."enum__properties_v_version_value_tier";
   DROP TYPE "public"."enum__properties_v_version_moderation";
-  DROP TYPE "public"."enum__properties_v_version_visibility";
   DROP TYPE "public"."enum__properties_v_version_source_type";
   DROP TYPE "public"."enum__properties_v_version_status";
   DROP TYPE "public"."enum__properties_v_published_locale";

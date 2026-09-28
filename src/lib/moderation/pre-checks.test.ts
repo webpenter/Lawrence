@@ -3,23 +3,22 @@ import { describe, expect, it } from 'vitest';
 import { lexicalToText, runPreChecks, type PreCheckInput } from './pre-checks';
 
 const CLEAN: PreCheckInput = {
-  waterAccessType: ['private_dock'],
-  distanceToWaterM: 0,
   coordinates: [9.2099, 44.3034],
-  priceEur: 10_000_000,
+  priceEur: 26_000_000,
   imageCount: 8,
   descriptionText: 'x'.repeat(350),
-  title: 'Villa with private dock and 38 m of sea frontage',
+  title: 'Palazzo with 38 m of private sea frontage',
 };
 
-describe('runPreChecks (§8.6 automated moderation)', () => {
+describe('runPreChecks (§9.4 automated moderation)', () => {
   it('returns no flags for a clean listing (the auto-approve path)', () => {
     expect(runPreChecks(CLEAN, { destinationMedianEur: 8_000_000 })).toEqual([]);
   });
 
-  it('flags the water rule', () => {
-    const flags = runPreChecks({ ...CLEAN, distanceToWaterM: 80 });
-    expect(flags.map((f) => f.code)).toContain('water_rule');
+  it('flags the admission policy below €20M without the prime override', () => {
+    const flags = runPreChecks({ ...CLEAN, priceEur: 15_000_000 });
+    expect(flags.map((f) => f.code)).toContain('admission');
+    expect(runPreChecks({ ...CLEAN, priceEur: 15_000_000, valueTier: 'prime' })).toEqual([]);
   });
 
   it('flags implausible and missing coordinates', () => {
@@ -38,6 +37,10 @@ describe('runPreChecks (§8.6 automated moderation)', () => {
       ),
     ).toContain('price_outlier');
     expect(runPreChecks({ ...CLEAN, priceEur: 100_000_000 }, {})).toEqual([]);
+  });
+
+  it('flags a listing with no enforceable value at all', () => {
+    expect(runPreChecks({ ...CLEAN, priceEur: null }).map((f) => f.code)).toContain('admission');
   });
 
   it('flags too few images and short descriptions', () => {

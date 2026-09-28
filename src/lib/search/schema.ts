@@ -1,36 +1,47 @@
 import type { PropertyFilters } from '@/lib/db/filters';
-
-export const PROPERTIES_ALIAS = 'properties';
+import { PUBLICLY_VISIBLE_STATUSES } from '@/lib/db/filters';
 
 /**
- * Typesense collection schema carrying every §10.2 facet plus a geopoint.
- * Postgres remains the source of truth; this index is rebuilt atomically by
- * fullReindex() and patched incrementally from the Property hooks.
+ * §7.1: two physically separate Typesense collections — the browser only ever
+ * receives the public search-only key, so off-market inventory is separated by
+ * infrastructure, not by a filter flag. Both are aliases; fullReindex swaps them
+ * atomically.
+ */
+export const PUBLIC_LISTINGS_ALIAS = 'public_listings';
+export const MEMBER_LISTINGS_ALIAS = 'member_listings';
+
+export type SearchAudience = 'public' | 'member';
+
+export function aliasFor(audience: SearchAudience): string {
+  return audience === 'public' ? PUBLIC_LISTINGS_ALIAS : MEMBER_LISTINGS_ALIAS;
+}
+
+/**
+ * One schema serves both collections: the member index holds off-market
+ * listings with the same §8.3 member projection (exact price or band,
+ * locality-level geography). Never internalValueEur, never an address.
  */
 export const PROPERTY_SEARCH_SCHEMA = {
   fields: [
-    { name: 'slug', type: 'string' as const },
+    { name: 'slug', type: 'string' as const, optional: true },
     { name: 'title', type: 'string' as const },
     { name: 'status', type: 'string' as const, facet: true },
     { name: 'isSample', type: 'bool' as const, facet: true },
-    { name: 'priceEur', type: 'int64' as const, optional: true, facet: true },
+    { name: 'valueTier', type: 'string' as const, facet: true, optional: true },
     { name: 'propertyType', type: 'string' as const, facet: true, optional: true },
-    { name: 'waterBodyType', type: 'string' as const, facet: true, optional: true },
-    { name: 'waterAccessType', type: 'string[]' as const, facet: true, optional: true },
-    { name: 'waterFrontageM', type: 'float' as const, optional: true, facet: true },
-    { name: 'beachType', type: 'string' as const, facet: true, optional: true },
-    { name: 'orientation', type: 'string' as const, facet: true, optional: true },
+    { name: 'priceDisclosure', type: 'string' as const, facet: true, optional: true },
+    { name: 'priceEur', type: 'int64' as const, optional: true, facet: true },
+    { name: 'priceBandMinEur', type: 'int64' as const, optional: true },
+    { name: 'priceBandMaxEur', type: 'int64' as const, optional: true },
+    { name: 'features', type: 'string[]' as const, facet: true, optional: true },
     { name: 'tenure', type: 'string' as const, facet: true, optional: true },
-    { name: 'maxBoatLoaM', type: 'float' as const, optional: true },
-    { name: 'maxBoatBeamM', type: 'float' as const, optional: true },
-    { name: 'waterDepthAtBerthM', type: 'float' as const, optional: true },
-    { name: 'navigableToOpenSea', type: 'bool' as const, facet: true, optional: true },
-    { name: 'fixedBridgesToOpenSea', type: 'bool' as const, optional: true },
-    { name: 'minBridgeClearanceM', type: 'float' as const, optional: true },
     { name: 'bedrooms', type: 'int32' as const, optional: true, facet: true },
     { name: 'bathrooms', type: 'int32' as const, optional: true },
     { name: 'builtAreaSqm', type: 'float' as const, optional: true },
     { name: 'plotAreaSqm', type: 'float' as const, optional: true },
+    { name: 'waterAccess', type: 'bool' as const, facet: true, optional: true },
+    { name: 'waterBodyType', type: 'string' as const, facet: true, optional: true },
+    { name: 'waterFrontageM', type: 'float' as const, optional: true },
     { name: 'country', type: 'string' as const, facet: true, optional: true },
     // Display-only locality line for result rows ("Portofino · Liguria").
     { name: 'locality', type: 'string' as const, optional: true },
@@ -38,6 +49,7 @@ export const PROPERTY_SEARCH_SCHEMA = {
     { name: 'destinationId', type: 'int64' as const, facet: true, optional: true },
     { name: 'location', type: 'geopoint' as const, optional: true },
     { name: 'approximate', type: 'bool' as const, optional: true },
+    { name: 'featured', type: 'bool' as const, optional: true },
     { name: 'publishedAtTs', type: 'int64' as const, optional: true },
   ],
   default_sorting_field: '',
@@ -54,37 +66,25 @@ function inClause(field: string, values: string[]): string {
 /** PropertyFilters → Typesense filter_by. Mirrors filtersToWhere exactly. */
 export function filtersToTypesense(filters: PropertyFilters): string {
   const parts: string[] = [
-    'status:=[`in_market`,`under_offer`]',
+    `status:=[${PUBLICLY_VISIBLE_STATUSES.map((s) => `\`${s}\``).join(',')}]`,
   ];
   if (process.env.SAMPLE_DATA_ENABLED !== 'true') parts.push('isSample:=false');
 
   if (filters.priceMinEur != null) parts.push(`priceEur:>=${filters.priceMinEur}`);
   if (filters.priceMaxEur != null) parts.push(`priceEur:<=${filters.priceMaxEur}`);
 
-  if (filters.waterBodyTypes?.length) parts.push(inClause('waterBodyType', filters.waterBodyTypes));
-  if (filters.waterAccessTypes?.length)
-    parts.push(inClause('waterAccessType', filters.waterAccessTypes));
-  if (filters.minFrontageM != null) parts.push(`waterFrontageM:>=${filters.minFrontageM}`);
-
-  if (filters.boatLoaM != null) parts.push(`maxBoatLoaM:>=${filters.boatLoaM}`);
-  if (filters.boatDraftM != null) parts.push(`waterDepthAtBerthM:>=${filters.boatDraftM}`);
-  if (filters.boatBeamM != null) parts.push(`maxBoatBeamM:>=${filters.boatBeamM}`);
-  if (filters.navigableToOpenSea) parts.push('navigableToOpenSea:=true');
-  if (filters.noFixedBridges) parts.push('fixedBridgesToOpenSea:=false');
-  if (filters.minBridgeClearanceM != null)
-    parts.push(
-      `(fixedBridgesToOpenSea:=false || minBridgeClearanceM:>=${filters.minBridgeClearanceM})`,
-    );
-
+  if (filters.valueTiers?.length) parts.push(inClause('valueTier', filters.valueTiers));
   if (filters.propertyTypes?.length) parts.push(inClause('propertyType', filters.propertyTypes));
+  if (filters.features?.length) parts.push(inClause('features', filters.features));
   if (filters.bedsMin != null) parts.push(`bedrooms:>=${filters.bedsMin}`);
   if (filters.bathsMin != null) parts.push(`bathrooms:>=${filters.bathsMin}`);
   if (filters.minBuiltSqm != null) parts.push(`builtAreaSqm:>=${filters.minBuiltSqm}`);
   if (filters.minPlotSqm != null) parts.push(`plotAreaSqm:>=${filters.minPlotSqm}`);
-
-  if (filters.orientations?.length) parts.push(inClause('orientation', filters.orientations));
-  if (filters.beachTypes?.length) parts.push(inClause('beachType', filters.beachTypes));
   if (filters.tenures?.length) parts.push(inClause('tenure', filters.tenures));
+
+  if (filters.waterAccess) parts.push('waterAccess:=true');
+  if (filters.waterBodyTypes?.length) parts.push(inClause('waterBodyType', filters.waterBodyTypes));
+  if (filters.minFrontageM != null) parts.push(`waterFrontageM:>=${filters.minFrontageM}`);
 
   if (filters.country) parts.push(`country:=\`${esc(filters.country)}\``);
   if (filters.destinationId != null) parts.push(`destinationId:=${filters.destinationId}`);
@@ -107,8 +107,6 @@ export function sortToTypesense(sort: PropertyFilters['sort']): string {
       return 'priceEur:asc';
     case 'price_desc':
       return 'priceEur:desc';
-    case 'frontage_desc':
-      return 'waterFrontageM:desc';
     case 'newest':
     default:
       return 'publishedAtTs:desc';
@@ -116,13 +114,13 @@ export function sortToTypesense(sort: PropertyFilters['sort']): string {
 }
 
 export const FACET_BY = [
-  'waterBodyType',
-  'waterAccessType',
+  'valueTier',
   'propertyType',
-  'beachType',
-  'orientation',
+  'priceDisclosure',
+  'features',
   'tenure',
   'country',
   'bedrooms',
-  'navigableToOpenSea',
+  'waterAccess',
+  'waterBodyType',
 ].join(',');

@@ -65,9 +65,13 @@ function blueprintToProperty(b: ListingBlueprint): Property {
     slug: `sample-${b.reference.toLowerCase()}`,
     reference: b.reference,
     agency: 0,
-    status: b.status,
+    status: b.status === 'in_market' ? 'available' : b.status,
     moderation: 'approved',
-    visibility: 'public',
+    channel: 'public',
+    publication: 'published_openly',
+    priceDisclosure: 'exact',
+    valueTier:
+      b.approxPriceEur >= 50_000_000 ? 'signature' : b.approxPriceEur >= 20_000_000 ? 'trophy' : 'prime',
     isSample: true,
     featured: b.featured,
     sourceType: 'manual',
@@ -85,24 +89,14 @@ function blueprintToProperty(b: ListingBlueprint): Property {
     yearBuilt: b.yearBuilt,
     condition: b.condition,
     features: b.features,
-    waterBodyType: b.waterBodyType,
-    waterAccessType: b.waterAccessType,
-    distanceToWaterM: b.distanceToWaterM,
-    waterFrontageM: b.waterFrontageM ?? undefined,
-    beachType: b.beachType,
-    orientation: b.orientation,
-    swimmableFromProperty: b.swimmableFromProperty,
-    shorelineTenure: b.shorelineTenure,
-    mooringType: b.mooringType ?? undefined,
-    berthCount: b.berthCount ?? undefined,
-    maxBoatLoaM: b.maxBoatLoaM ?? undefined,
-    maxBoatBeamM: b.maxBoatBeamM ?? undefined,
-    waterDepthAtBerthM: b.waterDepthAtBerthM ?? undefined,
-    navigableToOpenSea: b.navigableToOpenSea,
-    fixedBridgesToOpenSea: b.fixedBridgesToOpenSea,
-    minBridgeClearanceM: b.minBridgeClearanceM ?? undefined,
-    nearestMarinaName: b.nearestMarinaName,
-    nearestMarinaDistanceKm: b.nearestMarinaDistanceKm,
+    waterfront: {
+      waterAccess: true,
+      waterBodyType: b.waterBodyType,
+      waterFrontageM: b.waterFrontageM ?? undefined,
+      mooringType: b.mooringType ?? undefined,
+      maxBoatLoaM: b.maxBoatLoaM ?? undefined,
+      berthCount: b.berthCount ?? undefined,
+    },
     location: {
       locality: b.locality,
       region: destination?.region,
@@ -142,24 +136,15 @@ export function findFallbackProperty(slug: string): Property | null {
 function matches(b: ListingBlueprint, filters: PropertyFilters): boolean {
   if (filters.waterBodyTypes?.length && !filters.waterBodyTypes.includes(b.waterBodyType))
     return false;
-  if (
-    filters.waterAccessTypes?.length &&
-    !b.waterAccessType.some((a) => filters.waterAccessTypes?.includes(a))
-  )
-    return false;
   if (filters.propertyTypes?.length && !filters.propertyTypes.includes(b.propertyType))
     return false;
+  if (filters.features?.length && !filters.features.some((f) => b.features.includes(f)))
+    return false;
   if (filters.minFrontageM != null && (b.waterFrontageM ?? 0) < filters.minFrontageM) return false;
-  if (filters.boatLoaM != null && (b.maxBoatLoaM ?? 0) < filters.boatLoaM) return false;
-  if (filters.boatDraftM != null && (b.waterDepthAtBerthM ?? 0) < filters.boatDraftM) return false;
-  if (filters.navigableToOpenSea && !b.navigableToOpenSea) return false;
-  if (filters.noFixedBridges && b.fixedBridgesToOpenSea) return false;
   if (filters.bedsMin != null && b.bedrooms < filters.bedsMin) return false;
   if (filters.bathsMin != null && b.bathrooms < filters.bathsMin) return false;
   if (filters.priceMinEur != null && b.approxPriceEur < filters.priceMinEur) return false;
   if (filters.priceMaxEur != null && b.approxPriceEur > filters.priceMaxEur) return false;
-  if (filters.orientations?.length && !filters.orientations.includes(b.orientation)) return false;
-  if (filters.beachTypes?.length && !filters.beachTypes.includes(b.beachType)) return false;
   if (filters.tenures?.length && !filters.tenures.includes(b.tenure)) return false;
   if (filters.country) {
     const destination = SAMPLE_DESTINATION_BY_SLUG.get(b.destinationSlug);
@@ -178,12 +163,12 @@ function toHit(property: Property, b: ListingBlueprint): SearchHit {
     isSample: true,
     priceEur: property.priceEur ?? undefined,
     propertyType: property.propertyType,
-    waterBodyType: property.waterBodyType,
-    waterAccessType: property.waterAccessType ?? [],
-    waterFrontageM: property.waterFrontageM ?? undefined,
-    maxBoatLoaM: property.maxBoatLoaM ?? undefined,
-    waterDepthAtBerthM: property.waterDepthAtBerthM ?? undefined,
-    navigableToOpenSea: Boolean(property.navigableToOpenSea),
+    valueTier: property.valueTier ?? undefined,
+    priceDisclosure: property.priceDisclosure,
+    waterAccess: true,
+    waterBodyType: property.waterfront?.waterBodyType ?? undefined,
+    waterFrontageM: property.waterfront?.waterFrontageM ?? undefined,
+    features: property.features ?? [],
     bedrooms: property.bedrooms ?? undefined,
     bathrooms: property.bathrooms ?? undefined,
     builtAreaSqm: property.builtAreaSqm ?? undefined,
@@ -206,8 +191,6 @@ export function fallbackSearch(filters: PropertyFilters): SearchResult {
         return a.approxPriceEur - b.approxPriceEur;
       case 'price_desc':
         return b.approxPriceEur - a.approxPriceEur;
-      case 'frontage_desc':
-        return (b.waterFrontageM ?? 0) - (a.waterFrontageM ?? 0);
       default:
         return a.index - b.index;
     }

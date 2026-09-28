@@ -48,10 +48,10 @@ describe('classifyAttention (§8.10)', () => {
   const base = {
     id: 1,
     title: 'Villa',
-    status: 'in_market',
+    status: 'available',
     moderation: 'approved',
-    waterFrontageM: 38,
-    maxBoatLoaM: 24,
+    marketId: 7,
+    hasValue: true,
     expiresAt: '2026-12-01T00:00:00Z',
   };
 
@@ -64,16 +64,16 @@ describe('classifyAttention (§8.10)', () => {
       {
         ...base,
         moderation: 'changes_requested',
-        waterFrontageM: null,
-        maxBoatLoaM: null,
+        marketId: null,
+        hasValue: false,
         expiresAt: '2026-09-30T00:00:00Z',
       },
       NOW,
     );
     expect(reasons).toEqual([
       'changes_requested',
-      'missing_frontage',
-      'missing_nautical',
+      'missing_market',
+      'missing_value',
       'expiring',
     ]);
   });

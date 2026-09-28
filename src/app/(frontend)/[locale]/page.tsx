@@ -2,11 +2,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
-import { BoatFitStrip } from '@/components/property/BoatFitStrip';
-import { BOAT_BUCKETS } from '@/lib/boat-buckets';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { Link } from '@/i18n/navigation';
-import { getDestinationCounts, getFeatured, searchPropertiesPostgres, type Locale } from '@/lib/db';
+import { getDestinationCounts, getFeatured, type Locale } from '@/lib/db';
 import type { DestinationCount } from '@/lib/db';
 import type { Property } from '@/payload-types';
 import { HERO_SCRIM, HORIZON_LINE, horizonGradientFor } from '@/tokens/placeholders';
@@ -17,7 +15,6 @@ export const revalidate = 300;
 import {
   FALLBACK_DESTINATIONS,
   FALLBACK_FEATURED,
-  fallbackSearch,
   sampleFallbackEnabled,
 } from '@/lib/sample/fallback';
 
@@ -36,22 +33,6 @@ async function safeDestinations(locale: Locale): Promise<DestinationCount[]> {
   } catch {
     return sampleFallbackEnabled() ? FALLBACK_DESTINATIONS.slice(0, 8) : [];
   }
-}
-
-/** Precomputed "Will it fit?" bucket counts (§10.1 block 5). */
-async function safeBucketCounts(): Promise<Record<number, number>> {
-  const counts: Record<number, number> = {};
-  for (const bucket of BOAT_BUCKETS) {
-    try {
-      const result = await searchPropertiesPostgres({ boatLoaM: bucket, limit: 1 });
-      counts[bucket] = result.total;
-    } catch {
-      counts[bucket] = sampleFallbackEnabled()
-        ? fallbackSearch({ boatLoaM: bucket, limit: 1 }).total
-        : 0;
-    }
-  }
-  return counts;
 }
 
 const WATER_TILES = [
@@ -74,10 +55,9 @@ export default async function HomePage({
   const ts = await getTranslations('search');
   const nav = await getTranslations('nav');
 
-  const [featured, destinations, bucketCounts] = await Promise.all([
+  const [featured, destinations] = await Promise.all([
     safeFeatured(locale as Locale),
     safeDestinations(locale as Locale),
-    safeBucketCounts(),
   ]);
 
   return (
@@ -246,40 +226,6 @@ export default async function HomePage({
         </section>
       ) : null}
 
-      {/* 5 · "Will it fit?" — the brand moment (§10.1). */}
-      {/* 6 · Why WATERLINE (§10.1 / §11.1). */}
-      <section className="grid gap-6 px-7 py-9 md:grid-cols-3">
-        {(['whyVerified', 'whyFrontage', 'whyBerth'] as const).map((key) => (
-          <p key={key} className="border-t border-ink pt-3 text-sm text-graphite">
-            {t(key)}
-          </p>
-        ))}
-      </section>
-
-      {/* 8 · List with us (§10.1; journal lands with its first articles). */}
-      <section className="border-t border-line px-7 py-9 text-center">
-        <h2 className="mb-2 font-display text-xl text-ink">{t('supplyCtaTitle')}</h2>
-        <p className="mx-auto mb-5 max-w-[52ch] text-sm text-graphite">{t('supplyCtaSub')}</p>
-        <Link
-          href="/list-with-us"
-          className="inline-block bg-obsidian px-6 py-3 text-xs uppercase tracking-[0.14em] text-vellum"
-        >
-          {nav('listWithUs')}
-        </Link>
-      </section>
-
-      {/* 5 · "Will it fit?" — the brand moment sits flush above the footer,
-          forming one continuous abyss band per the design preview. */}
-      <BoatFitStrip
-        title={t('boatStripTitle')}
-        sub={t('boatStripSub')}
-        lengthLabel={t('boatStripLength')}
-        draftLabel={t('boatStripDraft', { draft: '2.5' })}
-        searchCta={t('searchCta')}
-        bucketCounts={bucketCounts}
-        resultTemplate={t.raw('boatStripResult') as string}
-        locale={locale}
-      />
       </main>
 
       <SiteFooter />

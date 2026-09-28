@@ -4,7 +4,7 @@ import type { FxRates } from '@/lib/fx';
 
 import { formatArea, formatLength, formatPriceEur, isCurrency, isUnitSystem } from './format';
 
-const RATES: FxRates = { EUR: 1, USD: 1.08, GBP: 0.85, CHF: 0.94, AED: 3.97, SGD: 1.45 };
+const RATES: FxRates = { EUR: 1, USD: 1.08, GBP: 0.85, CHF: 0.94, AED: 3.97, SGD: 1.45, HKD: 8.42 };
 
 describe('formatPriceEur (Prompt 6 currency switcher)', () => {
   it('formats EUR without conversion', () => {

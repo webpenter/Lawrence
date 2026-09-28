@@ -9,7 +9,7 @@ import {
   soldPageShouldRetire,
 } from '@/lib/expiry';
 import { passesEditorialGate } from '@/lib/seo/combos';
-import { deletePropertyDocument } from '@/lib/search/sync';
+import { deleteListingEverywhere } from '@/lib/search/sync';
 
 export const maxDuration = 300;
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         data: { status: 'expired' },
         overrideAccess: true,
       });
-      await deletePropertyDocument(String(listing.id));
+      await deleteListingEverywhere(String(listing.id));
       if (listing.slug) {
         // §14.5: 410 Gone removes the URL from indexes faster than a 404.
         const from = `/property/${listing.slug}`;
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       data: { status: 'archived' },
       overrideAccess: true,
     });
-    await deletePropertyDocument(String(listing.id));
+    await deleteListingEverywhere(String(listing.id));
     if (listing.slug) {
       const from = `/property/${listing.slug}`;
       const existing = await payload.find({

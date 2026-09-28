@@ -64,12 +64,12 @@ export interface AttentionRow {
   title: string;
   status: string;
   moderation: string;
-  waterFrontageM?: number | null;
-  maxBoatLoaM?: number | null;
+  marketId?: number | null;
+  hasValue?: boolean;
   expiresAt?: string | null;
 }
 
-export type AttentionReason = 'missing_frontage' | 'expiring' | 'changes_requested' | 'missing_nautical';
+export type AttentionReason = 'missing_market' | 'expiring' | 'changes_requested' | 'missing_value';
 
 /** §8.10 "listings needing attention", classified with every applicable reason. */
 export function classifyAttention(
@@ -79,9 +79,9 @@ export function classifyAttention(
 ): AttentionReason[] {
   const reasons: AttentionReason[] = [];
   if (listing.moderation === 'changes_requested') reasons.push('changes_requested');
-  if (listing.waterFrontageM == null) reasons.push('missing_frontage');
-  if (listing.maxBoatLoaM == null) reasons.push('missing_nautical');
-  if (listing.expiresAt && ['in_market', 'under_offer'].includes(listing.status)) {
+  if (listing.marketId == null) reasons.push('missing_market');
+  if (listing.hasValue === false) reasons.push('missing_value');
+  if (listing.expiresAt && ['available', 'reserved', 'under_offer'].includes(listing.status)) {
     const expires = new Date(listing.expiresAt).getTime();
     if (expires <= now.getTime() + expiryWindowDays * 24 * 3600_000) reasons.push('expiring');
   }

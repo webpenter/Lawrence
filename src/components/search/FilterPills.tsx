@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
-import { humanizeEnum } from '@/components/property/WaterChips';
+import { humanizeEnum } from '@/lib/humanize';
 import { Link } from '@/i18n/navigation';
 import {
   activeFilterParams,

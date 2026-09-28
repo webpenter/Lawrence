@@ -7,19 +7,18 @@ import { validateRow, type RawRow } from './validate-row';
 
 const VALID_ROW: RawRow = {
   reference: 'AG-001',
-  title_en: 'Villa with private dock',
+  title_en: 'Palazzo with private dock',
   description_en: 'A'.repeat(320),
-  property_type: 'villa',
-  status: 'pending_review',
+  property_type: 'palazzo',
+  status: 'draft',
   price_type: 'fixed',
-  price_amount: '14500000',
+  price_amount: '34500000',
   currency: 'EUR',
   bedrooms: '6',
   bathrooms: '5',
   built_area_sqm: '740',
+  water_access: 'true',
   water_body_type: 'sea',
-  water_access_types: 'private_dock|direct_shore',
-  distance_to_water_m: '0',
   water_frontage_m: '38',
   country: 'IT',
   locality: 'Portofino',
@@ -28,25 +27,44 @@ const VALID_ROW: RawRow = {
   image_urls: Array.from({ length: 6 }, (_, i) => `https://img.example/p${i}.jpg`).join('|'),
 };
 
-describe('validateRow (§8.4 dry-run report)', () => {
+describe('validateRow (§9.4 dry-run report)', () => {
   it('passes a fully valid row with no issues', () => {
     const report = validateRow(VALID_ROW, 2);
     expect(report.status).toBe('ok');
     expect(report.issues).toEqual([]);
   });
 
-  it('rejects distance_to_water_m=80 with a clear column-level reason (acceptance)', () => {
-    const report = validateRow({ ...VALID_ROW, distance_to_water_m: '80' }, 3);
+  it('rejects a €5M row with the admission reason on the price column (acceptance)', () => {
+    const report = validateRow({ ...VALID_ROW, price_amount: '5000000' }, 3);
     expect(report.status).toBe('error');
-    const issue = report.issues.find((i) => i.column === 'distance_to_water_m');
-    expect(issue?.reason).toContain('80');
-    expect(issue?.reason).toContain('50');
+    const issue = report.issues.find((i) => i.column === 'price_amount');
+    expect(issue?.reason).toContain('€10M');
+  });
+
+  it('only warns at €10–20M — the prime exception track decision is a human one', () => {
+    const report = validateRow({ ...VALID_ROW, price_amount: '15000000' }, 3);
+    expect(report.status).toBe('warning');
+    expect(report.issues.find((i) => i.column === 'price_amount')?.reason).toMatch(/prime/i);
+  });
+
+  it('warns when a non-EUR row has no internal value to enforce on', () => {
+    const report = validateRow({ ...VALID_ROW, currency: 'USD' }, 3);
+    expect(report.status).toBe('warning');
+    expect(report.issues.find((i) => i.column === 'internal_value_eur')?.reason).toMatch(/€20M/);
+  });
+
+  it('enforces on internal_value_eur when present', () => {
+    const report = validateRow(
+      { ...VALID_ROW, currency: 'USD', internal_value_eur: '26000000' },
+      3,
+    );
+    expect(report.status).toBe('ok');
   });
 
   it('flags every missing required column by name', () => {
     const report = validateRow({ reference: 'X' }, 2);
     const columns = report.issues.filter((i) => i.severity === 'error').map((i) => i.column);
-    for (const required of ['title_en', 'water_access_types', 'latitude', 'image_urls']) {
+    for (const required of ['title_en', 'price_type', 'latitude', 'image_urls']) {
       expect(columns).toContain(required);
     }
   });
@@ -61,11 +79,8 @@ describe('validateRow (§8.4 dry-run report)', () => {
     expect(report.issues.find((i) => i.column === 'bedrooms')?.reason).toContain('six');
   });
 
-  it('warns (not errors) on fewer than 6 images and missing frontage', () => {
-    const report = validateRow(
-      { ...VALID_ROW, image_urls: 'https://img.example/a.jpg', water_frontage_m: '' },
-      2,
-    );
+  it('warns (not errors) on fewer than 6 images', () => {
+    const report = validateRow({ ...VALID_ROW, image_urls: 'https://img.example/a.jpg' }, 2);
     expect(report.status).toBe('warning');
     expect(report.issues.every((i) => i.severity === 'warning')).toBe(true);
   });
@@ -76,20 +91,23 @@ describe('validateRow (§8.4 dry-run report)', () => {
   });
 });
 
-describe('mapRowToListing (§8.4)', () => {
+describe('mapRowToListing (§9.4)', () => {
   const mapped = mapRowToListing(VALID_ROW, 42);
 
-  it('maps scalars, enums, multis and location correctly', () => {
+  it('maps scalars, enums, the waterfront group and location correctly', () => {
     expect(mapped.agency).toBe(42);
-    expect(mapped.waterAccessType).toEqual(['private_dock', 'direct_shore']);
-    expect(mapped.priceAmount).toBe(14_500_000);
+    expect(mapped.priceAmount).toBe(34_500_000);
+    expect(
+      (mapped.waterfront as { waterAccess: boolean; waterFrontageM: number }).waterFrontageM,
+    ).toBe(38);
     expect((mapped.location as { coordinates: number[] }).coordinates).toEqual([9.2099, 44.3034]);
     expect((mapped.location as { country: string }).country).toBe('IT');
   });
 
   it('never lets an import set lifecycle fields', () => {
-    expect(mapped.status).toBe('pending_review');
+    expect(mapped.status).toBe('draft');
     expect(mapped.moderation).toBe('unreviewed');
+    expect(mapped.channel).toBe('public');
     expect(mapped).not.toHaveProperty('featured');
     expect(mapped).not.toHaveProperty('slug');
   });
@@ -112,7 +130,7 @@ const KYERO_SAMPLE = `<?xml version="1.0" encoding="utf-8"?>
   <property>
     <id>77</id>
     <ref>KY-77</ref>
-    <price>2500000</price>
+    <price>25000000</price>
     <currency>eur</currency>
     <type>villa</type>
     <town>Javea</town>
@@ -130,8 +148,8 @@ const KYERO_SAMPLE = `<?xml version="1.0" encoding="utf-8"?>
   </property>
 </root>`;
 
-describe('parseKyeroFeed (§8.5 adapter)', () => {
-  it('maps the Kyero shape onto §8.4 columns', async () => {
+describe('parseKyeroFeed (adapter)', () => {
+  it('maps the Kyero shape onto the §9.4 columns', async () => {
     const rows = await parseKyeroFeed(KYERO_SAMPLE);
     expect(rows).toHaveLength(1);
     const row = rows[0] as RawRow;
@@ -144,35 +162,36 @@ describe('parseKyeroFeed (§8.5 adapter)', () => {
     expect(row.description_en).toContain('mooring');
   });
 
-  it('applies the agency field mapping for water columns Kyero lacks', async () => {
+  it('applies the agency field mapping for columns Kyero lacks', async () => {
     const rows = await parseKyeroFeed(KYERO_SAMPLE, {
-      'custom.water_access': 'water_access_types',
+      'custom.description': 'description_en',
     });
-    // No custom node in the sample: column stays absent, and the dry-run
-    // report will name exactly what the agency still has to supply.
-    const report = validateRow(rows[0] as RawRow, 2);
+    // No custom node in the sample: the dry-run report names exactly what the
+    // agency still has to supply (the sample lacks a long-enough description
+    // only warns; required columns error).
+    const report = validateRow({ ...(rows[0] as RawRow), title_en: '' }, 2);
     expect(report.status).toBe('error');
-    expect(report.issues.some((i) => i.column === 'water_access_types')).toBe(true);
+    expect(report.issues.some((i) => i.column === 'title_en')).toBe(true);
   });
 });
 
-describe('parseNativeJsonFeed (§8.5 native contract)', () => {
+describe('parseNativeJsonFeed (native contract)', () => {
   it('normalises arrays and scalars onto the column shape', () => {
     const rows = parseNativeJsonFeed({
       listings: [
         {
           reference: 'NJ-1',
-          water_access_types: ['private_dock', 'slipway'],
-          distance_to_water_m: 5,
-          swimmable: true,
+          features: ['helipad', 'private_dock'],
+          water_frontage_m: 38,
+          water_access: true,
         },
       ],
     });
     expect(rows[0]).toMatchObject({
       reference: 'NJ-1',
-      water_access_types: 'private_dock|slipway',
-      distance_to_water_m: '5',
-      swimmable: 'true',
+      features: 'helipad|private_dock',
+      water_frontage_m: '38',
+      water_access: 'true',
     });
   });
 

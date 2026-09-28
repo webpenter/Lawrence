@@ -900,104 +900,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.properties_water_access_type": {
-      "name": "properties_water_access_type",
-      "schema": "",
-      "columns": {
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "enum_properties_water_access_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "properties_water_access_type_order_idx": {
-          "name": "properties_water_access_type_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "properties_water_access_type_parent_idx": {
-          "name": "properties_water_access_type_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "properties_water_access_type_value_idx": {
-          "name": "properties_water_access_type_value_idx",
-          "columns": [
-            {
-              "expression": "value",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "properties_water_access_type_parent_fk": {
-          "name": "properties_water_access_type_parent_fk",
-          "tableFrom": "properties_water_access_type",
-          "tableTo": "properties",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.properties_features": {
       "name": "properties_features",
       "schema": "",
@@ -1208,6 +1110,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "available_from": {
+          "name": "available_from",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "price_type": {
           "name": "price_type",
           "type": "enum_properties_price_type",
@@ -1230,10 +1138,21 @@
           "notNull": false,
           "default": "'EUR'"
         },
-        "price_qualifier": {
-          "name": "price_qualifier",
-          "type": "enum_properties_price_qualifier",
-          "typeSchema": "public",
+        "price_band_min": {
+          "name": "price_band_min",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_band_max": {
+          "name": "price_band_max",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "internal_value_eur": {
+          "name": "internal_value_eur",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
@@ -1244,201 +1163,36 @@
           "primaryKey": false,
           "notNull": false
         },
-        "lease_years_remaining": {
-          "name": "lease_years_remaining",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "service_charge_annual": {
-          "name": "service_charge_annual",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "property_tax_annual": {
-          "name": "property_tax_annual",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "available_from": {
-          "name": "available_from",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "water_body_type": {
-          "name": "water_body_type",
-          "type": "enum_properties_water_body_type",
+        "ownership_structure": {
+          "name": "ownership_structure",
+          "type": "enum_properties_ownership_structure",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "water_body_id": {
-          "name": "water_body_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "distance_to_water_m": {
-          "name": "distance_to_water_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "water_frontage_m": {
-          "name": "water_frontage_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "beach_type": {
-          "name": "beach_type",
-          "type": "enum_properties_beach_type",
+        "sale_structure": {
+          "name": "sale_structure",
+          "type": "enum_properties_sale_structure",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "orientation": {
-          "name": "orientation",
-          "type": "enum_properties_orientation",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "swimmable_from_property": {
-          "name": "swimmable_from_property",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tidal": {
-          "name": "tidal",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tide_range_m": {
-          "name": "tide_range_m",
+        "annual_running_cost_eur": {
+          "name": "annual_running_cost_eur",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "waterfront_protection": {
-          "name": "waterfront_protection",
-          "type": "enum_properties_waterfront_protection",
+        "mandate_type": {
+          "name": "mandate_type",
+          "type": "enum_properties_mandate_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "flood_zone": {
-          "name": "flood_zone",
+        "commission_terms": {
+          "name": "commission_terms",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "shoreline_tenure": {
-          "name": "shoreline_tenure",
-          "type": "enum_properties_shoreline_tenure",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "concession_expiry": {
-          "name": "concession_expiry",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "mooring_type": {
-          "name": "mooring_type",
-          "type": "enum_properties_mooring_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "berth_count": {
-          "name": "berth_count",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "max_boat_loa_m": {
-          "name": "max_boat_loa_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "max_boat_beam_m": {
-          "name": "max_boat_beam_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "water_depth_at_berth_m": {
-          "name": "water_depth_at_berth_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "navigable_to_open_sea": {
-          "name": "navigable_to_open_sea",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fixed_bridges_to_open_sea": {
-          "name": "fixed_bridges_to_open_sea",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "min_bridge_clearance_m": {
-          "name": "min_bridge_clearance_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "nearest_marina_name": {
-          "name": "nearest_marina_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "nearest_marina_distance_km": {
-          "name": "nearest_marina_distance_km",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "shore_power": {
-          "name": "shore_power",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fresh_water_at_dock": {
-          "name": "fresh_water_at_dock",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fuel_dock_nearby": {
-          "name": "fuel_dock_nearby",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "helipad": {
-          "name": "helipad",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "seaplane_access": {
-          "name": "seaplane_access",
-          "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
@@ -1450,6 +1204,18 @@
         },
         "bathrooms": {
           "name": "bathrooms",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reception_rooms": {
+          "name": "reception_rooms",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "staff_accommodation": {
+          "name": "staff_accommodation",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -1466,8 +1232,20 @@
           "primaryKey": false,
           "notNull": false
         },
+        "plot_area_ha": {
+          "name": "plot_area_ha",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
         "terrace_area_sqm": {
           "name": "terrace_area_sqm",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "floors": {
+          "name": "floors",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -1484,17 +1262,25 @@
           "primaryKey": false,
           "notNull": false
         },
-        "floors": {
-          "name": "floors",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
         "parking_spaces": {
           "name": "parking_spaces",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
+        },
+        "architect": {
+          "name": "architect",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "heritage_status": {
+          "name": "heritage_status",
+          "type": "enum_properties_heritage_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'none'"
         },
         "condition": {
           "name": "condition",
@@ -1506,6 +1292,45 @@
         "energy_rating": {
           "name": "energy_rating",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "waterfront_water_access": {
+          "name": "waterfront_water_access",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "waterfront_water_body_type": {
+          "name": "waterfront_water_body_type",
+          "type": "enum_properties_waterfront_water_body_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "waterfront_water_frontage_m": {
+          "name": "waterfront_water_frontage_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "waterfront_mooring_type": {
+          "name": "waterfront_mooring_type",
+          "type": "enum_properties_waterfront_mooring_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "waterfront_max_boat_loa_m": {
+          "name": "waterfront_max_boat_loa_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "waterfront_berth_count": {
+          "name": "waterfront_berth_count",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
@@ -1551,6 +1376,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "location_destination_id": {
+          "name": "location_destination_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "location_coordinates": {
           "name": "location_coordinates",
           "type": "geometry(Point)",
@@ -1563,13 +1394,15 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "'exact'"
+          "default": "'approximate_500m'"
         },
-        "location_destination_id": {
-          "name": "location_destination_id",
-          "type": "integer",
+        "location_public_geography": {
+          "name": "location_public_geography",
+          "type": "enum_properties_location_public_geography",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'locality'"
         },
         "video_url": {
           "name": "video_url",
@@ -1580,6 +1413,37 @@
         "virtual_tour_url": {
           "name": "virtual_tour_url",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "publication": {
+          "name": "publication",
+          "type": "enum_properties_publication",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'published_openly'"
+        },
+        "channel": {
+          "name": "channel",
+          "type": "enum_properties_channel",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'public'"
+        },
+        "price_disclosure": {
+          "name": "price_disclosure",
+          "type": "enum_properties_price_disclosure",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'exact'"
+        },
+        "value_tier": {
+          "name": "value_tier",
+          "type": "enum_properties_value_tier",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
@@ -1623,14 +1487,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "visibility": {
-          "name": "visibility",
-          "type": "enum_properties_visibility",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'public'"
-        },
         "featured": {
           "name": "featured",
           "type": "boolean",
@@ -1647,6 +1503,18 @@
         },
         "price_eur": {
           "name": "price_eur",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_band_min_eur": {
+          "name": "price_band_min_eur",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_band_max_eur": {
+          "name": "price_band_max_eur",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -1702,8 +1570,15 @@
           "notNull": false,
           "default": 0
         },
-        "lead_count": {
-          "name": "lead_count",
+        "member_view_count": {
+          "name": "member_view_count",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "enquiry_count": {
+          "name": "enquiry_count",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false,
@@ -1748,101 +1623,26 @@
           "method": "btree",
           "with": {}
         },
-        "properties_water_body_type_idx": {
-          "name": "properties_water_body_type_idx",
-          "columns": [
-            {
-              "expression": "water_body_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "properties_water_body_idx": {
-          "name": "properties_water_body_idx",
-          "columns": [
-            {
-              "expression": "water_body_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "properties_water_frontage_m_idx": {
-          "name": "properties_water_frontage_m_idx",
-          "columns": [
-            {
-              "expression": "water_frontage_m",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "properties_max_boat_loa_m_idx": {
-          "name": "properties_max_boat_loa_m_idx",
-          "columns": [
-            {
-              "expression": "max_boat_loa_m",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "properties_water_depth_at_berth_m_idx": {
-          "name": "properties_water_depth_at_berth_m_idx",
-          "columns": [
-            {
-              "expression": "water_depth_at_berth_m",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "properties_navigable_to_open_sea_idx": {
-          "name": "properties_navigable_to_open_sea_idx",
-          "columns": [
-            {
-              "expression": "navigable_to_open_sea",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "properties_location_location_country_idx": {
           "name": "properties_location_location_country_idx",
           "columns": [
             {
               "expression": "location_country",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "properties_location_location_destination_idx": {
+          "name": "properties_location_location_destination_idx",
+          "columns": [
+            {
+              "expression": "location_destination_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1868,11 +1668,41 @@
           "method": "btree",
           "with": {}
         },
-        "properties_location_location_destination_idx": {
-          "name": "properties_location_location_destination_idx",
+        "properties_channel_idx": {
+          "name": "properties_channel_idx",
           "columns": [
             {
-              "expression": "location_destination_id",
+              "expression": "channel",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "properties_price_disclosure_idx": {
+          "name": "properties_price_disclosure_idx",
+          "columns": [
+            {
+              "expression": "price_disclosure",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "properties_value_tier_idx": {
+          "name": "properties_value_tier_idx",
+          "columns": [
+            {
+              "expression": "value_tier",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1948,21 +1778,6 @@
           "columns": [
             {
               "expression": "moderation",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "properties_visibility_idx": {
-          "name": "properties_visibility_idx",
-          "columns": [
-            {
-              "expression": "visibility",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2108,17 +1923,17 @@
           "method": "btree",
           "with": {}
         },
-        "status_visibility_isSample_idx": {
-          "name": "status_visibility_isSample_idx",
+        "channel_status_isSample_idx": {
+          "name": "channel_status_isSample_idx",
           "columns": [
             {
-              "expression": "status",
+              "expression": "channel",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
-              "expression": "visibility",
+              "expression": "status",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2158,19 +1973,6 @@
         }
       },
       "foreignKeys": {
-        "properties_water_body_id_water_bodies_id_fk": {
-          "name": "properties_water_body_id_water_bodies_id_fk",
-          "tableFrom": "properties",
-          "tableTo": "water_bodies",
-          "columnsFrom": [
-            "water_body_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
         "properties_location_destination_id_destinations_id_fk": {
           "name": "properties_location_destination_id_destinations_id_fk",
           "tableFrom": "properties",
@@ -2243,6 +2045,18 @@
         "subtitle": {
           "name": "subtitle",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tax_notes": {
+          "name": "tax_notes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provenance": {
+          "name": "provenance",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -2445,104 +2259,6 @@
           "tableTo": "media",
           "columnsFrom": [
             "media_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._properties_v_version_water_access_type": {
-      "name": "_properties_v_version_water_access_type",
-      "schema": "",
-      "columns": {
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "enum__properties_v_version_water_access_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "_properties_v_version_water_access_type_order_idx": {
-          "name": "_properties_v_version_water_access_type_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_properties_v_version_water_access_type_parent_idx": {
-          "name": "_properties_v_version_water_access_type_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_properties_v_version_water_access_type_value_idx": {
-          "name": "_properties_v_version_water_access_type_value_idx",
-          "columns": [
-            {
-              "expression": "value",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "_properties_v_version_water_access_type_parent_fk": {
-          "name": "_properties_v_version_water_access_type_parent_fk",
-          "tableFrom": "_properties_v_version_water_access_type",
-          "tableTo": "_properties_v",
-          "columnsFrom": [
-            "parent_id"
           ],
           "columnsTo": [
             "id"
@@ -2779,6 +2495,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "version_available_from": {
+          "name": "version_available_from",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "version_price_type": {
           "name": "version_price_type",
           "type": "enum__properties_v_version_price_type",
@@ -2801,10 +2523,21 @@
           "notNull": false,
           "default": "'EUR'"
         },
-        "version_price_qualifier": {
-          "name": "version_price_qualifier",
-          "type": "enum__properties_v_version_price_qualifier",
-          "typeSchema": "public",
+        "version_price_band_min": {
+          "name": "version_price_band_min",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_price_band_max": {
+          "name": "version_price_band_max",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_internal_value_eur": {
+          "name": "version_internal_value_eur",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
@@ -2815,201 +2548,36 @@
           "primaryKey": false,
           "notNull": false
         },
-        "version_lease_years_remaining": {
-          "name": "version_lease_years_remaining",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_service_charge_annual": {
-          "name": "version_service_charge_annual",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_property_tax_annual": {
-          "name": "version_property_tax_annual",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_available_from": {
-          "name": "version_available_from",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_water_body_type": {
-          "name": "version_water_body_type",
-          "type": "enum__properties_v_version_water_body_type",
+        "version_ownership_structure": {
+          "name": "version_ownership_structure",
+          "type": "enum__properties_v_version_ownership_structure",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "version_water_body_id": {
-          "name": "version_water_body_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_distance_to_water_m": {
-          "name": "version_distance_to_water_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_water_frontage_m": {
-          "name": "version_water_frontage_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_beach_type": {
-          "name": "version_beach_type",
-          "type": "enum__properties_v_version_beach_type",
+        "version_sale_structure": {
+          "name": "version_sale_structure",
+          "type": "enum__properties_v_version_sale_structure",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "version_orientation": {
-          "name": "version_orientation",
-          "type": "enum__properties_v_version_orientation",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_swimmable_from_property": {
-          "name": "version_swimmable_from_property",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_tidal": {
-          "name": "version_tidal",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_tide_range_m": {
-          "name": "version_tide_range_m",
+        "version_annual_running_cost_eur": {
+          "name": "version_annual_running_cost_eur",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "version_waterfront_protection": {
-          "name": "version_waterfront_protection",
-          "type": "enum__properties_v_version_waterfront_protection",
+        "version_mandate_type": {
+          "name": "version_mandate_type",
+          "type": "enum__properties_v_version_mandate_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "version_flood_zone": {
-          "name": "version_flood_zone",
+        "version_commission_terms": {
+          "name": "version_commission_terms",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_shoreline_tenure": {
-          "name": "version_shoreline_tenure",
-          "type": "enum__properties_v_version_shoreline_tenure",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_concession_expiry": {
-          "name": "version_concession_expiry",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_mooring_type": {
-          "name": "version_mooring_type",
-          "type": "enum__properties_v_version_mooring_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_berth_count": {
-          "name": "version_berth_count",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_max_boat_loa_m": {
-          "name": "version_max_boat_loa_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_max_boat_beam_m": {
-          "name": "version_max_boat_beam_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_water_depth_at_berth_m": {
-          "name": "version_water_depth_at_berth_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_navigable_to_open_sea": {
-          "name": "version_navigable_to_open_sea",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_fixed_bridges_to_open_sea": {
-          "name": "version_fixed_bridges_to_open_sea",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_min_bridge_clearance_m": {
-          "name": "version_min_bridge_clearance_m",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_nearest_marina_name": {
-          "name": "version_nearest_marina_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_nearest_marina_distance_km": {
-          "name": "version_nearest_marina_distance_km",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_shore_power": {
-          "name": "version_shore_power",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_fresh_water_at_dock": {
-          "name": "version_fresh_water_at_dock",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_fuel_dock_nearby": {
-          "name": "version_fuel_dock_nearby",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_helipad": {
-          "name": "version_helipad",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_seaplane_access": {
-          "name": "version_seaplane_access",
-          "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
@@ -3021,6 +2589,18 @@
         },
         "version_bathrooms": {
           "name": "version_bathrooms",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_reception_rooms": {
+          "name": "version_reception_rooms",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_staff_accommodation": {
+          "name": "version_staff_accommodation",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -3037,8 +2617,20 @@
           "primaryKey": false,
           "notNull": false
         },
+        "version_plot_area_ha": {
+          "name": "version_plot_area_ha",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
         "version_terrace_area_sqm": {
           "name": "version_terrace_area_sqm",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_floors": {
+          "name": "version_floors",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -3055,17 +2647,25 @@
           "primaryKey": false,
           "notNull": false
         },
-        "version_floors": {
-          "name": "version_floors",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
         "version_parking_spaces": {
           "name": "version_parking_spaces",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
+        },
+        "version_architect": {
+          "name": "version_architect",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_heritage_status": {
+          "name": "version_heritage_status",
+          "type": "enum__properties_v_version_heritage_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'none'"
         },
         "version_condition": {
           "name": "version_condition",
@@ -3077,6 +2677,45 @@
         "version_energy_rating": {
           "name": "version_energy_rating",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_waterfront_water_access": {
+          "name": "version_waterfront_water_access",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "version_waterfront_water_body_type": {
+          "name": "version_waterfront_water_body_type",
+          "type": "enum__properties_v_version_waterfront_water_body_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_waterfront_water_frontage_m": {
+          "name": "version_waterfront_water_frontage_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_waterfront_mooring_type": {
+          "name": "version_waterfront_mooring_type",
+          "type": "enum__properties_v_version_waterfront_mooring_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_waterfront_max_boat_loa_m": {
+          "name": "version_waterfront_max_boat_loa_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_waterfront_berth_count": {
+          "name": "version_waterfront_berth_count",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
@@ -3122,6 +2761,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "version_location_destination_id": {
+          "name": "version_location_destination_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "version_location_coordinates": {
           "name": "version_location_coordinates",
           "type": "geometry(Point)",
@@ -3134,13 +2779,15 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "'exact'"
+          "default": "'approximate_500m'"
         },
-        "version_location_destination_id": {
-          "name": "version_location_destination_id",
-          "type": "integer",
+        "version_location_public_geography": {
+          "name": "version_location_public_geography",
+          "type": "enum__properties_v_version_location_public_geography",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'locality'"
         },
         "version_video_url": {
           "name": "version_video_url",
@@ -3151,6 +2798,37 @@
         "version_virtual_tour_url": {
           "name": "version_virtual_tour_url",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_publication": {
+          "name": "version_publication",
+          "type": "enum__properties_v_version_publication",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'published_openly'"
+        },
+        "version_channel": {
+          "name": "version_channel",
+          "type": "enum__properties_v_version_channel",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'public'"
+        },
+        "version_price_disclosure": {
+          "name": "version_price_disclosure",
+          "type": "enum__properties_v_version_price_disclosure",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'exact'"
+        },
+        "version_value_tier": {
+          "name": "version_value_tier",
+          "type": "enum__properties_v_version_value_tier",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
@@ -3194,14 +2872,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "version_visibility": {
-          "name": "version_visibility",
-          "type": "enum__properties_v_version_visibility",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'public'"
-        },
         "version_featured": {
           "name": "version_featured",
           "type": "boolean",
@@ -3218,6 +2888,18 @@
         },
         "version_price_eur": {
           "name": "version_price_eur",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_price_band_min_eur": {
+          "name": "version_price_band_min_eur",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_price_band_max_eur": {
+          "name": "version_price_band_max_eur",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -3273,8 +2955,15 @@
           "notNull": false,
           "default": 0
         },
-        "version_lead_count": {
-          "name": "version_lead_count",
+        "version_member_view_count": {
+          "name": "version_member_view_count",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "version_enquiry_count": {
+          "name": "version_enquiry_count",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false,
@@ -3371,101 +3060,26 @@
           "method": "btree",
           "with": {}
         },
-        "_properties_v_version_version_water_body_type_idx": {
-          "name": "_properties_v_version_version_water_body_type_idx",
-          "columns": [
-            {
-              "expression": "version_water_body_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_properties_v_version_version_water_body_idx": {
-          "name": "_properties_v_version_version_water_body_idx",
-          "columns": [
-            {
-              "expression": "version_water_body_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_properties_v_version_version_water_frontage_m_idx": {
-          "name": "_properties_v_version_version_water_frontage_m_idx",
-          "columns": [
-            {
-              "expression": "version_water_frontage_m",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_properties_v_version_version_max_boat_loa_m_idx": {
-          "name": "_properties_v_version_version_max_boat_loa_m_idx",
-          "columns": [
-            {
-              "expression": "version_max_boat_loa_m",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_properties_v_version_version_water_depth_at_berth_m_idx": {
-          "name": "_properties_v_version_version_water_depth_at_berth_m_idx",
-          "columns": [
-            {
-              "expression": "version_water_depth_at_berth_m",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_properties_v_version_version_navigable_to_open_sea_idx": {
-          "name": "_properties_v_version_version_navigable_to_open_sea_idx",
-          "columns": [
-            {
-              "expression": "version_navigable_to_open_sea",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "_properties_v_version_location_version_location_country_idx": {
           "name": "_properties_v_version_location_version_location_country_idx",
           "columns": [
             {
               "expression": "version_location_country",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_properties_v_version_location_version_location_destinat_idx": {
+          "name": "_properties_v_version_location_version_location_destinat_idx",
+          "columns": [
+            {
+              "expression": "version_location_destination_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3491,11 +3105,41 @@
           "method": "btree",
           "with": {}
         },
-        "_properties_v_version_location_version_location_destinat_idx": {
-          "name": "_properties_v_version_location_version_location_destinat_idx",
+        "_properties_v_version_version_channel_idx": {
+          "name": "_properties_v_version_version_channel_idx",
           "columns": [
             {
-              "expression": "version_location_destination_id",
+              "expression": "version_channel",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_properties_v_version_version_price_disclosure_idx": {
+          "name": "_properties_v_version_version_price_disclosure_idx",
+          "columns": [
+            {
+              "expression": "version_price_disclosure",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_properties_v_version_version_value_tier_idx": {
+          "name": "_properties_v_version_version_value_tier_idx",
+          "columns": [
+            {
+              "expression": "version_value_tier",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3571,21 +3215,6 @@
           "columns": [
             {
               "expression": "version_moderation",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_properties_v_version_version_visibility_idx": {
-          "name": "_properties_v_version_version_visibility_idx",
-          "columns": [
-            {
-              "expression": "version_visibility",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3821,17 +3450,17 @@
           "method": "btree",
           "with": {}
         },
-        "version_status_version_visibility_version_isSample_idx": {
-          "name": "version_status_version_visibility_version_isSample_idx",
+        "version_channel_version_status_version_isSample_idx": {
+          "name": "version_channel_version_status_version_isSample_idx",
           "columns": [
             {
-              "expression": "version_status",
+              "expression": "version_channel",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
-              "expression": "version_visibility",
+              "expression": "version_status",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3877,19 +3506,6 @@
           "tableTo": "properties",
           "columnsFrom": [
             "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "_properties_v_version_water_body_id_water_bodies_id_fk": {
-          "name": "_properties_v_version_water_body_id_water_bodies_id_fk",
-          "tableFrom": "_properties_v",
-          "tableTo": "water_bodies",
-          "columnsFrom": [
-            "version_water_body_id"
           ],
           "columnsTo": [
             "id"
@@ -3969,6 +3585,18 @@
         "version_subtitle": {
           "name": "version_subtitle",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_tax_notes": {
+          "name": "version_tax_notes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_provenance": {
+          "name": "version_provenance",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -9533,48 +9161,39 @@
         "agency_agent"
       ]
     },
-    "public.enum_properties_water_access_type": {
-      "name": "enum_properties_water_access_type",
-      "schema": "public",
-      "values": [
-        "private_beach",
-        "shared_beach",
-        "direct_shore",
-        "private_dock",
-        "private_mooring",
-        "marina_berth_included",
-        "boathouse",
-        "slipway",
-        "seawall_quay",
-        "rock_platform",
-        "riparian_access",
-        "whole_island"
-      ]
-    },
     "public.enum_properties_features": {
       "name": "enum_properties_features",
       "schema": "public",
       "values": [
         "pool",
-        "infinity_pool",
-        "heated_pool",
-        "gym",
+        "indoor_pool",
         "spa",
-        "sauna",
-        "staff_quarters",
+        "gym",
+        "cinema",
+        "wine_cellar",
+        "ballroom",
+        "library",
+        "chapel",
         "helipad",
         "tennis",
+        "padel",
+        "golf_hole",
+        "equestrian",
         "vineyard",
         "olive_grove",
-        "solar",
+        "beach",
+        "private_dock",
+        "marina_berth",
+        "ski_in_ski_out",
+        "gatehouse",
+        "staff_quarters",
+        "guest_houses",
+        "generator",
         "geothermal",
-        "elevator",
-        "gated",
+        "solar",
         "smart_home",
-        "guest_house",
-        "garage",
-        "wine_cellar",
-        "cinema"
+        "car_gallery",
+        "panic_room"
       ]
     },
     "public.enum_properties_property_type": {
@@ -9582,20 +9201,20 @@
       "schema": "public",
       "values": [
         "villa",
-        "apartment",
-        "penthouse",
         "estate",
-        "farmhouse",
-        "chalet",
+        "penthouse",
         "townhouse",
+        "chalet",
         "castle",
-        "lighthouse",
-        "boathouse",
+        "palazzo",
         "private_island",
-        "land_plot",
-        "marina_residence",
-        "development_project",
-        "hotel_resort"
+        "vineyard_estate",
+        "equestrian_estate",
+        "hotel_resort",
+        "development_site",
+        "apartment",
+        "lodge",
+        "ranch"
       ]
     },
     "public.enum_properties_price_type": {
@@ -9604,8 +9223,8 @@
       "values": [
         "fixed",
         "on_request",
-        "auction",
-        "poa"
+        "price_band",
+        "auction"
       ]
     },
     "public.enum_properties_currency": {
@@ -9617,17 +9236,8 @@
         "GBP",
         "CHF",
         "AED",
-        "SGD"
-      ]
-    },
-    "public.enum_properties_price_qualifier": {
-      "name": "enum_properties_price_qualifier",
-      "schema": "public",
-      "values": [
-        "guide",
-        "asking",
-        "offers_over",
-        "reduced"
+        "SGD",
+        "HKD"
       ]
     },
     "public.enum_properties_tenure": {
@@ -9636,88 +9246,48 @@
       "values": [
         "freehold",
         "leasehold",
-        "concession",
+        "usufruct",
+        "concession"
+      ]
+    },
+    "public.enum_properties_ownership_structure": {
+      "name": "enum_properties_ownership_structure",
+      "schema": "public",
+      "values": [
+        "direct",
+        "spv",
+        "trust",
+        "foundation",
+        "company"
+      ]
+    },
+    "public.enum_properties_sale_structure": {
+      "name": "enum_properties_sale_structure",
+      "schema": "public",
+      "values": [
+        "asset_sale",
+        "share_transfer",
         "fractional",
-        "share_transfer"
+        "auction"
       ]
     },
-    "public.enum_properties_water_body_type": {
-      "name": "enum_properties_water_body_type",
+    "public.enum_properties_mandate_type": {
+      "name": "enum_properties_mandate_type",
       "schema": "public",
       "values": [
-        "sea",
-        "ocean",
-        "lake",
-        "river",
-        "lagoon",
-        "canal",
-        "fjord",
-        "bay",
-        "estuary",
-        "reservoir",
-        "marina_basin"
+        "exclusive",
+        "open",
+        "introduction_only"
       ]
     },
-    "public.enum_properties_beach_type": {
-      "name": "enum_properties_beach_type",
-      "schema": "public",
-      "values": [
-        "sand",
-        "pebble",
-        "rock",
-        "mixed",
-        "none"
-      ]
-    },
-    "public.enum_properties_orientation": {
-      "name": "enum_properties_orientation",
-      "schema": "public",
-      "values": [
-        "N",
-        "NE",
-        "E",
-        "SE",
-        "S",
-        "SW",
-        "W",
-        "NW"
-      ]
-    },
-    "public.enum_properties_waterfront_protection": {
-      "name": "enum_properties_waterfront_protection",
-      "schema": "public",
-      "values": [
-        "natural",
-        "seawall",
-        "riprap",
-        "breakwater",
-        "pier_only"
-      ]
-    },
-    "public.enum_properties_shoreline_tenure": {
-      "name": "enum_properties_shoreline_tenure",
-      "schema": "public",
-      "values": [
-        "private_to_waterline",
-        "private_to_high_water",
-        "public_easement",
-        "state_concession",
-        "riparian_rights"
-      ]
-    },
-    "public.enum_properties_mooring_type": {
-      "name": "enum_properties_mooring_type",
+    "public.enum_properties_heritage_status": {
+      "name": "enum_properties_heritage_status",
       "schema": "public",
       "values": [
         "none",
-        "buoy",
-        "jetty",
-        "pontoon",
-        "fixed_dock",
-        "floating_dock",
-        "boat_lift",
-        "dry_dock",
-        "marina_berth"
+        "listed",
+        "protected",
+        "unesco_area"
       ]
     },
     "public.enum_properties_condition": {
@@ -9731,13 +9301,88 @@
         "shell"
       ]
     },
+    "public.enum_properties_waterfront_water_body_type": {
+      "name": "enum_properties_waterfront_water_body_type",
+      "schema": "public",
+      "values": [
+        "sea",
+        "ocean",
+        "lake",
+        "river",
+        "lagoon",
+        "canal",
+        "fjord",
+        "bay",
+        "estuary"
+      ]
+    },
+    "public.enum_properties_waterfront_mooring_type": {
+      "name": "enum_properties_waterfront_mooring_type",
+      "schema": "public",
+      "values": [
+        "none",
+        "buoy",
+        "jetty",
+        "pontoon",
+        "fixed_dock",
+        "floating_dock",
+        "boat_lift",
+        "marina_berth"
+      ]
+    },
     "public.enum_properties_location_coordinate_precision": {
       "name": "enum_properties_location_coordinate_precision",
       "schema": "public",
       "values": [
         "exact",
         "approximate_500m",
-        "hidden"
+        "locality_only"
+      ]
+    },
+    "public.enum_properties_location_public_geography": {
+      "name": "enum_properties_location_public_geography",
+      "schema": "public",
+      "values": [
+        "country",
+        "region",
+        "market",
+        "locality"
+      ]
+    },
+    "public.enum_properties_publication": {
+      "name": "enum_properties_publication",
+      "schema": "public",
+      "values": [
+        "published_openly",
+        "published_without_price",
+        "published_as_band",
+        "off_market"
+      ]
+    },
+    "public.enum_properties_channel": {
+      "name": "enum_properties_channel",
+      "schema": "public",
+      "values": [
+        "public",
+        "off_market"
+      ]
+    },
+    "public.enum_properties_price_disclosure": {
+      "name": "enum_properties_price_disclosure",
+      "schema": "public",
+      "values": [
+        "exact",
+        "band",
+        "on_request"
+      ]
+    },
+    "public.enum_properties_value_tier": {
+      "name": "enum_properties_value_tier",
+      "schema": "public",
+      "values": [
+        "prime",
+        "trophy",
+        "signature"
       ]
     },
     "public.listing_status": {
@@ -9745,8 +9390,8 @@
       "schema": "public",
       "values": [
         "draft",
-        "pending_review",
-        "in_market",
+        "available",
+        "reserved",
         "under_offer",
         "sold",
         "withdrawn",
@@ -9764,23 +9409,14 @@
         "changes_requested"
       ]
     },
-    "public.enum_properties_visibility": {
-      "name": "enum_properties_visibility",
-      "schema": "public",
-      "values": [
-        "public",
-        "unlisted",
-        "private"
-      ]
-    },
     "public.enum_properties_source_type": {
       "name": "enum_properties_source_type",
       "schema": "public",
       "values": [
         "manual",
         "csv_import",
-        "xml_feed",
-        "api"
+        "feed",
+        "owner_submission"
       ]
     },
     "public.enum_properties_status": {
@@ -9791,48 +9427,39 @@
         "published"
       ]
     },
-    "public.enum__properties_v_version_water_access_type": {
-      "name": "enum__properties_v_version_water_access_type",
-      "schema": "public",
-      "values": [
-        "private_beach",
-        "shared_beach",
-        "direct_shore",
-        "private_dock",
-        "private_mooring",
-        "marina_berth_included",
-        "boathouse",
-        "slipway",
-        "seawall_quay",
-        "rock_platform",
-        "riparian_access",
-        "whole_island"
-      ]
-    },
     "public.enum__properties_v_version_features": {
       "name": "enum__properties_v_version_features",
       "schema": "public",
       "values": [
         "pool",
-        "infinity_pool",
-        "heated_pool",
-        "gym",
+        "indoor_pool",
         "spa",
-        "sauna",
-        "staff_quarters",
+        "gym",
+        "cinema",
+        "wine_cellar",
+        "ballroom",
+        "library",
+        "chapel",
         "helipad",
         "tennis",
+        "padel",
+        "golf_hole",
+        "equestrian",
         "vineyard",
         "olive_grove",
-        "solar",
+        "beach",
+        "private_dock",
+        "marina_berth",
+        "ski_in_ski_out",
+        "gatehouse",
+        "staff_quarters",
+        "guest_houses",
+        "generator",
         "geothermal",
-        "elevator",
-        "gated",
+        "solar",
         "smart_home",
-        "guest_house",
-        "garage",
-        "wine_cellar",
-        "cinema"
+        "car_gallery",
+        "panic_room"
       ]
     },
     "public.enum__properties_v_version_property_type": {
@@ -9840,20 +9467,20 @@
       "schema": "public",
       "values": [
         "villa",
-        "apartment",
-        "penthouse",
         "estate",
-        "farmhouse",
-        "chalet",
+        "penthouse",
         "townhouse",
+        "chalet",
         "castle",
-        "lighthouse",
-        "boathouse",
+        "palazzo",
         "private_island",
-        "land_plot",
-        "marina_residence",
-        "development_project",
-        "hotel_resort"
+        "vineyard_estate",
+        "equestrian_estate",
+        "hotel_resort",
+        "development_site",
+        "apartment",
+        "lodge",
+        "ranch"
       ]
     },
     "public.enum__properties_v_version_price_type": {
@@ -9862,8 +9489,8 @@
       "values": [
         "fixed",
         "on_request",
-        "auction",
-        "poa"
+        "price_band",
+        "auction"
       ]
     },
     "public.enum__properties_v_version_currency": {
@@ -9875,17 +9502,8 @@
         "GBP",
         "CHF",
         "AED",
-        "SGD"
-      ]
-    },
-    "public.enum__properties_v_version_price_qualifier": {
-      "name": "enum__properties_v_version_price_qualifier",
-      "schema": "public",
-      "values": [
-        "guide",
-        "asking",
-        "offers_over",
-        "reduced"
+        "SGD",
+        "HKD"
       ]
     },
     "public.enum__properties_v_version_tenure": {
@@ -9894,88 +9512,48 @@
       "values": [
         "freehold",
         "leasehold",
-        "concession",
+        "usufruct",
+        "concession"
+      ]
+    },
+    "public.enum__properties_v_version_ownership_structure": {
+      "name": "enum__properties_v_version_ownership_structure",
+      "schema": "public",
+      "values": [
+        "direct",
+        "spv",
+        "trust",
+        "foundation",
+        "company"
+      ]
+    },
+    "public.enum__properties_v_version_sale_structure": {
+      "name": "enum__properties_v_version_sale_structure",
+      "schema": "public",
+      "values": [
+        "asset_sale",
+        "share_transfer",
         "fractional",
-        "share_transfer"
+        "auction"
       ]
     },
-    "public.enum__properties_v_version_water_body_type": {
-      "name": "enum__properties_v_version_water_body_type",
+    "public.enum__properties_v_version_mandate_type": {
+      "name": "enum__properties_v_version_mandate_type",
       "schema": "public",
       "values": [
-        "sea",
-        "ocean",
-        "lake",
-        "river",
-        "lagoon",
-        "canal",
-        "fjord",
-        "bay",
-        "estuary",
-        "reservoir",
-        "marina_basin"
+        "exclusive",
+        "open",
+        "introduction_only"
       ]
     },
-    "public.enum__properties_v_version_beach_type": {
-      "name": "enum__properties_v_version_beach_type",
-      "schema": "public",
-      "values": [
-        "sand",
-        "pebble",
-        "rock",
-        "mixed",
-        "none"
-      ]
-    },
-    "public.enum__properties_v_version_orientation": {
-      "name": "enum__properties_v_version_orientation",
-      "schema": "public",
-      "values": [
-        "N",
-        "NE",
-        "E",
-        "SE",
-        "S",
-        "SW",
-        "W",
-        "NW"
-      ]
-    },
-    "public.enum__properties_v_version_waterfront_protection": {
-      "name": "enum__properties_v_version_waterfront_protection",
-      "schema": "public",
-      "values": [
-        "natural",
-        "seawall",
-        "riprap",
-        "breakwater",
-        "pier_only"
-      ]
-    },
-    "public.enum__properties_v_version_shoreline_tenure": {
-      "name": "enum__properties_v_version_shoreline_tenure",
-      "schema": "public",
-      "values": [
-        "private_to_waterline",
-        "private_to_high_water",
-        "public_easement",
-        "state_concession",
-        "riparian_rights"
-      ]
-    },
-    "public.enum__properties_v_version_mooring_type": {
-      "name": "enum__properties_v_version_mooring_type",
+    "public.enum__properties_v_version_heritage_status": {
+      "name": "enum__properties_v_version_heritage_status",
       "schema": "public",
       "values": [
         "none",
-        "buoy",
-        "jetty",
-        "pontoon",
-        "fixed_dock",
-        "floating_dock",
-        "boat_lift",
-        "dry_dock",
-        "marina_berth"
+        "listed",
+        "protected",
+        "unesco_area"
       ]
     },
     "public.enum__properties_v_version_condition": {
@@ -9989,13 +9567,88 @@
         "shell"
       ]
     },
+    "public.enum__properties_v_version_waterfront_water_body_type": {
+      "name": "enum__properties_v_version_waterfront_water_body_type",
+      "schema": "public",
+      "values": [
+        "sea",
+        "ocean",
+        "lake",
+        "river",
+        "lagoon",
+        "canal",
+        "fjord",
+        "bay",
+        "estuary"
+      ]
+    },
+    "public.enum__properties_v_version_waterfront_mooring_type": {
+      "name": "enum__properties_v_version_waterfront_mooring_type",
+      "schema": "public",
+      "values": [
+        "none",
+        "buoy",
+        "jetty",
+        "pontoon",
+        "fixed_dock",
+        "floating_dock",
+        "boat_lift",
+        "marina_berth"
+      ]
+    },
     "public.enum__properties_v_version_location_coordinate_precision": {
       "name": "enum__properties_v_version_location_coordinate_precision",
       "schema": "public",
       "values": [
         "exact",
         "approximate_500m",
-        "hidden"
+        "locality_only"
+      ]
+    },
+    "public.enum__properties_v_version_location_public_geography": {
+      "name": "enum__properties_v_version_location_public_geography",
+      "schema": "public",
+      "values": [
+        "country",
+        "region",
+        "market",
+        "locality"
+      ]
+    },
+    "public.enum__properties_v_version_publication": {
+      "name": "enum__properties_v_version_publication",
+      "schema": "public",
+      "values": [
+        "published_openly",
+        "published_without_price",
+        "published_as_band",
+        "off_market"
+      ]
+    },
+    "public.enum__properties_v_version_channel": {
+      "name": "enum__properties_v_version_channel",
+      "schema": "public",
+      "values": [
+        "public",
+        "off_market"
+      ]
+    },
+    "public.enum__properties_v_version_price_disclosure": {
+      "name": "enum__properties_v_version_price_disclosure",
+      "schema": "public",
+      "values": [
+        "exact",
+        "band",
+        "on_request"
+      ]
+    },
+    "public.enum__properties_v_version_value_tier": {
+      "name": "enum__properties_v_version_value_tier",
+      "schema": "public",
+      "values": [
+        "prime",
+        "trophy",
+        "signature"
       ]
     },
     "public.enum__properties_v_version_moderation": {
@@ -10008,23 +9661,14 @@
         "changes_requested"
       ]
     },
-    "public.enum__properties_v_version_visibility": {
-      "name": "enum__properties_v_version_visibility",
-      "schema": "public",
-      "values": [
-        "public",
-        "unlisted",
-        "private"
-      ]
-    },
     "public.enum__properties_v_version_source_type": {
       "name": "enum__properties_v_version_source_type",
       "schema": "public",
       "values": [
         "manual",
         "csv_import",
-        "xml_feed",
-        "api"
+        "feed",
+        "owner_submission"
       ]
     },
     "public.enum__properties_v_version_status": {
@@ -10103,9 +9747,7 @@
         "canal",
         "fjord",
         "bay",
-        "estuary",
-        "reservoir",
-        "marina_basin"
+        "estuary"
       ]
     },
     "public.enum_leads_locale": {
@@ -10148,20 +9790,20 @@
       "schema": "public",
       "values": [
         "villa",
-        "apartment",
-        "penthouse",
         "estate",
-        "farmhouse",
-        "chalet",
+        "penthouse",
         "townhouse",
+        "chalet",
         "castle",
-        "lighthouse",
-        "boathouse",
+        "palazzo",
         "private_island",
-        "land_plot",
-        "marina_residence",
-        "development_project",
-        "hotel_resort"
+        "vineyard_estate",
+        "equestrian_estate",
+        "hotel_resort",
+        "development_site",
+        "apartment",
+        "lodge",
+        "ranch"
       ]
     },
     "public.enum_landing_pages_combo_water_body_type": {
@@ -10176,9 +9818,7 @@
         "canal",
         "fjord",
         "bay",
-        "estuary",
-        "reservoir",
-        "marina_basin"
+        "estuary"
       ]
     },
     "public.enum_landing_pages_status": {
@@ -10194,20 +9834,20 @@
       "schema": "public",
       "values": [
         "villa",
-        "apartment",
-        "penthouse",
         "estate",
-        "farmhouse",
-        "chalet",
+        "penthouse",
         "townhouse",
+        "chalet",
         "castle",
-        "lighthouse",
-        "boathouse",
+        "palazzo",
         "private_island",
-        "land_plot",
-        "marina_residence",
-        "development_project",
-        "hotel_resort"
+        "vineyard_estate",
+        "equestrian_estate",
+        "hotel_resort",
+        "development_site",
+        "apartment",
+        "lodge",
+        "ranch"
       ]
     },
     "public.enum__landing_pages_v_version_combo_water_body_type": {
@@ -10222,9 +9862,7 @@
         "canal",
         "fjord",
         "bay",
-        "estuary",
-        "reservoir",
-        "marina_basin"
+        "estuary"
       ]
     },
     "public.enum__landing_pages_v_version_status": {
@@ -10365,6 +10003,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "a252235b-f83d-4a8b-a9f7-2cd11d463a1b",
+  "id": "a508bf9a-7f92-4e45-aa69-6f8636ecb9e6",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

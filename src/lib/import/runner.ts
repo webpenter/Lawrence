@@ -142,13 +142,12 @@ export async function runImport(args: RunImportArgs): Promise<ImportSummary> {
       summary.created += 1;
     }
 
-    // §8.6: clean listings from verified agencies auto-approve and publish.
+    // §9.4: clean listings from verified agencies auto-approve and publish.
     if (agency.tier === 'verified' && !data.duplicateOf) {
       const flags = runPreChecks({
-        waterAccessType: data.waterAccessType as string[],
-        distanceToWaterM: data.distanceToWaterM as number,
         coordinates: coords ?? null,
-        priceEur: null, // priceEur is computed in the hook; median check runs in review.
+        priceEur: (data.currency === 'EUR' ? (data.priceAmount as number | null) : null) ?? null,
+        internalValueEur: (data.internalValueEur as number | null) ?? null,
         imageCount: imageUrlsFromRow(row).length,
         descriptionText: lexicalToText(data.description),
         title: (data.title as string) ?? '',
@@ -157,7 +156,7 @@ export async function runImport(args: RunImportArgs): Promise<ImportSummary> {
         await payload.update({
           collection: 'properties',
           id: listingId,
-          data: { moderation: 'approved', status: 'in_market', _status: 'published' },
+          data: { moderation: 'approved', status: 'available', _status: 'published' },
           overrideAccess: true,
         });
       } else {

@@ -2,33 +2,35 @@ import { describe, expect, it } from 'vitest';
 
 import { activeFilterParams, parseSearchParams, queryWithout } from './parse-search-params';
 
-describe('parseSearchParams — the §5.5 URL contract', () => {
-  it('parses the spec example URL exactly', () => {
+describe('parseSearchParams — the §11.2 URL contract', () => {
+  it('parses a full browse URL exactly', () => {
     const filters = parseSearchParams({
+      price: '20000000-80000000',
+      tier: 'trophy,signature',
+      type: 'villa,palazzo',
+      features: 'helipad,private_dock',
+      beds: '6',
+      tenure: 'freehold',
+      waterfront: '1',
       water: 'sea,lake',
-      access: 'private_dock',
       minFrontage: '25',
-      boatLoa: '24',
-      draft: '2.5',
-      price: '2000000-10000000',
-      type: 'villa,estate',
-      beds: '4',
       bbox: '8.1,44.2,9.6,44.6',
-      sort: 'frontage_desc',
+      sort: 'price_desc',
       page: '2',
     });
     expect(filters).toEqual({
+      priceMinEur: 20_000_000,
+      priceMaxEur: 80_000_000,
+      valueTiers: ['trophy', 'signature'],
+      propertyTypes: ['villa', 'palazzo'],
+      features: ['helipad', 'private_dock'],
+      bedsMin: 6,
+      tenures: ['freehold'],
+      waterAccess: true,
       waterBodyTypes: ['sea', 'lake'],
-      waterAccessTypes: ['private_dock'],
       minFrontageM: 25,
-      boatLoaM: 24,
-      boatDraftM: 2.5,
-      priceMinEur: 2_000_000,
-      priceMaxEur: 10_000_000,
-      propertyTypes: ['villa', 'estate'],
-      bedsMin: 4,
       bbox: { west: 8.1, south: 44.2, east: 9.6, north: 44.6 },
-      sort: 'frontage_desc',
+      sort: 'price_desc',
       page: 2,
     });
   });
@@ -38,44 +40,51 @@ describe('parseSearchParams — the §5.5 URL contract', () => {
     expect(parseSearchParams({ type: 'castle,timeshare' })).toEqual({
       propertyTypes: ['castle'],
     });
+    expect(parseSearchParams({ tier: 'prime,bargain' })).toEqual({ valueTiers: ['prime'] });
     expect(parseSearchParams({ sort: 'random' })).toEqual({});
   });
 
   it('handles open-ended price ranges', () => {
-    expect(parseSearchParams({ price: '2000000-' })).toEqual({ priceMinEur: 2_000_000 });
-    expect(parseSearchParams({ price: '-5000000' })).toEqual({ priceMaxEur: 5_000_000 });
+    expect(parseSearchParams({ price: '20000000-' })).toEqual({ priceMinEur: 20_000_000 });
+    expect(parseSearchParams({ price: '-50000000' })).toEqual({ priceMaxEur: 50_000_000 });
   });
 
   it('rejects malformed numbers, negative values and bad bboxes', () => {
-    expect(parseSearchParams({ boatLoa: 'abc' })).toEqual({});
+    expect(parseSearchParams({ minFrontage: 'abc' })).toEqual({});
     expect(parseSearchParams({ beds: '-2' })).toEqual({});
     expect(parseSearchParams({ bbox: '10,44,8,45' })).toEqual({}); // west >= east
     expect(parseSearchParams({ bbox: '8,44,10' })).toEqual({});
   });
 
   it('parses booleans and country', () => {
-    expect(parseSearchParams({ openSea: '1', noBridges: 'true', country: 'it' })).toEqual({
-      navigableToOpenSea: true,
-      noFixedBridges: true,
+    expect(parseSearchParams({ waterfront: '1', country: 'it' })).toEqual({
+      waterAccess: true,
       country: 'IT',
     });
-    expect(parseSearchParams({ openSea: '0', country: 'italy' })).toEqual({});
+    expect(parseSearchParams({ waterfront: '0', country: 'italy' })).toEqual({});
   });
 });
 
 describe('activeFilterParams', () => {
   it('lists only params that parsed into real filters', () => {
     expect(
-      activeFilterParams({ water: 'sea', boatLoa: '24', sort: 'newest', page: '3', beds: 'x' }),
-    ).toEqual(['water', 'boatLoa']);
+      activeFilterParams({ water: 'sea', tier: 'trophy', sort: 'newest', page: '3', beds: 'x' }),
+    ).toEqual(['tier', 'water']);
   });
 });
 
 describe('queryWithout', () => {
   it('removes the named params and resets pagination', () => {
     expect(
-      queryWithout({ water: 'sea', boatLoa: '24', draft: '2.5', page: '3' }, ['boatLoa', 'draft']),
-    ).toBe('?water=sea');
+      queryWithout({ water: 'sea', minFrontage: '25', waterfront: '1', page: '3' }, [
+        'waterfront',
+        'water',
+        'minFrontage',
+      ]),
+    ).toBe('');
+    expect(queryWithout({ water: 'sea', tier: 'trophy', page: '3' }, ['water'])).toBe(
+      '?tier=trophy',
+    );
   });
 
   it('returns an empty string when nothing remains', () => {

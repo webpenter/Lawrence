@@ -7,7 +7,6 @@ import { getViewerPreferences } from '@/lib/intl/preferences';
 import type { Property } from '@/payload-types';
 
 import { HorizonImage } from './HorizonImage';
-import { WaterChips } from './WaterChips';
 
 interface PropertyCardProps {
   property: Property;
@@ -63,7 +62,6 @@ export async function PropertyCard({
           <span key={item}>{item}</span>
         ))}
       </div>
-      <WaterChips property={property} units={units} locale={locale} />
       <div className="mt-1 text-sm tabular-nums text-ink">{price}</div>
     </>
   );

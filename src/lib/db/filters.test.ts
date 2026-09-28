@@ -8,13 +8,19 @@ function clauses(where: Where): Where[] {
   return (where.and ?? []) as Where[];
 }
 
-describe('publicPredicate', () => {
-  it('always requires in-market/under-offer, public, approved, published', () => {
+describe('publicPredicate (§8.2)', () => {
+  it('always requires the public channel, a visible status, and a published version', () => {
     const and = clauses(publicPredicate());
-    expect(and).toContainEqual({ status: { in: ['in_market', 'under_offer'] } });
-    expect(and).toContainEqual({ visibility: { equals: 'public' } });
-    expect(and).toContainEqual({ moderation: { equals: 'approved' } });
+    expect(and).toContainEqual({ channel: { equals: 'public' } });
+    expect(and).toContainEqual({ status: { in: ['available', 'reserved', 'under_offer'] } });
+    expect(and).toContainEqual({ moderation: { not_in: ['rejected', 'changes_requested'] } });
     expect(and).toContainEqual({ _status: { equals: 'published' } });
+  });
+
+  it('can never match an off-market listing', () => {
+    // The channel clause is unconditional — the single §7.1 separation rule.
+    const and = clauses(publicPredicate());
+    expect(and.some((c) => 'channel' in c)).toBe(true);
   });
 
   it('excludes samples unless SAMPLE_DATA_ENABLED=true', () => {
@@ -27,87 +33,47 @@ describe('publicPredicate', () => {
   });
 });
 
-describe('filtersToWhere — every nautical filter (Prompt 5 acceptance)', () => {
-  it('boat LOA: berth must take the boat', () => {
-    expect(clauses(filtersToWhere({ boatLoaM: 24 }))).toContainEqual({
-      maxBoatLoaM: { greater_than_equal: 24 },
-    });
-  });
-
-  it('draft: depth at berth must be at least the draft', () => {
-    expect(clauses(filtersToWhere({ boatDraftM: 2.5 }))).toContainEqual({
-      waterDepthAtBerthM: { greater_than_equal: 2.5 },
-    });
-  });
-
-  it('beam: berth width must take the beam', () => {
-    expect(clauses(filtersToWhere({ boatBeamM: 6.4 }))).toContainEqual({
-      maxBoatBeamM: { greater_than_equal: 6.4 },
-    });
-  });
-
-  it('navigable to open sea', () => {
-    expect(clauses(filtersToWhere({ navigableToOpenSea: true }))).toContainEqual({
-      navigableToOpenSea: { equals: true },
-    });
-  });
-
-  it('no fixed bridges', () => {
-    expect(clauses(filtersToWhere({ noFixedBridges: true }))).toContainEqual({
-      fixedBridgesToOpenSea: { not_equals: true },
-    });
-  });
-
-  it('bridge clearance: no bridges OR clearance is sufficient', () => {
-    expect(clauses(filtersToWhere({ minBridgeClearanceM: 18 }))).toContainEqual({
-      or: [
-        { fixedBridgesToOpenSea: { not_equals: true } },
-        { minBridgeClearanceM: { greater_than_equal: 18 } },
-      ],
-    });
-  });
-
-  it('min frontage', () => {
-    expect(clauses(filtersToWhere({ minFrontageM: 25 }))).toContainEqual({
-      waterFrontageM: { greater_than_equal: 25 },
-    });
-  });
-
-  it('price range, beds, baths, areas, enums, country, destination, status', () => {
+describe('filtersToWhere (§11.2 browse controls)', () => {
+  it('price range, tiers, beds, baths, areas, enums, country, market, status', () => {
     const and = clauses(
       filtersToWhere({
-        priceMinEur: 2_000_000,
-        priceMaxEur: 10_000_000,
-        bedsMin: 4,
-        bathsMin: 3,
-        minBuiltSqm: 400,
-        minPlotSqm: 1000,
-        waterBodyTypes: ['sea', 'lake'],
-        waterAccessTypes: ['private_dock'],
-        propertyTypes: ['villa'],
-        orientations: ['SW'],
-        beachTypes: ['sand'],
+        priceMinEur: 20_000_000,
+        priceMaxEur: 80_000_000,
+        valueTiers: ['trophy', 'signature'],
+        bedsMin: 6,
+        bathsMin: 5,
+        minBuiltSqm: 800,
+        minPlotSqm: 5000,
+        propertyTypes: ['villa', 'palazzo'],
+        features: ['helipad'],
         tenures: ['freehold'],
         country: 'IT',
         destinationId: 7,
-        status: 'in_market',
+        status: 'available',
       }),
     );
-    expect(and).toContainEqual({ priceEur: { greater_than_equal: 2_000_000 } });
-    expect(and).toContainEqual({ priceEur: { less_than_equal: 10_000_000 } });
-    expect(and).toContainEqual({ bedrooms: { greater_than_equal: 4 } });
-    expect(and).toContainEqual({ bathrooms: { greater_than_equal: 3 } });
-    expect(and).toContainEqual({ builtAreaSqm: { greater_than_equal: 400 } });
-    expect(and).toContainEqual({ plotAreaSqm: { greater_than_equal: 1000 } });
-    expect(and).toContainEqual({ waterBodyType: { in: ['sea', 'lake'] } });
-    expect(and).toContainEqual({ waterAccessType: { in: ['private_dock'] } });
-    expect(and).toContainEqual({ propertyType: { in: ['villa'] } });
-    expect(and).toContainEqual({ orientation: { in: ['SW'] } });
-    expect(and).toContainEqual({ beachType: { in: ['sand'] } });
+    expect(and).toContainEqual({ priceEur: { greater_than_equal: 20_000_000 } });
+    expect(and).toContainEqual({ priceEur: { less_than_equal: 80_000_000 } });
+    expect(and).toContainEqual({ valueTier: { in: ['trophy', 'signature'] } });
+    expect(and).toContainEqual({ bedrooms: { greater_than_equal: 6 } });
+    expect(and).toContainEqual({ bathrooms: { greater_than_equal: 5 } });
+    expect(and).toContainEqual({ builtAreaSqm: { greater_than_equal: 800 } });
+    expect(and).toContainEqual({ plotAreaSqm: { greater_than_equal: 5000 } });
+    expect(and).toContainEqual({ propertyType: { in: ['villa', 'palazzo'] } });
+    expect(and).toContainEqual({ features: { in: ['helipad'] } });
     expect(and).toContainEqual({ tenure: { in: ['freehold'] } });
     expect(and).toContainEqual({ 'location.country': { equals: 'IT' } });
     expect(and).toContainEqual({ 'location.destination': { equals: 7 } });
-    expect(and).toContainEqual({ status: { equals: 'in_market' } });
+    expect(and).toContainEqual({ status: { equals: 'available' } });
+  });
+
+  it('waterfront sub-block filters address the group fields', () => {
+    const and = clauses(
+      filtersToWhere({ waterAccess: true, waterBodyTypes: ['sea', 'lake'], minFrontageM: 25 }),
+    );
+    expect(and).toContainEqual({ 'waterfront.waterAccess': { equals: true } });
+    expect(and).toContainEqual({ 'waterfront.waterBodyType': { in: ['sea', 'lake'] } });
+    expect(and).toContainEqual({ 'waterfront.waterFrontageM': { greater_than_equal: 25 } });
   });
 
   it('map bbox becomes a polygon within-clause', () => {
@@ -127,7 +93,6 @@ describe('sortToPayload', () => {
   it('maps every sort option', () => {
     expect(sortToPayload('price_asc')).toBe('priceEur');
     expect(sortToPayload('price_desc')).toBe('-priceEur');
-    expect(sortToPayload('frontage_desc')).toBe('-waterFrontageM');
     expect(sortToPayload('newest')).toBe('-publishedAt');
     expect(sortToPayload(undefined)).toBe('-publishedAt');
   });

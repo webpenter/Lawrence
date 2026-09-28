@@ -348,7 +348,7 @@ export interface Agent {
   createdAt: string;
 }
 /**
- * A listing publishes only with at least one water access type and distance to water ≤ 50 m. This rule is the brand. Brochure PDF for any published listing: /api/property/{slug}/brochure.pdf?locale=en
+ * Lawrence lists property from €20M (€10–20M only on the prime exception track, an admin decision). Off-market listings never have a slug, never appear in sitemaps, feeds or the public search collection.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "properties".
@@ -363,155 +363,146 @@ export interface Property {
   reference?: string | null;
   propertyType:
     | 'villa'
-    | 'apartment'
-    | 'penthouse'
     | 'estate'
-    | 'farmhouse'
-    | 'chalet'
+    | 'penthouse'
     | 'townhouse'
+    | 'chalet'
     | 'castle'
-    | 'lighthouse'
-    | 'boathouse'
+    | 'palazzo'
     | 'private_island'
-    | 'land_plot'
-    | 'marina_residence'
-    | 'development_project'
-    | 'hotel_resort';
-  priceType: 'fixed' | 'on_request' | 'auction' | 'poa';
-  priceAmount?: number | null;
-  currency: 'EUR' | 'USD' | 'GBP' | 'CHF' | 'AED' | 'SGD';
-  priceQualifier?: ('guide' | 'asking' | 'offers_over' | 'reduced') | null;
-  tenure?: ('freehold' | 'leasehold' | 'concession' | 'fractional' | 'share_transfer') | null;
-  leaseYearsRemaining?: number | null;
-  serviceChargeAnnual?: number | null;
-  propertyTaxAnnual?: number | null;
+    | 'vineyard_estate'
+    | 'equestrian_estate'
+    | 'hotel_resort'
+    | 'development_site'
+    | 'apartment'
+    | 'lodge'
+    | 'ranch';
   availableFrom?: string | null;
-  waterBodyType:
-    | 'sea'
-    | 'ocean'
-    | 'lake'
-    | 'river'
-    | 'lagoon'
-    | 'canal'
-    | 'fjord'
-    | 'bay'
-    | 'estuary'
-    | 'reservoir'
-    | 'marina_basin';
+  priceType: 'fixed' | 'on_request' | 'price_band' | 'auction';
+  priceAmount?: number | null;
+  currency: 'EUR' | 'USD' | 'GBP' | 'CHF' | 'AED' | 'SGD' | 'HKD';
+  priceBandMin?: number | null;
+  priceBandMax?: number | null;
   /**
-   * Controlled name: "Ligurian Sea", "Lake Como", …
+   * Admin-only, never serialised to any audience. Required to publish a listing without an exact public price — the €20M threshold is enforced on it.
    */
-  waterBody?: (number | null) | WaterBody;
+  internalValueEur?: number | null;
+  tenure?: ('freehold' | 'leasehold' | 'usufruct' | 'concession') | null;
+  ownershipStructure?: ('direct' | 'spv' | 'trust' | 'foundation' | 'company') | null;
+  saleStructure?: ('asset_sale' | 'share_transfer' | 'fractional' | 'auction') | null;
   /**
-   * At least one is required to publish. "Sea view" and "near the beach" do not qualify.
+   * Members-only extra (§8.3).
    */
-  waterAccessType?:
-    | (
-        | 'private_beach'
-        | 'shared_beach'
-        | 'direct_shore'
-        | 'private_dock'
-        | 'private_mooring'
-        | 'marina_berth_included'
-        | 'boathouse'
-        | 'slipway'
-        | 'seawall_quay'
-        | 'rock_platform'
-        | 'riparian_access'
-        | 'whole_island'
-      )[]
-    | null;
+  annualRunningCostEur?: number | null;
   /**
-   * Metres from the property boundary to the waterline. Above 50 m the listing cannot publish.
+   * Factual, sourced — never advice.
    */
-  distanceToWaterM?: number | null;
+  taxNotes?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  mandateType?: ('exclusive' | 'open' | 'introduction_only') | null;
   /**
-   * ⚠ Linear metres of private shoreline — the headline card stat. Cards and ranking suffer without it; fill it whenever the shoreline is private.
+   * Staff-only.
    */
-  waterFrontageM?: number | null;
-  beachType?: ('sand' | 'pebble' | 'rock' | 'mixed' | 'none') | null;
-  orientation?: ('N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW') | null;
-  swimmableFromProperty?: boolean | null;
-  tidal?: boolean | null;
-  tideRangeM?: number | null;
-  waterfrontProtection?: ('natural' | 'seawall' | 'riprap' | 'breakwater' | 'pier_only') | null;
-  /**
-   * Local designation verbatim; shown with a disclaimer.
-   */
-  floodZone?: string | null;
-  /**
-   * In Italy this is the demanio marittimo question — it materially changes value.
-   */
-  shorelineTenure?:
-    | ('private_to_waterline' | 'private_to_high_water' | 'public_easement' | 'state_concession' | 'riparian_rights')
-    | null;
-  concessionExpiry?: string | null;
-  mooringType?:
-    | (
-        | 'none'
-        | 'buoy'
-        | 'jetty'
-        | 'pontoon'
-        | 'fixed_dock'
-        | 'floating_dock'
-        | 'boat_lift'
-        | 'dry_dock'
-        | 'marina_berth'
-      )
-    | null;
-  berthCount?: number | null;
-  maxBoatLoaM?: number | null;
-  maxBoatBeamM?: number | null;
-  waterDepthAtBerthM?: number | null;
-  navigableToOpenSea?: boolean | null;
-  fixedBridgesToOpenSea?: boolean | null;
-  minBridgeClearanceM?: number | null;
-  nearestMarinaName?: string | null;
-  nearestMarinaDistanceKm?: number | null;
-  shorePower?: boolean | null;
-  freshWaterAtDock?: boolean | null;
-  fuelDockNearby?: boolean | null;
-  helipad?: boolean | null;
-  seaplaneAccess?: boolean | null;
+  commissionTerms?: string | null;
   bedrooms?: number | null;
   bathrooms?: number | null;
+  receptionRooms?: number | null;
+  staffAccommodation?: number | null;
   builtAreaSqm?: number | null;
   plotAreaSqm?: number | null;
+  plotAreaHa?: number | null;
   terraceAreaSqm?: number | null;
+  floors?: number | null;
   yearBuilt?: number | null;
   renovatedYear?: number | null;
-  floors?: number | null;
   parkingSpaces?: number | null;
+  architect?: string | null;
+  heritageStatus?: ('none' | 'listed' | 'protected' | 'unesco_area') | null;
   condition?: ('new' | 'renovated' | 'good' | 'to_renovate' | 'shell') | null;
   energyRating?: string | null;
+  /**
+   * How a €60M estate is narrated — history, architecture, land (§3.2).
+   */
+  provenance?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   features?:
     | (
         | 'pool'
-        | 'infinity_pool'
-        | 'heated_pool'
-        | 'gym'
+        | 'indoor_pool'
         | 'spa'
-        | 'sauna'
-        | 'staff_quarters'
+        | 'gym'
+        | 'cinema'
+        | 'wine_cellar'
+        | 'ballroom'
+        | 'library'
+        | 'chapel'
         | 'helipad'
         | 'tennis'
+        | 'padel'
+        | 'golf_hole'
+        | 'equestrian'
         | 'vineyard'
         | 'olive_grove'
-        | 'solar'
+        | 'beach'
+        | 'private_dock'
+        | 'marina_berth'
+        | 'ski_in_ski_out'
+        | 'gatehouse'
+        | 'staff_quarters'
+        | 'guest_houses'
+        | 'generator'
         | 'geothermal'
-        | 'elevator'
-        | 'gated'
+        | 'solar'
         | 'smart_home'
-        | 'guest_house'
-        | 'garage'
-        | 'wine_cellar'
-        | 'cinema'
+        | 'car_gallery'
+        | 'panic_room'
       )[]
     | null;
+  /**
+   * Optional §6.3 sub-block — valuable at this level, and the bridge to the sister portal.
+   */
+  waterfront?: {
+    waterAccess?: boolean | null;
+    waterBodyType?: ('sea' | 'ocean' | 'lake' | 'river' | 'lagoon' | 'canal' | 'fjord' | 'bay' | 'estuary') | null;
+    waterFrontageM?: number | null;
+    mooringType?:
+      ('none' | 'buoy' | 'jetty' | 'pontoon' | 'fixed_dock' | 'floating_dock' | 'boat_lift' | 'marina_berth') | null;
+    maxBoatLoaM?: number | null;
+    berthCount?: number | null;
+  };
   location?: {
+    /**
+     * Audience-aware display string, e.g. "Cap Ferrat, Côte d'Azur".
+     */
     label?: string | null;
     /**
-     * Admin-only. Never rendered publicly.
+     * Staff-only. Never serialised to any audience.
      */
     addressLine?: string | null;
     locality?: string | null;
@@ -523,15 +514,22 @@ export interface Property {
     country?: string | null;
     continent?: string | null;
     /**
+     * The Market this listing belongs to (renamed in Prompt 4).
+     */
+    destination?: (number | null) | Destination;
+    /**
      * @minItems 2
      * @maxItems 2
      */
     coordinates?: [number, number] | null;
     /**
-     * approximate_500m renders a jittered circle publicly; exact coordinates never reach the client for those listings.
+     * Exact pins only where the seller permits (§4.8). approximate_500m renders a jittered circle publicly; locality_only sends no coordinates at all.
      */
-    coordinatePrecision?: ('exact' | 'approximate_500m' | 'hidden') | null;
-    destination?: (number | null) | Destination;
+    coordinatePrecision?: ('exact' | 'approximate_500m' | 'locality_only') | null;
+    /**
+     * The coarsest truthful label shown to anonymous visitors.
+     */
+    publicGeography?: ('country' | 'region' | 'market' | 'locality') | null;
   };
   /**
    * Ordered. The first image is the hero and card image.
@@ -539,9 +537,12 @@ export interface Property {
   media?: (number | Media)[] | null;
   videoUrl?: string | null;
   virtualTourUrl?: string | null;
+  /**
+   * Members-only by default (§6.5).
+   */
   floorplans?: (number | Media)[] | null;
   /**
-   * Private — admin and owning agency only. Never public.
+   * Private — staff and owning agency only. Never public.
    */
   documents?: (number | Media)[] | null;
   description?: {
@@ -568,7 +569,23 @@ export interface Property {
   metaTitle?: string | null;
   metaDescription?: string | null;
   /**
-   * Generated on first publish. Immutable — changes create a Redirect.
+   * "How should this property be published?" — the one required control (§8.4). It sets channel and price disclosure.
+   */
+  publication: 'published_openly' | 'published_without_price' | 'published_as_band' | 'off_market';
+  /**
+   * Derived from the publication control — the single routing decision.
+   */
+  channel: 'public' | 'off_market';
+  /**
+   * Derived for public listings; for off-market listings members see exact or band (§8.3).
+   */
+  priceDisclosure: 'exact' | 'band' | 'on_request';
+  /**
+   * trophy/signature derive from the EUR value automatically. prime (€10–20M) is an explicit admin decision, capped at 10% of published inventory.
+   */
+  valueTier?: ('prime' | 'trophy' | 'signature') | null;
+  /**
+   * Generated on first publish; always null for off-market listings (addressed by id). Changes create a Redirect.
    */
   slug?: string | null;
   /**
@@ -576,19 +593,18 @@ export interface Property {
    */
   agency: number | Agency;
   /**
-   * Lead routing target.
+   * Enquiry routing target.
    */
   agent?: (number | null) | Agent;
-  status: 'draft' | 'pending_review' | 'in_market' | 'under_offer' | 'sold' | 'withdrawn' | 'expired' | 'archived';
+  status: 'draft' | 'available' | 'reserved' | 'under_offer' | 'sold' | 'withdrawn' | 'expired' | 'archived';
+  /**
+   * Dormant in Phase 1; Track B turns the queue on.
+   */
   moderation: 'unreviewed' | 'approved' | 'rejected' | 'changes_requested';
   /**
-   * Shown to the agency. Not public.
+   * Shown to the submitter. Not public.
    */
   moderationNote?: string | null;
-  /**
-   * unlisted = link-only, noindex, out of sitemap.
-   */
-  visibility: 'public' | 'unlisted' | 'private';
   /**
    * Editorial only. Agencies cannot self-feature.
    */
@@ -601,57 +617,36 @@ export interface Property {
    * Computed from the daily FX snapshot. The only field used for price sorting/filtering.
    */
   priceEur?: number | null;
+  priceBandMinEur?: number | null;
+  priceBandMaxEur?: number | null;
   publishedAt?: string | null;
   /**
-   * publishedAt + 180 days unless the agency reconfirms availability.
+   * publishedAt + 120 days unless availability is reconfirmed (§9.3).
    */
   expiresAt?: string | null;
   /**
-   * Set when the agency confirms the listing is still available.
+   * Set when availability is confirmed still current.
    */
   lastVerifiedAt?: string | null;
   /**
-   * When the §8.7 T-14 confirmation email last went out.
+   * When the §9.3 T-14 confirmation email last went out.
    */
   expiryReminderSentAt?: string | null;
-  sourceType: 'manual' | 'csv_import' | 'xml_feed' | 'api';
+  sourceType: 'manual' | 'csv_import' | 'feed' | 'owner_submission';
   /**
-   * Set by duplicate detection (§8.8).
+   * Set by duplicate detection (§6.1).
    */
   duplicateOf?: (number | null) | Property;
   fingerprint?: string | null;
   viewCount?: number | null;
-  leadCount?: number | null;
+  /**
+   * Off-market views counted separately (§6.1).
+   */
+  memberViewCount?: number | null;
+  enquiryCount?: number | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "water-bodies".
- */
-export interface WaterBody {
-  id: number;
-  name: string;
-  slug: string;
-  type?:
-    | (
-        | 'sea'
-        | 'ocean'
-        | 'lake'
-        | 'river'
-        | 'lagoon'
-        | 'canal'
-        | 'fjord'
-        | 'bay'
-        | 'estuary'
-        | 'reservoir'
-        | 'marina_basin'
-      )
-    | null;
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -681,6 +676,19 @@ export interface Destination {
   } | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "water-bodies".
+ */
+export interface WaterBody {
+  id: number;
+  name: string;
+  slug: string;
+  type?: ('sea' | 'ocean' | 'lake' | 'river' | 'lagoon' | 'canal' | 'fjord' | 'bay' | 'estuary') | null;
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -758,37 +766,23 @@ export interface LandingPage {
     propertyType?:
       | (
           | 'villa'
-          | 'apartment'
-          | 'penthouse'
           | 'estate'
-          | 'farmhouse'
-          | 'chalet'
+          | 'penthouse'
           | 'townhouse'
+          | 'chalet'
           | 'castle'
-          | 'lighthouse'
-          | 'boathouse'
+          | 'palazzo'
           | 'private_island'
-          | 'land_plot'
-          | 'marina_residence'
-          | 'development_project'
+          | 'vineyard_estate'
+          | 'equestrian_estate'
           | 'hotel_resort'
+          | 'development_site'
+          | 'apartment'
+          | 'lodge'
+          | 'ranch'
         )
       | null;
-    waterBodyType?:
-      | (
-          | 'sea'
-          | 'ocean'
-          | 'lake'
-          | 'river'
-          | 'lagoon'
-          | 'canal'
-          | 'fjord'
-          | 'bay'
-          | 'estuary'
-          | 'reservoir'
-          | 'marina_basin'
-        )
-      | null;
+    waterBodyType?: ('sea' | 'ocean' | 'lake' | 'river' | 'lagoon' | 'canal' | 'fjord' | 'bay' | 'estuary') | null;
     destination?: (number | null) | Destination;
     country?: string | null;
   };
@@ -1241,56 +1235,48 @@ export interface PropertiesSelect<T extends boolean = true> {
   subtitle?: T;
   reference?: T;
   propertyType?: T;
+  availableFrom?: T;
   priceType?: T;
   priceAmount?: T;
   currency?: T;
-  priceQualifier?: T;
+  priceBandMin?: T;
+  priceBandMax?: T;
+  internalValueEur?: T;
   tenure?: T;
-  leaseYearsRemaining?: T;
-  serviceChargeAnnual?: T;
-  propertyTaxAnnual?: T;
-  availableFrom?: T;
-  waterBodyType?: T;
-  waterBody?: T;
-  waterAccessType?: T;
-  distanceToWaterM?: T;
-  waterFrontageM?: T;
-  beachType?: T;
-  orientation?: T;
-  swimmableFromProperty?: T;
-  tidal?: T;
-  tideRangeM?: T;
-  waterfrontProtection?: T;
-  floodZone?: T;
-  shorelineTenure?: T;
-  concessionExpiry?: T;
-  mooringType?: T;
-  berthCount?: T;
-  maxBoatLoaM?: T;
-  maxBoatBeamM?: T;
-  waterDepthAtBerthM?: T;
-  navigableToOpenSea?: T;
-  fixedBridgesToOpenSea?: T;
-  minBridgeClearanceM?: T;
-  nearestMarinaName?: T;
-  nearestMarinaDistanceKm?: T;
-  shorePower?: T;
-  freshWaterAtDock?: T;
-  fuelDockNearby?: T;
-  helipad?: T;
-  seaplaneAccess?: T;
+  ownershipStructure?: T;
+  saleStructure?: T;
+  annualRunningCostEur?: T;
+  taxNotes?: T;
+  mandateType?: T;
+  commissionTerms?: T;
   bedrooms?: T;
   bathrooms?: T;
+  receptionRooms?: T;
+  staffAccommodation?: T;
   builtAreaSqm?: T;
   plotAreaSqm?: T;
+  plotAreaHa?: T;
   terraceAreaSqm?: T;
+  floors?: T;
   yearBuilt?: T;
   renovatedYear?: T;
-  floors?: T;
   parkingSpaces?: T;
+  architect?: T;
+  heritageStatus?: T;
   condition?: T;
   energyRating?: T;
+  provenance?: T;
   features?: T;
+  waterfront?:
+    | T
+    | {
+        waterAccess?: T;
+        waterBodyType?: T;
+        waterFrontageM?: T;
+        mooringType?: T;
+        maxBoatLoaM?: T;
+        berthCount?: T;
+      };
   location?:
     | T
     | {
@@ -1301,9 +1287,10 @@ export interface PropertiesSelect<T extends boolean = true> {
         region?: T;
         country?: T;
         continent?: T;
+        destination?: T;
         coordinates?: T;
         coordinatePrecision?: T;
-        destination?: T;
+        publicGeography?: T;
       };
   media?: T;
   videoUrl?: T;
@@ -1319,16 +1306,21 @@ export interface PropertiesSelect<T extends boolean = true> {
       };
   metaTitle?: T;
   metaDescription?: T;
+  publication?: T;
+  channel?: T;
+  priceDisclosure?: T;
+  valueTier?: T;
   slug?: T;
   agency?: T;
   agent?: T;
   status?: T;
   moderation?: T;
   moderationNote?: T;
-  visibility?: T;
   featured?: T;
   isSample?: T;
   priceEur?: T;
+  priceBandMinEur?: T;
+  priceBandMaxEur?: T;
   publishedAt?: T;
   expiresAt?: T;
   lastVerifiedAt?: T;
@@ -1337,7 +1329,8 @@ export interface PropertiesSelect<T extends boolean = true> {
   duplicateOf?: T;
   fingerprint?: T;
   viewCount?: T;
-  leadCount?: T;
+  memberViewCount?: T;
+  enquiryCount?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

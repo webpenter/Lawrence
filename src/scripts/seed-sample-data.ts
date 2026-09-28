@@ -227,6 +227,34 @@ function descriptionInput(blueprint: ListingBlueprint): DescriptionInput {
   };
 }
 
+// Interim vocabulary bridge until the Prompt 12 Lawrence generator lands:
+// the inherited blueprints use the sister portal's enums.
+const LAWRENCE_PROPERTY_TYPE: Record<string, string> = {
+  farmhouse: 'estate',
+  lighthouse: 'villa',
+  boathouse: 'villa',
+  land_plot: 'development_site',
+  marina_residence: 'apartment',
+  development_project: 'development_site',
+};
+
+const LAWRENCE_FEATURE: Record<string, string | null> = {
+  infinity_pool: 'pool',
+  heated_pool: 'pool',
+  sauna: 'spa',
+  elevator: null,
+  gated: 'gatehouse',
+  guest_house: 'guest_houses',
+  garage: 'car_gallery',
+};
+
+function mapFeatures(features: string[]): string[] {
+  const mapped = features
+    .map((f) => (f in LAWRENCE_FEATURE ? LAWRENCE_FEATURE[f] : f))
+    .filter((f): f is string => Boolean(f));
+  return [...new Set(mapped)];
+}
+
 async function attachGallery(
   payload: Payload,
   propertyId: number,
@@ -287,7 +315,7 @@ async function main(): Promise<void> {
     await purgeSamples(payload);
   }
 
-  const { destinationIds, waterBodyIds } = await seedReferenceData(payload);
+  const { destinationIds } = await seedReferenceData(payload);
   const { agencyIds, agentIdsByAgency } = await seedAgencies(payload);
   await seedEditorialStubs(payload, destinationIds);
 
@@ -320,15 +348,21 @@ async function main(): Promise<void> {
       agent: agentId,
       isSample: true,
       featured: blueprint.featured,
-      status: blueprint.status,
+      status: blueprint.status === 'in_market' ? 'available' : blueprint.status,
       moderation: 'approved',
-      visibility: 'public',
+      channel: 'public',
+      publication: 'published_openly',
+      priceDisclosure: 'exact',
       sourceType: 'manual',
-      propertyType: blueprint.propertyType,
+      propertyType: LAWRENCE_PROPERTY_TYPE[blueprint.propertyType] ?? blueprint.propertyType,
       priceType: 'fixed',
-      priceAmount: blueprint.priceAmount,
+      // Interim scaling until the Prompt 12 Lawrence generator lands: the
+      // inherited demo economics sit below the €20M admission floor.
+      priceAmount: Math.round(
+        blueprint.priceAmount * Math.max(4, Math.ceil(22_000_000 / blueprint.approxPriceEur)),
+      ),
       currency: blueprint.currency,
-      tenure: blueprint.tenure,
+      tenure: blueprint.tenure === 'freehold' || blueprint.tenure === 'leasehold' ? blueprint.tenure : 'freehold',
       bedrooms: blueprint.bedrooms,
       bathrooms: blueprint.bathrooms,
       builtAreaSqm: blueprint.builtAreaSqm,
@@ -336,26 +370,16 @@ async function main(): Promise<void> {
       terraceAreaSqm: blueprint.terraceAreaSqm,
       yearBuilt: blueprint.yearBuilt,
       condition: blueprint.condition,
-      features: blueprint.features,
-      waterBodyType: blueprint.waterBodyType,
-      waterBody: waterBodyIds.get(blueprint.waterBodySlug),
-      waterAccessType: blueprint.waterAccessType,
-      distanceToWaterM: blueprint.distanceToWaterM,
-      waterFrontageM: blueprint.waterFrontageM ?? undefined,
-      beachType: blueprint.beachType,
-      orientation: blueprint.orientation,
-      swimmableFromProperty: blueprint.swimmableFromProperty,
-      shorelineTenure: blueprint.shorelineTenure,
-      mooringType: blueprint.mooringType ?? undefined,
-      berthCount: blueprint.berthCount ?? undefined,
-      maxBoatLoaM: blueprint.maxBoatLoaM ?? undefined,
-      maxBoatBeamM: blueprint.maxBoatBeamM ?? undefined,
-      waterDepthAtBerthM: blueprint.waterDepthAtBerthM ?? undefined,
-      navigableToOpenSea: blueprint.navigableToOpenSea,
-      fixedBridgesToOpenSea: blueprint.fixedBridgesToOpenSea,
-      minBridgeClearanceM: blueprint.minBridgeClearanceM ?? undefined,
-      nearestMarinaName: blueprint.nearestMarinaName,
-      nearestMarinaDistanceKm: blueprint.nearestMarinaDistanceKm,
+      features: mapFeatures(blueprint.features),
+      waterfront: {
+        waterAccess: true,
+        waterBodyType: blueprint.waterBodyType === 'marina_basin' ? 'sea' : blueprint.waterBodyType,
+        waterFrontageM: blueprint.waterFrontageM ?? undefined,
+        mooringType:
+          blueprint.mooringType === 'dry_dock' ? 'boat_lift' : (blueprint.mooringType ?? undefined),
+        maxBoatLoaM: blueprint.maxBoatLoaM ?? undefined,
+        berthCount: blueprint.berthCount ?? undefined,
+      },
       description: textToLexical(composeDescription(input, DESCRIPTION_TEMPLATES.en!)),
       location: {
         locality: blueprint.locality,

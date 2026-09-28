@@ -62,9 +62,9 @@ export async function getPropertyBySlug(
 }
 
 /**
- * Detail-page fetch: unlike getPropertyBySlug, also returns sold/expired and
- * unlisted listings so the page can render its designed states (§10.3).
- * Private listings and unapproved/unpublished docs stay invisible.
+ * Detail-page fetch: unlike getPropertyBySlug, also returns sold/expired
+ * listings so the page can render its designed states (§11.3). Off-market
+ * listings have no slug and can never match; unpublished docs stay invisible.
  */
 export async function getPropertyForDetail(
   slug: string,
@@ -77,9 +77,9 @@ export async function getPropertyForDetail(
       and: [
         { slug: { equals: slug } },
         { _status: { equals: 'published' } },
-        { moderation: { equals: 'approved' } },
-        { visibility: { in: ['public', 'unlisted'] } },
-        { status: { in: ['in_market', 'under_offer', 'sold', 'expired'] } },
+        { channel: { equals: 'public' } },
+        { moderation: { not_in: ['rejected', 'changes_requested'] } },
+        { status: { in: ['available', 'reserved', 'under_offer', 'sold', 'expired'] } },
       ],
     },
     locale,
@@ -126,12 +126,14 @@ export async function getSimilar(
   locale: Locale = 'en',
 ): Promise<Property[]> {
   const payload = await getPayloadClient();
-  const clauses: Where[] = [
-    publicPredicate(),
-    { id: { not_equals: property.id } },
-    { waterBodyType: { equals: property.waterBodyType } },
-  ];
-  if (property.location?.country) {
+  const clauses: Where[] = [publicPredicate(), { id: { not_equals: property.id } }];
+  if (property.location?.destination) {
+    const marketId =
+      typeof property.location.destination === 'object'
+        ? property.location.destination.id
+        : property.location.destination;
+    clauses.push({ 'location.destination': { equals: marketId } });
+  } else if (property.location?.country) {
     clauses.push({ 'location.country': { equals: property.location.country } });
   }
   if (property.priceEur != null) {
@@ -227,7 +229,8 @@ export async function getAggregatesForScope(scope: {
   const payload = await getPayloadClient();
   const clauses: Where[] = [publicPredicate()];
   if (scope.country) clauses.push({ 'location.country': { equals: scope.country } });
-  if (scope.waterBodyType) clauses.push({ waterBodyType: { equals: scope.waterBodyType } });
+  if (scope.waterBodyType)
+    clauses.push({ 'waterfront.waterBodyType': { equals: scope.waterBodyType } });
   if (scope.propertyType) clauses.push({ propertyType: { equals: scope.propertyType } });
   if (scope.destinationId != null)
     clauses.push({ 'location.destination': { equals: scope.destinationId } });
@@ -237,7 +240,7 @@ export async function getAggregatesForScope(scope: {
     where: { and: clauses },
     limit: 1000,
     depth: 0,
-    select: { priceEur: true, waterFrontageM: true, propertyType: true },
+    select: { priceEur: true, waterfront: true, propertyType: true },
   });
 
   const typeCounts = new Map<string, number>();
@@ -255,7 +258,7 @@ export async function getAggregatesForScope(scope: {
       res.docs.map((d) => d.priceEur).filter((v): v is number => v != null),
     ),
     medianFrontageM: median(
-      res.docs.map((d) => d.waterFrontageM).filter((v): v is number => v != null),
+      res.docs.map((d) => d.waterfront?.waterFrontageM).filter((v): v is number => v != null),
     ),
     topPropertyType,
   };

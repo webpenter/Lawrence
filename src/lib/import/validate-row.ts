@@ -1,5 +1,4 @@
-import { MAX_DISTANCE_TO_WATER_M } from '@/collections/Property/enums';
-import { checkWaterRule } from '@/collections/Property/validation';
+import { checkAdmission } from '@/collections/Property/validation';
 
 import { IMPORT_COLUMNS } from './columns';
 
@@ -114,19 +113,37 @@ export function validateRow(raw: RawRow, rowNumber: number): RowReport {
     }
   }
 
-  // The water rule (§2.2) — the reason every other check exists.
-  const distance = Number(value('distance_to_water_m'));
-  const access = value('water_access_types').split(PIPE).map((p) => p.trim()).filter(Boolean);
-  const water = checkWaterRule({
-    waterAccessType: access,
-    distanceToWaterM: Number.isFinite(distance) ? distance : null,
-  });
-  if (!water.ok && !issues.some((i) => i.column === 'distance_to_water_m' && i.severity === 'error')) {
+  // The admission policy (§2.2) — the reason every other check exists. FX is
+  // not available in this pure validator, so a non-EUR price without an
+  // internal value only warns; the publish-time hook re-enforces exactly.
+  const parseMoney = (name: string): number => {
+    const raw = value(name);
+    return raw === '' ? Number.NaN : Number(raw);
+  };
+  const internalValue = parseMoney('internal_value_eur');
+  const priceAmount = parseMoney('price_amount');
+  const currency = value('currency') || 'EUR';
+  const enforceable = Number.isFinite(internalValue)
+    ? internalValue
+    : currency === 'EUR' && Number.isFinite(priceAmount)
+      ? priceAmount
+      : null;
+  if (enforceable == null) {
     issues.push({
-      column: distance > MAX_DISTANCE_TO_WATER_M ? 'distance_to_water_m' : 'water_access_types',
-      reason: water.reason as string,
-      severity: 'error',
+      column: 'internal_value_eur',
+      reason:
+        'No enforceable EUR value: set internal_value_eur (required for on-request or non-EUR rows) — the €20M admission threshold cannot be verified.',
+      severity: 'warning',
     });
+  } else {
+    const admission = checkAdmission({ internalValueEur: enforceable });
+    if (!admission.ok) {
+      issues.push({
+        column: Number.isFinite(internalValue) ? 'internal_value_eur' : 'price_amount',
+        reason: admission.reason as string,
+        severity: enforceable >= 10_000_000 ? 'warning' : 'error',
+      });
+    }
   }
 
   // Coordinate plausibility (§8.6 pre-check, importable subset).

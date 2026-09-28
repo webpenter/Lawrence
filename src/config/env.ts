@@ -26,7 +26,7 @@ const envSchema = z.object({
   R2_BUCKET: z.string().optional(),
   NEXT_PUBLIC_CF_IMAGES_URL: z.string().optional(),
   NEXT_PUBLIC_MAPTILER_KEY: z.string().optional(),
-  FX_API_KEY: z.string().optional(),
+  FX_API_URL: z.string().optional().default('https://api.frankfurter.app'),
   UNSPLASH_ACCESS_KEY: z.string().optional(),
   NEXT_PUBLIC_PLAUSIBLE_DOMAIN: z.string().optional(),
   SENTRY_DSN: z.string().optional(),

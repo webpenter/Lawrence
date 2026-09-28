@@ -9,11 +9,9 @@ import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { EnquiryForm } from '@/components/property/EnquiryForm';
 import { GalleryGrid } from '@/components/property/GalleryGrid';
-import { NauticalPanel } from '@/components/property/NauticalPanel';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { ViewBeacon } from '@/components/property/ViewBeacon';
-import { WaterCredentialsTable } from '@/components/property/WaterCredentialsTable';
-import { humanizeEnum } from '@/components/property/WaterChips';
+import { humanizeEnum } from '@/lib/humanize';
 import { Badge } from '@/components/ui/Badge';
 import { Link } from '@/i18n/navigation';
 import { getPropertyForDetail, getPublicSlugs, getPayloadClient, type Locale } from '@/lib/db';
@@ -77,13 +75,11 @@ export async function generateMetadata({ params }: DetailPageProps): Promise<Met
   const property = await loadProperty(slug, locale);
   if (!property) return {};
 
-  // §11.4 meta template: {title} — {propertyType} with {accessType} in {locality}
-  const access = property.waterAccessType?.[0];
+  // §12.4 meta template: {propertyType} for sale in {locality} — trophy property from €20M.
   const parts = [
     property.title,
     '—',
     humanizeEnum(property.propertyType),
-    access ? `with ${humanizeEnum(access).toLowerCase()}` : null,
     property.location?.locality ? `in ${property.location.locality}` : null,
   ].filter(Boolean);
 
@@ -91,8 +87,8 @@ export async function generateMetadata({ params }: DetailPageProps): Promise<Met
   const generatedDescription = [
     property.bedrooms != null ? `${property.bedrooms} bedrooms` : null,
     property.builtAreaSqm != null ? `${property.builtAreaSqm} m²` : null,
-    property.waterFrontageM != null
-      ? `${property.waterFrontageM} m of private ${humanizeEnum(property.waterBodyType ?? 'water').toLowerCase()} frontage`
+    property.waterfront?.waterFrontageM != null
+      ? `${property.waterfront.waterFrontageM} m of private water frontage`
       : null,
     property.location?.locality ? `in ${property.location.locality}` : null,
   ]
@@ -100,7 +96,7 @@ export async function generateMetadata({ params }: DetailPageProps): Promise<Met
     .join(', ');
 
   const noindex =
-    property.visibility === 'unlisted' ||
+    property.channel === 'off_market' ||
     property.isSample ||
     soldPageIsNoindex(property, new Date());
 
@@ -193,7 +189,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
         event="listing_viewed"
         props={{
           propertyId: property.id,
-          waterType: property.waterBodyType ?? undefined,
+          valueTier: property.valueTier ?? undefined,
           priceBand:
             property.priceEur != null
               ? property.priceEur < 1_000_000
@@ -211,11 +207,6 @@ export default async function PropertyPage({ params }: DetailPageProps) {
       {property.isSample ? (
         <p className="bg-patina-soft px-4 sm:px-7 py-2 text-center text-xs uppercase tracking-[0.12em] text-obsidian">
           {t('sampleBadge')}
-        </p>
-      ) : null}
-      {property.visibility === 'unlisted' ? (
-        <p className="bg-bone px-4 sm:px-7 py-2 text-center text-xs text-graphite">
-          {t('unlistedNotice')}
         </p>
       ) : null}
       {stateNotice ? (
@@ -264,9 +255,6 @@ export default async function PropertyPage({ params }: DetailPageProps) {
 
       <div className="grid gap-8 px-4 py-6 sm:px-7 lg:grid-cols-[1.5fr_1fr]">
         <div>
-          <WaterCredentialsTable property={property} />
-          <NauticalPanel property={property} />
-
           {facts.length > 0 ? (
             <section className="mt-6">
               <h2 className="mb-3 font-display text-lg text-ink">{t('keyFactsTitle')}</h2>

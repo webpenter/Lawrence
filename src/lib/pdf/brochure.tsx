@@ -8,7 +8,7 @@ import {
 } from '@react-pdf/renderer';
 import * as React from 'react';
 
-import { humanizeEnum } from '@/components/property/WaterChips';
+import { humanizeEnum } from '@/lib/humanize';
 import { brand } from '@/config/brand';
 import type { Property } from '@/payload-types';
 import { tokens } from '@/tokens/tokens';
@@ -178,23 +178,20 @@ export function BrochureDocument({ property, labels, priceLabel, imageUrls, mapU
     .filter(Boolean)
     .join(' · ');
 
+  const waterfront = property.waterfront;
   const water: Array<[string, string]> = [];
-  if (property.waterBodyType) water.push([labels.labelWaterBody, humanizeEnum(property.waterBodyType)]);
-  if (property.waterAccessType?.length)
-    water.push([labels.labelAccess, property.waterAccessType.map(humanizeEnum).join(' · ')]);
-  if (property.waterFrontageM != null) water.push([labels.labelFrontage, `${property.waterFrontageM} m`]);
-  if (property.distanceToWaterM != null)
-    water.push([labels.labelDistanceToWater, `${property.distanceToWaterM} m`]);
-  if (property.orientation) water.push([labels.labelOrientation, property.orientation]);
+  if (waterfront?.waterAccess) {
+    if (waterfront.waterBodyType)
+      water.push([labels.labelWaterBody, humanizeEnum(waterfront.waterBodyType)]);
+    if (waterfront.waterFrontageM != null)
+      water.push([labels.labelFrontage, `${waterfront.waterFrontageM} m`]);
+  }
 
   const nautical: Array<[string, string]> = [];
-  if (property.mooringType && property.mooringType !== 'none')
-    nautical.push([labels.labelMooring, humanizeEnum(property.mooringType)]);
-  if (property.maxBoatLoaM != null) nautical.push([labels.labelMaxBoatLength, `${property.maxBoatLoaM} m`]);
-  if (property.waterDepthAtBerthM != null)
-    nautical.push([labels.labelDepthAtBerth, `${property.waterDepthAtBerthM} m`]);
-  if (property.navigableToOpenSea != null)
-    nautical.push([labels.labelNavigableToOpenSea, property.navigableToOpenSea ? labels.yes : labels.no]);
+  if (waterfront?.mooringType && waterfront.mooringType !== 'none')
+    nautical.push([labels.labelMooring, humanizeEnum(waterfront.mooringType)]);
+  if (waterfront?.maxBoatLoaM != null)
+    nautical.push([labels.labelMaxBoatLength, `${waterfront.maxBoatLoaM} m`]);
 
   const facts: Array<[string, string]> = [];
   if (property.bedrooms != null) facts.push([labels.factBedrooms, String(property.bedrooms)]);

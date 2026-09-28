@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 
-import { humanizeEnum } from '@/components/property/WaterChips';
+import { humanizeEnum } from '@/lib/humanize';
 import { AspectBox } from '@/components/ui/AspectBox';
 import { Link } from '@/i18n/navigation';
 import { formatLength, formatPriceEur } from '@/lib/intl/format';

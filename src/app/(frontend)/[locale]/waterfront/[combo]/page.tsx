@@ -8,7 +8,7 @@ import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { EnquiryForm } from '@/components/property/EnquiryForm';
 import { StatsStrip } from '@/components/property/StatsStrip';
-import { humanizeEnum } from '@/components/property/WaterChips';
+import { humanizeEnum } from '@/lib/humanize';
 import { HitCard } from '@/components/search/HitCard';
 import { Link } from '@/i18n/navigation';
 import {

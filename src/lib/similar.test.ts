@@ -11,14 +11,13 @@ function listing(overrides: Partial<Property>): Property {
     propertyType: 'villa',
     priceType: 'fixed',
     currency: 'EUR',
-    waterBodyType: 'sea',
+    channel: 'public',
+    valueTier: 'trophy',
     agency: 1,
-    status: 'in_market',
+    status: 'available',
     moderation: 'approved',
-    visibility: 'public',
     sourceType: 'manual',
-    priceEur: 10_000_000,
-    waterFrontageM: 38,
+    priceEur: 30_000_000,
     location: { destination: 5 },
     updatedAt: '',
     createdAt: '',
@@ -28,37 +27,31 @@ function listing(overrides: Partial<Property>): Property {
 
 const subject = listing({ id: 1 });
 
-describe('isSimilar (spec Prompt 8: swappable similar-listings logic)', () => {
-  it('accepts same water body + price within ±35%', () => {
-    expect(isSimilar(subject, listing({ id: 2, priceEur: 12_000_000, location: {} }))).toBe(true);
-    expect(isSimilar(subject, listing({ id: 3, priceEur: 6_600_000, location: {} }))).toBe(true);
+describe('isSimilar (§11.3: comparable properties in the same market and band)', () => {
+  it('accepts price within ±35% even in another market', () => {
+    expect(isSimilar(subject, listing({ id: 2, priceEur: 36_000_000, location: {} }))).toBe(true);
+    expect(isSimilar(subject, listing({ id: 3, priceEur: 20_000_000, location: {} }))).toBe(true);
   });
 
-  it('rejects price outside ±35% when destination differs', () => {
+  it('rejects price outside ±35% when the market differs', () => {
     expect(
-      isSimilar(subject, listing({ id: 4, priceEur: 20_000_000, location: { destination: 9 } })),
+      isSimilar(subject, listing({ id: 4, priceEur: 60_000_000, location: { destination: 9 } })),
     ).toBe(false);
   });
 
-  it('accepts same destination even when price is far apart', () => {
+  it('accepts the same market even when price is far apart', () => {
     expect(
-      isSimilar(subject, listing({ id: 5, priceEur: 25_000_000, location: { destination: 5 } })),
+      isSimilar(subject, listing({ id: 5, priceEur: 75_000_000, location: { destination: 5 } })),
     ).toBe(true);
   });
 
-  it('rejects a different water body outright', () => {
-    expect(isSimilar(subject, listing({ id: 6, waterBodyType: 'lake' }))).toBe(false);
+  it('rejects off-market candidates outright (§8.2)', () => {
+    expect(isSimilar(subject, listing({ id: 6, channel: 'off_market' }))).toBe(false);
   });
 
   it('rejects sold and expired listings', () => {
     expect(isSimilar(subject, listing({ id: 7, status: 'sold' }))).toBe(false);
     expect(isSimilar(subject, listing({ id: 8, status: 'expired' }))).toBe(false);
-  });
-
-  it('rejects non-comparable frontage (outside half-to-double)', () => {
-    expect(isSimilar(subject, listing({ id: 9, waterFrontageM: 100 }))).toBe(false);
-    expect(isSimilar(subject, listing({ id: 10, waterFrontageM: 10 }))).toBe(false);
-    expect(isSimilar(subject, listing({ id: 11, waterFrontageM: 60 }))).toBe(true);
   });
 
   it('never returns the subject itself', () => {
@@ -67,11 +60,11 @@ describe('isSimilar (spec Prompt 8: swappable similar-listings logic)', () => {
 });
 
 describe('rankSimilar', () => {
-  it('prefers same destination, then closest price, and respects the limit', () => {
+  it('prefers same market, then closest price, and respects the limit', () => {
     const candidates = [
-      listing({ id: 20, priceEur: 13_000_000, location: { destination: 9 } }),
-      listing({ id: 21, priceEur: 10_500_000, location: { destination: 9 } }),
-      listing({ id: 22, priceEur: 24_000_000, location: { destination: 5 } }),
+      listing({ id: 20, priceEur: 39_000_000, location: { destination: 9 } }),
+      listing({ id: 21, priceEur: 31_000_000, location: { destination: 9 } }),
+      listing({ id: 22, priceEur: 72_000_000, location: { destination: 5 } }),
       listing({ id: 23, status: 'sold' }),
     ];
     const ranked = rankSimilar(subject, candidates, 2);

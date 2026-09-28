@@ -17,7 +17,7 @@ const multi = (v: string | undefined) =>
 /**
  * Validated raw row → Property create/update data (§8.4). Import listings are
  * never trusted with lifecycle fields: status is forced to pending_review, the
- * hooks recompute slug/priceEur/fingerprint, and moderation stays unreviewed
+ * hooks recompute slug/priceEur/fingerprint (status stays draft), and moderation stays unreviewed
  * unless the §8.6 auto-approve path clears it.
  */
 export function mapRowToListing(raw: RawRow, agencyId: number): MappedListing {
@@ -26,47 +26,37 @@ export function mapRowToListing(raw: RawRow, agencyId: number): MappedListing {
   const listing: MappedListing = {
     agency: agencyId,
     sourceType: 'csv_import',
-    status: 'pending_review',
+    status: 'draft',
     moderation: 'unreviewed',
-    visibility: 'public',
+    channel: 'public',
     reference: text(value('reference')),
     title: text(value('title_en')),
     propertyType: text(value('property_type')),
     priceType: text(value('price_type')) ?? 'fixed',
     priceAmount: num(value('price_amount')),
+    priceBandMin: num(value('price_band_min')),
+    priceBandMax: num(value('price_band_max')),
+    internalValueEur: num(value('internal_value_eur')),
     currency: text(value('currency')) ?? 'EUR',
     tenure: text(value('tenure')),
+    ownershipStructure: text(value('ownership_structure')),
+    saleStructure: text(value('sale_structure')),
     bedrooms: num(value('bedrooms')),
     bathrooms: num(value('bathrooms')),
     builtAreaSqm: num(value('built_area_sqm')),
     plotAreaSqm: num(value('plot_area_sqm')),
     yearBuilt: num(value('year_built')),
     condition: text(value('condition')),
-    waterBodyType: text(value('water_body_type')),
-    waterAccessType: multi(value('water_access_types')),
-    distanceToWaterM: num(value('distance_to_water_m')),
-    waterFrontageM: num(value('water_frontage_m')),
-    beachType: text(value('beach_type')),
-    orientation: text(value('orientation')),
-    swimmableFromProperty: value('swimmable') ? parseBool(value('swimmable') as string) : undefined,
-    shorelineTenure: text(value('shoreline_tenure')),
-    concessionExpiry: text(value('concession_expiry')),
-    floodZone: text(value('flood_zone')),
-    waterfrontProtection: text(value('waterfront_protection')),
-    mooringType: text(value('mooring_type')),
-    berthCount: num(value('berth_count')),
-    maxBoatLoaM: num(value('max_boat_loa_m')),
-    maxBoatBeamM: num(value('max_boat_beam_m')),
-    waterDepthAtBerthM: num(value('water_depth_at_berth_m')),
-    navigableToOpenSea: value('navigable_to_open_sea')
-      ? parseBool(value('navigable_to_open_sea') as string)
-      : undefined,
-    fixedBridgesToOpenSea: value('fixed_bridges_to_open_sea')
-      ? parseBool(value('fixed_bridges_to_open_sea') as string)
-      : undefined,
-    minBridgeClearanceM: num(value('min_bridge_clearance_m')),
-    nearestMarinaName: text(value('nearest_marina_name')),
-    nearestMarinaDistanceKm: num(value('nearest_marina_distance_km')),
+    heritageStatus: text(value('heritage_status')),
+    architect: text(value('architect')),
+    waterfront: {
+      waterAccess: value('water_access') ? parseBool(value('water_access') as string) : undefined,
+      waterBodyType: text(value('water_body_type')),
+      waterFrontageM: num(value('water_frontage_m')),
+      mooringType: text(value('mooring_type')),
+      berthCount: num(value('berth_count')),
+      maxBoatLoaM: num(value('max_boat_loa_m')),
+    },
     videoUrl: text(value('video_url')),
     virtualTourUrl: text(value('virtual_tour_url')),
     location: {

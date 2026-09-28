@@ -206,8 +206,6 @@
     "listingsByStatus": "Annonces par statut",
     "attentionTitle": "À traiter",
     "attentionEmpty": "Rien à traiter.",
-    "reasonMissingFrontage": "rive manquante",
-    "reasonMissingNautical": "données nautiques absentes",
     "reasonExpiring": "expire bientôt",
     "reasonChangesRequested": "modifications demandées",
     "topListingsTitle": "Annonces les plus vues",
@@ -227,7 +225,9 @@
     "editInAdmin": "Vérifier dans le backoffice",
     "leaderboardTitle": "Classement des agences",
     "sampleLeakWarning": "Des annonces de démonstration sont visibles publiquement alors que le mode démo est DÉSACTIVÉ — purgez-les avant le lancement.",
-    "sampleLeakOk": "Aucune annonce de démonstration exposée publiquement."
+    "sampleLeakOk": "Aucune annonce de démonstration exposée publiquement.",
+    "reasonMissingMarket": "no market assigned",
+    "reasonMissingValue": "no enforceable value"
   },
   "journal": {
     "title": "Le Journal",

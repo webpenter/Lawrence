@@ -1,10 +1,10 @@
 import { brand } from '@/config/brand';
 import type { Property } from '@/payload-types';
 
-// §14.3: JSON-LD for listing pages — RealEstateListing + Offer +
-// BreadcrumbList, with water and nautical fields mapped into
+// §15.4: JSON-LD for listing pages — RealEstateListing + Offer +
+// BreadcrumbList, with the §6.3 features and waterfront sub-block mapped into
 // amenityFeature/LocationFeatureSpecification. Never invent values: only
-// populated fields are emitted.
+// populated fields are emitted, and the price obeys priceDisclosure.
 
 type Json = Record<string, unknown>;
 
@@ -22,28 +22,24 @@ function feature(name: string, value: unknown): Json {
 
 export function propertyAmenityFeatures(property: Property): Json[] {
   const features: Json[] = [];
-  if (property.waterBodyType) features.push(feature('Water body type', property.waterBodyType));
-  for (const access of property.waterAccessType ?? []) {
-    features.push(feature('Water access', access));
+  for (const item of property.features ?? []) {
+    features.push(feature(item.replace(/_/g, ' '), true));
   }
-  if (property.waterFrontageM != null)
-    features.push(feature('Private water frontage (m)', property.waterFrontageM));
-  if (property.distanceToWaterM != null)
-    features.push(feature('Distance to water (m)', property.distanceToWaterM));
-  if (property.swimmableFromProperty != null)
-    features.push(feature('Swimmable from the property', Boolean(property.swimmableFromProperty)));
-  if (property.mooringType && property.mooringType !== 'none')
-    features.push(feature('Mooring', property.mooringType));
-  if (property.maxBoatLoaM != null)
-    features.push(feature('Max boat length (m)', property.maxBoatLoaM));
-  if (property.maxBoatBeamM != null)
-    features.push(feature('Max beam (m)', property.maxBoatBeamM));
-  if (property.waterDepthAtBerthM != null)
-    features.push(feature('Water depth at berth (m)', property.waterDepthAtBerthM));
-  if (property.navigableToOpenSea != null)
-    features.push(feature('Navigable to open sea', Boolean(property.navigableToOpenSea)));
-  if (property.minBridgeClearanceM != null)
-    features.push(feature('Minimum bridge clearance (m)', property.minBridgeClearanceM));
+  if (property.heritageStatus && property.heritageStatus !== 'none')
+    features.push(feature('Heritage status', property.heritageStatus));
+  const waterfront = property.waterfront;
+  if (waterfront?.waterAccess) {
+    features.push(feature('Water access', true));
+    if (waterfront.waterBodyType)
+      features.push(feature('Water body type', waterfront.waterBodyType));
+    if (waterfront.waterFrontageM != null)
+      features.push(feature('Private water frontage (m)', waterfront.waterFrontageM));
+    if (waterfront.mooringType && waterfront.mooringType !== 'none')
+      features.push(feature('Mooring', waterfront.mooringType));
+    if (waterfront.maxBoatLoaM != null)
+      features.push(feature('Max boat length (m)', waterfront.maxBoatLoaM));
+    if (waterfront.berthCount != null) features.push(feature('Berths', waterfront.berthCount));
+  }
   return features;
 }
 
@@ -68,7 +64,8 @@ export function realEstateListingJsonLd(property: Property, locale: string): Jso
     };
   }
 
-  if (property.priceType === 'fixed' && property.priceEur != null) {
+  // audit:exposure rule: a price appears ONLY when priceDisclosure is exact.
+  if (property.priceDisclosure === 'exact' && property.priceEur != null) {
     jsonLd.offers = {
       '@type': 'Offer',
       price: property.priceEur,
@@ -77,6 +74,17 @@ export function realEstateListingJsonLd(property: Property, locale: string): Jso
         property.status === 'under_offer'
           ? 'https://schema.org/LimitedAvailability'
           : 'https://schema.org/InStock',
+      url,
+    };
+  } else if (
+    property.priceDisclosure === 'band' &&
+    (property.priceBandMinEur != null || property.priceBandMaxEur != null)
+  ) {
+    jsonLd.offers = {
+      '@type': 'AggregateOffer',
+      lowPrice: property.priceBandMinEur ?? undefined,
+      highPrice: property.priceBandMaxEur ?? undefined,
+      priceCurrency: 'EUR',
       url,
     };
   }

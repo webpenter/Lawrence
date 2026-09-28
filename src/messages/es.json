@@ -206,8 +206,6 @@
     "listingsByStatus": "Anuncios por estado",
     "attentionTitle": "Requiere atención",
     "attentionEmpty": "Nada requiere atención.",
-    "reasonMissingFrontage": "falta el frente de agua",
-    "reasonMissingNautical": "sin datos náuticos",
     "reasonExpiring": "caduca pronto",
     "reasonChangesRequested": "cambios solicitados",
     "topListingsTitle": "Anuncios más vistos",
@@ -227,7 +225,9 @@
     "editInAdmin": "Revisar en el backoffice",
     "leaderboardTitle": "Ranking de agencias",
     "sampleLeakWarning": "Hay anuncios de muestra visibles públicamente con el modo demo DESACTIVADO — púrguelos antes del lanzamiento.",
-    "sampleLeakOk": "Ningún anuncio de muestra expuesto públicamente."
+    "sampleLeakOk": "Ningún anuncio de muestra expuesto públicamente.",
+    "reasonMissingMarket": "no market assigned",
+    "reasonMissingValue": "no enforceable value"
   },
   "journal": {
     "title": "El Journal",

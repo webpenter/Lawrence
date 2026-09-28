@@ -1,7 +1,7 @@
-import { checkWaterRule } from '@/collections/Property/validation';
+import { checkAdmission } from '@/collections/Property/validation';
 
 /**
- * Automated moderation pre-checks (§8.6). Pure: anything flagged goes to a
+ * Automated moderation pre-checks (§9.4). Pure: anything flagged goes to a
  * human; a clean result from a verified-tier agency auto-approves.
  * The coastline-polygon proximity check needs the Natural Earth/OSM water
  * dataset and lands with the moderation-queue UI (see DECISIONS.md) —
@@ -9,10 +9,10 @@ import { checkWaterRule } from '@/collections/Property/validation';
  */
 
 export interface PreCheckInput {
-  waterAccessType?: string[] | null;
-  distanceToWaterM?: number | null;
   coordinates?: [number, number] | null;
   priceEur?: number | null;
+  internalValueEur?: number | null;
+  valueTier?: 'prime' | 'trophy' | 'signature' | null;
   imageCount: number;
   descriptionText: string;
   title: string;
@@ -34,11 +34,12 @@ const EMAIL_PATTERN = /[\w.+-]+@[\w-]+\.[\w.]+/;
 export function runPreChecks(input: PreCheckInput, context: PreCheckContext = {}): PreCheckFlag[] {
   const flags: PreCheckFlag[] = [];
 
-  const water = checkWaterRule({
-    waterAccessType: input.waterAccessType,
-    distanceToWaterM: input.distanceToWaterM,
+  const admission = checkAdmission({
+    internalValueEur: input.internalValueEur,
+    priceEur: input.priceEur,
+    valueTier: input.valueTier ?? undefined,
   });
-  if (!water.ok) flags.push({ code: 'water_rule', message: water.reason as string });
+  if (!admission.ok) flags.push({ code: 'admission', message: admission.reason as string });
 
   const coords = input.coordinates;
   if (!coords) {

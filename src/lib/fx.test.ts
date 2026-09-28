@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { convertToEur, type FxRates } from './fx';
 
-const RATES: FxRates = { EUR: 1, USD: 1.08, GBP: 0.85, CHF: 0.94, AED: 3.97, SGD: 1.45 };
+const RATES: FxRates = { EUR: 1, USD: 1.08, GBP: 0.85, CHF: 0.94, AED: 3.97, SGD: 1.45, HKD: 8.42 };
 
 describe('convertToEur (spec §6.2 — priceEur drives all sorting and filtering)', () => {
   it('is identity for EUR', () => {
