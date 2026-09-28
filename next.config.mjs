@@ -34,7 +34,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'images.waterline.com',
+        hostname: 'images.lawrenceprivatecollection.com',
       },
     ],
   },

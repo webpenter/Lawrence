@@ -1,8 +1,8 @@
-# WATERLINE
+# LAWRENCE PRIVATE COLLECTION
 
-The global waterfront-only property portal. Next.js 15 (App Router) + Payload 3 + Postgres/PostGIS + Typesense.
+A portal for trophy property from ~€20M: a fully public, indexable Collection plus a members-only Off-Market section. Next.js 15 (App Router) + Payload 3 + Postgres/PostGIS + Typesense.
 
-Read `CLAUDE.md` before writing any feature code — it is the project's non-negotiable rule set. The full build brief lives in `WATERLINE-Waterfront-Portal-Spec-v2.1.pdf` (`waterline_spec.txt` is a plain-text copy of the same document for quick grepping), and the build is sequenced in `DEVELOPMENT-PHASES.md`.
+Read `CLAUDE.md` before writing any feature code — it is the project's non-negotiable rule set. The full build brief lives in `LAWRENCE-Private-Collection-Spec-v2.pdf`, and the build is sequenced in `DEVELOPMENT-PHASES.md`. This repo was bootstrapped from the finished WATERLINE scaffold (see `DECISIONS.md`); Waterline-era code is replaced phase by phase.
 
 ## Prerequisites
 

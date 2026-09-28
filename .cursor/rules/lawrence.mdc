@@ -1,10 +1,14 @@
-# LAWRENCE PRIVATE COLLECTION — project rules for AI assistants
+---
+description: LAWRENCE PRIVATE COLLECTION — non-negotiable project rules
+globs:
+alwaysApply: true
+---
 
-## What this is
-A portal for trophy property from ~€20M. Two layers: a fully public, indexable Collection, and an
-Off-Market section that requires a free member account (email confirmation only — no NDA, no
-proof of funds, no manual vetting in this phase).
-Next.js 15 App Router + Payload 3 + Postgres/PostGIS + Typesense, deployed on Vercel.
+# LAWRENCE PRIVATE COLLECTION — rules for AI-assisted edits
+
+Before implementing any feature that renders listing data, state which audience (anonymous,
+member, staff) sees which fields and where the server-side check happens. Then implement.
+Then self-check against the acceptance criteria and report pass/fail per line.
 
 ## Non-negotiable rules
 1. Off-market content never leaks. It is never statically generated, never edge-cached, always
@@ -30,12 +34,3 @@ Next.js 15 App Router + Payload 3 + Postgres/PostGIS + Typesense, deployed on Ve
 ## Definition of done for any task
 pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e && pnpm analyze pass;
 new logic has tests; `pnpm audit:exposure` passes; no console or hydration errors.
-
-## audit:exposure
-A required script that crawls every public route as an anonymous visitor and asserts that no
-response contains: an off-market listing id or slug, an exact address, owner data, internalValueEur,
-or a price for a listing whose priceDisclosure is not "exact". Must pass before every merge.
-
-## Commands
-pnpm dev · build · typecheck · lint · test · test:e2e · analyze · seed · sample:purge ·
-search:reindex · audit:seo · audit:a11y · audit:exposure · audit:all

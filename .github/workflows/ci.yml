@@ -1,4 +1,4 @@
-name: WATERLINE CI
+name: LAWRENCE CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  DATABASE_URL: postgresql://postgres:waterline_dev_password@localhost:5432/waterline
+  DATABASE_URL: postgresql://postgres:lawrence_dev_password@localhost:5432/lawrence
   PAYLOAD_SECRET: ci_secret_change_me_in_production_min_32_chars
   NEXT_PUBLIC_SITE_URL: http://localhost:3000
   TYPESENSE_HOST: localhost
@@ -25,12 +25,12 @@ jobs:
         image: postgis/postgis:16-3.4
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: waterline_dev_password
-          POSTGRES_DB: waterline
+          POSTGRES_PASSWORD: lawrence_dev_password
+          POSTGRES_DB: lawrence
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d waterline"
+          --health-cmd "pg_isready -U postgres -d lawrence"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -90,12 +90,12 @@ jobs:
         image: postgis/postgis:16-3.4
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: waterline_dev_password
-          POSTGRES_DB: waterline
+          POSTGRES_PASSWORD: lawrence_dev_password
+          POSTGRES_DB: lawrence
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d waterline"
+          --health-cmd "pg_isready -U postgres -d lawrence"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -152,12 +152,12 @@ jobs:
         image: postgis/postgis:16-3.4
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: waterline_dev_password
-          POSTGRES_DB: waterline
+          POSTGRES_PASSWORD: lawrence_dev_password
+          POSTGRES_DB: lawrence
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d waterline"
+          --health-cmd "pg_isready -U postgres -d lawrence"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10

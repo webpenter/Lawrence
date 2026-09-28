@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { brand } from './brand';
 
 describe('Brand Config', () => {
-  it('should have WATERLINE as brand name', () => {
-    expect(brand.name).toBe('WATERLINE');
+  it('should have LAWRENCE PRIVATE COLLECTION as brand name', () => {
+    expect(brand.name).toBe('LAWRENCE PRIVATE COLLECTION');
   });
 
   it('should have valid email addresses', () => {
@@ -13,6 +13,6 @@ describe('Brand Config', () => {
   });
 
   it('should have valid domain', () => {
-    expect(brand.domain).toBe('waterline.com');
+    expect(brand.domain).toBe('lawrenceprivatecollection.com');
   });
 });

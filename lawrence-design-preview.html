@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lawrence Private Collection — Interface design preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --obsidian:#0A0B0D; --ink:#15171A; --graphite:#4A4D52; --mist:#9A9A94;
+  --bone:#F3F0EA; --vellum:#FAF8F4; --line:rgba(10,11,13,.10); --line-2:rgba(10,11,13,.20);
+  --patina:#7E6B4F; --patina-soft:#B9A888;
+  --deck:#0E0F11; --deck-line:rgba(255,255,255,.10);
+  --display:"Cormorant Garamond",ui-serif,Georgia,serif;
+  --body:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --deck:#0A0B0D; } }
+:root[data-theme="dark"]{ --deck:#0A0B0D; }
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--deck);color:#E8E5DF;font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+.num{font-variant-numeric:tabular-nums}
+
+/* deck */
+.deck-head{padding:64px 0 28px;border-bottom:1px solid var(--deck-line)}
+.kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--patina-soft);margin:0 0 16px}
+.deck-head h1{font-family:var(--display);font-weight:300;font-size:clamp(34px,5.4vw,64px);margin:0 0 4px;letter-spacing:.06em;color:#fff;text-transform:uppercase}
+.deck-head h1 small{display:block;font-family:var(--body);font-weight:300;font-size:12px;letter-spacing:.34em;color:var(--patina-soft);margin-top:10px}
+.deck-head p{margin:20px 0 0;max-width:64ch;color:#A3A29B;font-size:15px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 0}
+.toc a{font-size:12px;letter-spacing:.06em;color:#C7C3BA;text-decoration:none;border:1px solid var(--deck-line);padding:7px 12px;border-radius:999px}
+.toc a:hover{border-color:var(--patina);color:#fff}
+.screen{padding:56px 0 8px;border-bottom:1px solid var(--deck-line)}
+.screen:last-of-type{border-bottom:0}
+.screen-head{display:flex;gap:18px;align-items:baseline;margin:0 0 20px;flex-wrap:wrap}
+.screen-num{font-family:var(--display);font-size:32px;color:var(--patina-soft);line-height:1}
+.screen-head h2{font-family:var(--display);font-weight:400;font-size:28px;margin:0;color:#fff;letter-spacing:.01em}
+.screen-head .note{color:#8F8E88;font-size:13.5px;max-width:60ch;margin:4px 0 0;flex-basis:100%}
+
+.frame{border:1px solid var(--deck-line);border-radius:8px;overflow:hidden;background:#000;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.bar{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#1A1B1E;border-bottom:1px solid rgba(255,255,255,.06)}
+.dot{width:9px;height:9px;border-radius:50%;background:#3A3B3F}
+.url{flex:1;text-align:center;font-size:11px;color:#83817A;font-family:ui-monospace,monospace}
+.view{background:var(--bone);color:var(--ink);font-size:13px;line-height:1.55;overflow:hidden}
+
+/* site */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;position:relative;z-index:3}
+.brand{font-family:var(--display);font-size:18px;letter-spacing:.3em;text-transform:uppercase;line-height:1.1}
+.brand small{display:block;font-family:var(--body);font-size:7.5px;letter-spacing:.42em;opacity:.75;margin-top:4px}
+.nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase}
+.nav .acct{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;border-bottom:1px solid currentColor;padding-bottom:2px}
+
+.hero{position:relative;min-height:420px;display:flex;flex-direction:column;color:#fff}
+.ph{position:absolute;inset:0}
+.ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,13,.5) 0%,rgba(10,11,13,.05) 40%,rgba(10,11,13,.8) 100%)}
+.p-a{background:linear-gradient(160deg,#C9C2B4 0%,#9A9384 38%,#5C5A52 62%,#1D1E20 100%)}
+.p-b{background:linear-gradient(170deg,#CBD2CC 0%,#9AA79F 40%,#4E5A55 70%,#14181A 100%)}
+.p-c{background:linear-gradient(150deg,#D8CDBB 0%,#B0A184 42%,#6A5F4C 68%,#211E19 100%)}
+.p-d{background:linear-gradient(175deg,#C3CBD4 0%,#8D97A2 42%,#4A5159 70%,#16181B 100%)}
+.p-e{background:linear-gradient(155deg,#E0D8CB 0%,#BCAE97 40%,#7C6F5B 68%,#241F19 100%)}
+.p-f{background:linear-gradient(165deg,#BFC7C3 0%,#8E9994 44%,#48504D 72%,#121514 100%)}
+.hero-copy{position:relative;z-index:2;margin-top:auto;padding:0 32px 42px;max-width:760px}
+.hero h1{font-family:var(--display);font-weight:300;font-size:46px;line-height:1.1;margin:0 0 12px;letter-spacing:.005em}
+.hero p{margin:0 0 26px;font-size:13.5px;color:rgba(255,255,255,.82);max-width:56ch}
+.acts{display:flex;gap:12px}
+.act{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;padding:12px 20px;border:1px solid rgba(255,255,255,.55)}
+.act.solid{background:#fff;color:var(--obsidian);border-color:#fff}
+
+.sec{padding:44px 32px}
+.sec.tight{padding-top:30px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:26px}
+.sec-head h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0}
+.sec-head a{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--patina);text-decoration:none}
+.label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mist)}
+
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card .img{aspect-ratio:4/3;position:relative;overflow:hidden}
+.card h3{font-family:var(--display);font-weight:400;font-size:19px;margin:14px 0 6px;line-height:1.25}
+.card .meta{font-size:11px;color:var(--graphite);letter-spacing:.02em}
+.card .price{font-size:13.5px;margin-top:8px;letter-spacing:.02em}
+
+.offpanel{background:var(--obsidian);color:#fff;padding:52px 32px;display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+.offpanel h2{font-family:var(--display);font-weight:300;font-size:34px;margin:0 0 14px;line-height:1.15}
+.offpanel p{margin:0 0 22px;font-size:13px;color:rgba(255,255,255,.66);max-width:46ch}
+.offcount{font-family:var(--display);font-size:86px;line-height:1;color:var(--patina-soft)}
+.offcount small{display:block;font-family:var(--body);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:10px}
+
+.mkt{position:relative;aspect-ratio:4/5;display:flex;align-items:flex-end;color:#fff;overflow:hidden}
+.mkt .t{position:relative;z-index:2;padding:14px}
+.mkt .t b{font-family:var(--display);font-weight:400;font-size:17px;display:block}
+.mkt .t span{font-size:10px;color:rgba(255,255,255,.72);letter-spacing:.04em}
+
+/* listing */
+.gal{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:repeat(2,1fr);gap:3px;height:330px}
+.gal .g1{grid-row:span 2}
+.gal div{position:relative;overflow:hidden}
+.ltitle{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:end;padding:30px 32px 20px;border-bottom:1px solid var(--line)}
+.ltitle h1{font-family:var(--display);font-weight:300;font-size:34px;margin:8px 0 6px;line-height:1.15}
+.ltitle .loc{font-size:12px;color:var(--graphite)}
+.ltitle .p{font-family:var(--display);font-size:30px;text-align:right}
+.two{display:grid;grid-template-columns:1.55fr 1fr;gap:36px;padding:30px 32px}
+.facts{border-top:1px solid var(--obsidian)}
+.facts h3{font-family:var(--display);font-weight:400;font-size:19px;margin:16px 0 10px}
+.frow{display:grid;grid-template-columns:1fr auto;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}
+.frow span{color:var(--mist);letter-spacing:.04em}
+.frow b{font-weight:400}
+.memberbox{border:1px solid var(--line-2);padding:18px;margin-top:22px;background:var(--vellum);display:flex;justify-content:space-between;align-items:center;gap:20px}
+.memberbox b{font-family:var(--display);font-weight:400;font-size:17px}
+.memberbox p{margin:4px 0 0;font-size:11.5px;color:var(--graphite)}
+.qlink{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--patina);border-bottom:1px solid var(--patina);padding-bottom:2px;white-space:nowrap}
+.aside .box{border:1px solid var(--line);padding:20px;background:#fff}
+.mono{width:40px;height:40px;border-radius:50%;background:var(--obsidian);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:15px}
+.btn{display:block;text-align:center;background:var(--obsidian);color:#fff;padding:12px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-top:12px}
+.btn.ghost{background:none;color:var(--obsidian);border:1px solid var(--obsidian)}
+.locmap{margin-top:18px;height:150px;position:relative;overflow:hidden;border:1px solid var(--line)}
+
+/* off-market */
+.memberbar{background:var(--obsidian);color:rgba(255,255,255,.82);padding:10px 32px;display:flex;justify-content:space-between;align-items:center;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+.notice{background:var(--vellum);border-bottom:1px solid var(--line);padding:12px 32px;font-size:11.5px;color:var(--graphite);display:flex;gap:10px;align-items:center}
+.notice b{color:var(--ink);font-weight:500}
+.omfilters{display:flex;gap:8px;padding:14px 32px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.f{font-size:10.5px;border:1px solid var(--line-2);padding:6px 12px;color:var(--graphite)}
+.f.act{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+.f.key{border-color:var(--patina);color:var(--patina)}
+.omgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:26px 32px}
+.omcard{border:1px solid var(--line);background:#fff}
+.omcard .img{aspect-ratio:4/3;position:relative}
+.omcard .b{padding:14px}
+.omcard h3{font-family:var(--display);font-weight:400;font-size:17px;margin:0 0 6px}
+.tagline{display:inline-block;font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--patina);border:1px solid var(--patina);padding:3px 7px;margin-bottom:10px}
+
+/* market page */
+.mstats{width:100%;border-collapse:collapse;font-size:12px;margin:0 32px;width:calc(100% - 64px)}
+.mstats th{text-align:left;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);font-weight:400;padding:10px 0;border-bottom:1px solid var(--obsidian)}
+.mstats td{padding:11px 0;border-bottom:1px solid var(--line)}
+.mstats td:nth-child(2){text-align:right;font-variant-numeric:tabular-nums}
+.mstats td:nth-child(3){text-align:right;color:var(--mist);font-size:10.5px;width:38%}
+.prose{padding:34px 32px 10px;max-width:76ch}
+.prose h1{font-family:var(--display);font-weight:300;font-size:36px;margin:8px 0 14px;line-height:1.15}
+.prose p{font-size:13px;color:var(--graphite);margin:0 0 14px}
+.links{display:flex;flex-wrap:wrap;gap:8px;padding:10px 32px 34px}
+.links a{font-size:11px;color:var(--patina);border:1px solid var(--line-2);padding:6px 11px;text-decoration:none}
+
+/* join */
+.join{display:grid;grid-template-columns:1fr 1fr;min-height:420px}
+.joinimg{position:relative}
+.joinform{padding:52px 44px;display:flex;flex-direction:column;justify-content:center;background:var(--bone)}
+.joinform h1{font-family:var(--display);font-weight:300;font-size:34px;margin:0 0 10px}
+.joinform p{font-size:12.5px;color:var(--graphite);margin:0 0 26px;max-width:42ch}
+.input{border:1px solid var(--line-2);padding:13px 14px;font-size:12px;color:var(--mist);margin-bottom:12px;background:#fff}
+.check{display:flex;gap:9px;align-items:flex-start;font-size:11px;color:var(--graphite);margin:6px 0 18px}
+.check i{width:13px;height:13px;border:1px solid var(--line-2);flex:none;margin-top:1px;background:#fff}
+.alt{font-size:11px;color:var(--patina);text-align:center;margin-top:14px}
+
+.foot{background:var(--obsidian);color:rgba(255,255,255,.62);padding:34px 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;font-size:11px}
+.foot h5{color:#fff;font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 10px;font-weight:400}
+.foot p{margin:4px 0}
+
+/* mobile */
+.phones{display:flex;gap:26px;flex-wrap:wrap;justify-content:center}
+.phone{width:280px;border:1px solid var(--deck-line);border-radius:26px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.notch{height:22px;background:#000;position:relative}
+.notch::after{content:"";position:absolute;left:50%;top:6px;transform:translateX(-50%);width:80px;height:5px;border-radius:3px;background:#222}
+.mhero{position:relative;height:320px;display:flex;flex-direction:column;color:#fff;padding:16px}
+.mhero h1{font-family:var(--display);font-weight:300;font-size:29px;margin:auto 0 8px;position:relative;z-index:2;line-height:1.12}
+
+.caption{color:#83817A;font-size:12px;margin:12px 0 0;text-align:center}
+.notes{padding:40px 0 70px}
+.notes h3{font-family:var(--display);font-weight:400;font-size:22px;color:#fff;margin:0 0 12px}
+.notes ul{margin:0;padding-left:18px;color:#A3A29B;font-size:13.5px}
+.notes li{margin-bottom:7px}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0}
+.sw{width:86px}
+.sw i{display:block;height:48px;border:1px solid rgba(255,255,255,.14)}
+.sw b{display:block;font-size:10px;font-weight:500;color:#D6D2C9;margin-top:6px}
+.sw small{font-size:9.5px;color:#83817A;font-family:ui-monospace,monospace}
+@media(max-width:900px){
+  .grid3,.omgrid{grid-template-columns:1fr 1fr}
+  .grid4{grid-template-columns:1fr 1fr}
+  .two,.offpanel,.join{grid-template-columns:1fr}
+  .foot{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:32px}
+  .joinform{padding:36px 24px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="deck-head">
+    <p class="kicker">Interface design preview · Specification v2.0</p>
+    <h1>Lawrence<small>Private Collection</small></h1>
+    <p>Full-fidelity layout of the key screens, built with the exact design tokens in §10.2 of the specification. Photography is represented by tonal gradients — real imagery is sourced automatically per §13.2. The public Collection is complete and indexable; the Off-Market section opens with a free account, nothing more.</p>
+    <nav class="toc">
+      <a href="#s1">1 · Home</a><a href="#s2">2 · Off-market &amp; markets</a><a href="#s3">3 · Listing</a>
+      <a href="#s4">4 · Off-market section</a><a href="#s5">5 · Market page</a><a href="#s6">6 · Create an account</a>
+      <a href="#s7">7 · Mobile</a><a href="#s8">8 · Tokens</a>
+    </nav>
+  </header>
+
+  <!-- 1 -->
+  <section class="screen" id="s1">
+    <div class="screen-head">
+      <span class="screen-num">01</span>
+      <h2>Home — hero and the Collection</h2>
+      <p class="note">No search bar at first contact: this is not a search product. Two quiet actions, one still image, and six properties given room to breathe. Prices are shown exactly, as a band, or on request, depending on the seller's instruction.</p>
+    </div>
+    <div class="frame">
+      <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">lawrenceprivatecollection.com/en</span></div>
+      <div class="view">
+        <div class="hero">
+          <div class="ph p-a"></div>
+          <nav class="nav" style="color:#fff">
+            <div class="brand">Lawrence<small>Private Collection</small></div>
+            <ul><li>Collection</li><li>Off-market</li><li>Markets</li><li>Intelligence</li><li>Journal</li></ul>
+            <div class="acct">Create an account</div>
+          </nav>
+          <div class="hero-copy">
+            <h1>Exceptional property, openly and otherwise.</h1>
+            <p>Lawrence Private Collection publishes the world’s finest homes from €20 million. The properties that cannot be published are kept for members.</p>
+            <div class="acts"><span class="act solid">View the collection</span><span class="act">See the off-market properties</span></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>The Collection</h2><a>All properties →</a></div>
+          <div class="grid3">
+            <div class="card">
+              <div class="img"><div class="ph p-b"></div></div>
+              <h3>Belle Époque villa above the bay</h3>
+              <div class="meta">Cap Ferrat · Côte d’Azur, France · 9 bed · 1,240 m² · 1.8 ha</div>
+              <div class="price num">€64,000,000</div>
+            </div>
+            <div class="card">
+              <div class="img"><div class="ph p-c"></div></div>
+              <h3>Sixteenth-century estate with vineyard</h3>
+              <div class="meta">Val d’Orcia · Tuscany, Italy · 12 bed · 2,100 m² · 46 ha</div>
+              <div class="price num">Guide €28–32 M</div>
+            </div>
+            <div class="card">
+              <div class="img"><div class="ph p-d"></div></div>
+              <h3>Stucco-fronted townhouse, garden square</h3>
+              <div class="meta">Belgravia · London, United Kingdom · 7 bed · 890 m²</div>
+              <div class="price">Price on request</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="caption">Cards carry the market, the country and three facts. No badges, no ribbons, no urgency devices — restraint is the positioning.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="screen" id="s2">
+    <div class="screen-head">
+      <span class="screen-num">02</span>
+      <h2>Off-market invitation and markets</h2>
+      <p class="note">The off-market panel is the highest-value block on the homepage and gets a full viewport. The count is real, computed live. The gate behind it is an email address — nothing heavier in this phase.</p>
+    </div>
+    <div class="frame">
+      <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">lawrenceprivatecollection.com/en — continued</span></div>
+      <div class="view">
+        <div class="offpanel">
+          <div>
+            <p class="label" style="color:var(--patina-soft)">Held off-market</p>
+            <h2>Forty-one properties are not publicly listed.</h2>
+            <p>Sellers at this level often prefer discretion. Create a free account to view them — an email address is all it takes, and access opens immediately.</p>
+            <span class="act solid">Create an account</span>
+          </div>
+          <div style="text-align:center">
+            <div class="offcount num">41<small>Currently off-market</small></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Markets</h2><a>All markets and research →</a></div>
+          <div class="grid4">
+            <div class="mkt"><div class="ph p-a"></div><div class="t"><b>Côte d’Azur</b><span class="num">Prime entry €19,400/m² · +4.1% YoY</span></div></div>
+            <div class="mkt"><div class="ph p-c"></div><div class="t"><b>Tuscany</b><span class="num">Prime entry €9,800/m² · +2.3% YoY</span></div></div>
+            <div class="mkt"><div class="ph p-d"></div><div class="t"><b>London PCL</b><span class="num">Prime entry £24,100/m² · −1.2% YoY</span></div></div>
+            <div class="mkt"><div class="ph p-f"></div><div class="t"><b>Lake Como</b><span class="num">Prime entry €13,200/m² · +5.6% YoY</span></div></div>
+          </div>
+          <p class="label" style="margin-top:14px">Every figure carries its source and the date it refers to · see Intelligence</p>
+        </div>
+
+        <div class="sec tight" style="border-top:1px solid var(--line)">
+          <div class="sec-head"><h2>Intelligence</h2><a>All reports →</a></div>
+          <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:32px;align-items:center">
+            <div class="img" style="aspect-ratio:4/3;position:relative"><div class="ph p-e"></div></div>
+            <div>
+              <span class="label">Report · March 2026</span>
+              <h3 style="font-family:var(--display);font-weight:400;font-size:26px;margin:10px 0 10px;line-height:1.2">Prime entry prices across eighteen markets</h3>
+              <p style="font-size:12.5px;color:var(--graphite);margin:0 0 16px">Where the top five per cent of each market begins, what has moved in twelve months, and how the published share of inventory differs by country. Derived from official transaction registries; method and sources stated in full.</p>
+              <span class="qlink">Read the summary</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot">
+          <div><h5>Collection</h5><p>All properties</p><p>Off-market</p><p>Recently added</p></div>
+          <div><h5>Markets</h5><p>Côte d’Azur</p><p>Tuscany</p><p>London PCL</p><p>Lake Como</p></div>
+          <div><h5>Company</h5><p>About</p><p>Discretion</p><p>Sell with us</p><p>Contact the desk</p></div>
+          <div><h5>English · EUR · Metric</h5><p>Privacy · Cookies · Terms</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 LISTING -->
+  <section class="screen" id="s3">
+    <div class="screen-head">
+      <span class="screen-num">03</span>
+      <h2>Listing detail (public)</h2>
+      <p class="note">Fully open: photography, facts, provenance, market context. The account buys the extra images, the floor plans and the off-market inventory — an honest exchange rather than a blurred teaser. The map is a locality circle; exact coordinates never reach the browser.</p>
+    </div>
+    <div class="frame">
+      <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">lawrenceprivatecollection.com/en/property/belle-epoque-villa-cap-ferrat</span></div>
+      <div class="view">
+        <nav class="nav" style="border-bottom:1px solid var(--line);background:#fff;color:var(--ink)">
+          <div class="brand">Lawrence<small>Private Collection</small></div>
+          <ul style="color:var(--graphite)"><li>Collection</li><li>Off-market</li><li>Markets</li><li>Intelligence</li></ul>
+          <div class="acct">Create an account</div>
+        </nav>
+        <div class="gal">
+          <div class="g1"><div class="ph p-b"></div></div>
+          <div><div class="ph p-a"></div></div>
+          <div><div class="ph p-e"></div></div>
+          <div><div class="ph p-f"></div></div>
+          <div style="display:flex;align-items:center;justify-content:center;background:#20232680;color:#fff"><div class="ph p-d" style="opacity:.55"></div><span style="position:relative;z-index:2;font-size:11px;letter-spacing:.14em">+ 22 PHOTOS</span></div>
+        </div>
+        <div class="ltitle">
+          <div>
+            <span class="label">Cap Ferrat · Côte d’Azur · France · Ref. LPC-2041</span>
+            <h1>Belle Époque villa above the bay</h1>
+            <div class="loc">9 bedrooms · 7 bathrooms · 4 receptions · 1,240 m² · grounds 1.8 ha · built 1911, restored 2019</div>
+          </div>
+          <div class="p num">€64,000,000</div>
+        </div>
+        <div class="two">
+          <div>
+            <div class="facts">
+              <h3>The property</h3>
+              <div class="frow"><span>Built area</span><b class="num">1,240 m²</b></div>
+              <div class="frow"><span>Grounds</span><b class="num">1.8 ha (4.4 acres)</b></div>
+              <div class="frow"><span>Architect</span><b>Aaron Messiah (attrib.)</b></div>
+              <div class="frow"><span>Heritage status</span><b>Protected — façade and gardens</b></div>
+              <div class="frow"><span>Tenure</span><b>Freehold</b></div>
+              <div class="frow"><span>Ownership structure</span><b>SCI — share transfer possible</b></div>
+              <div class="frow"><span>Features</span><b>Pool · staff quarters · guest house · 18 m berth</b></div>
+            </div>
+            <div class="memberbox">
+              <div><b>22 further images and the floor plans</b><p>Available to members. An email address is all it takes.</p></div>
+              <span class="qlink">Create an account</span>
+            </div>
+            <p style="font-size:12.5px;color:var(--graphite);margin-top:22px">Built in 1911 on the western flank of the cap and restored over four years to 2019, the villa holds a terraced garden of eighteen hundred square metres descending to a private shoreline platform. The principal floor opens through five sets of doors onto a loggia facing the bay…</p>
+          </div>
+          <div class="aside">
+            <div class="box">
+              <div style="display:flex;gap:11px;align-items:center;margin-bottom:14px"><div class="mono">LD</div><div><b style="font-size:12.5px;font-weight:500">Lawrence Desk</b><br><span class="label">Replies within one business day</span></div></div>
+              <div class="btn">Request details</div>
+              <div class="btn ghost">Arrange a viewing</div>
+              <div class="btn ghost">Download brochure</div>
+              <div class="locmap">
+                <svg viewBox="0 0 360 180" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                  <rect width="360" height="180" fill="#E3E0D8"/>
+                  <path d="M0,120 C60,100 90,60 160,52 C230,44 280,80 360,64 L360,180 L0,180 Z" fill="#C9D2CE"/>
+                  <circle cx="186" cy="82" r="34" fill="#7E6B4F" fill-opacity=".16" stroke="#7E6B4F" stroke-opacity=".5"/>
+                  <g stroke="#D2CEC4" stroke-width="1"><path d="M0 45 H360 M0 90 H360 M0 135 H360 M90 0 V180 M180 0 V180 M270 0 V180"/></g>
+                </svg>
+              </div>
+              <p class="label" style="margin-top:10px">Approximate location · exact address provided on enquiry</p>
+            </div>
+          </div>
+        </div>
+        <div class="sec tight" style="border-top:1px solid var(--line)">
+          <div class="sec-head"><h2>Côte d’Azur — market context</h2><a>Market page →</a></div>
+          <table class="mstats" style="margin:0;width:100%">
+            <tr><td>Prime entry price</td><td class="num">€19,400 / m²</td><td>Notaires de France · Q4 2025</td></tr>
+            <tr><td>Change, twelve months</td><td class="num">+4.1 %</td><td>Notaires de France · Q4 2025</td></tr>
+            <tr><td>Published above €20M</td><td class="num">37 properties</td><td>Lawrence, live</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 OFF MARKET -->
+  <section class="screen" id="s4">
+    <div class="screen-head">
+      <span class="screen-num">04</span>
+      <h2>Off-Market section (members)</h2>
+      <p class="note">Dynamic, never cached, never indexed, and excluded from every sitemap and public API response. A calm one-line notice sets the expectation; there is no lock iconography anywhere.</p>
+    </div>
+    <div class="frame">
+      <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">lawrenceprivatecollection.com/en/off-market</span></div>
+      <div class="view">
+        <div class="memberbar"><span>Lawrence · Private Collection</span><span>Signed in · Saved 4 · Requirements set ✓</span></div>
+        <nav class="nav" style="border-bottom:1px solid var(--line);background:#fff;color:var(--ink);padding-top:14px;padding-bottom:14px">
+          <div class="brand">Lawrence<small>Private Collection</small></div>
+          <ul style="color:var(--graphite)"><li>Collection</li><li style="color:var(--patina)">Off-market</li><li>Markets</li><li>Account</li></ul>
+          <div class="acct">Sign out</div>
+        </nav>
+        <div class="notice"><b>Not publicly marketed.</b> These properties are shown to members only. Please treat the details as confidential.</div>
+        <div class="omfilters">
+          <span class="f key">Matches my requirements · 6</span>
+          <span class="f act">€20M–€50M</span>
+          <span class="f">Côte d’Azur · Tuscany · Como</span>
+          <span class="f">Estate · Villa</span>
+          <span class="f">Waterfront</span>
+          <span class="f" style="margin-left:auto">Sort: Recently added</span>
+        </div>
+        <div class="omgrid">
+          <div class="omcard">
+            <div class="img"><div class="ph p-e"></div></div>
+            <div class="b">
+              <span class="tagline">Off-market</span>
+              <h3>Waterfront estate, western shore</h3>
+              <div class="meta" style="font-size:11px;color:var(--graphite)">Lake Como, Italy · 11 bed · 1,650 m² · 3.1 ha · 120 m frontage</div>
+              <div class="price num" style="font-size:13px;margin-top:8px">Guide €38–42 M</div>
+            </div>
+          </div>
+          <div class="omcard">
+            <div class="img"><div class="ph p-a"></div></div>
+            <div class="b">
+              <span class="tagline">Off-market</span>
+              <h3>Cap d’Antibes seafront property</h3>
+              <div class="meta" style="font-size:11px;color:var(--graphite)">Côte d’Azur, France · 8 bed · 980 m² · 0.9 ha</div>
+              <div class="price num" style="font-size:13px;margin-top:8px">€55,000,000</div>
+            </div>
+          </div>
+          <div class="omcard">
+            <div class="img"><div class="ph p-c"></div></div>
+            <div class="b">
+              <span class="tagline">Off-market</span>
+              <h3>Historic palazzo with private courtyard</h3>
+              <div class="meta" style="font-size:11px;color:var(--graphite)">Florence, Italy · 14 bed · 2,400 m²</div>
+              <div class="price num" style="font-size:13px;margin-top:8px">Price on request</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 MARKET -->
+  <section class="screen" id="s5">
+    <div class="screen-head">
+      <span class="screen-num">05</span>
+      <h2>Market page — the SEO engine</h2>
+      <p class="note">This is what ranks and what assistants cite. The first sixty words answer the query directly, every figure carries a source and a date, and the off-market count converts readers into accounts.</p>
+    </div>
+    <div class="frame">
+      <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">lawrenceprivatecollection.com/en/markets/cote-dazur</span></div>
+      <div class="view">
+        <div class="prose">
+          <span class="label">Markets · France</span>
+          <h1>Prime property on the Côte d’Azur</h1>
+          <p>Prime entry on the Côte d’Azur stands at roughly €19,400 per square metre as of Q4 2025, up 4.1 % over twelve months. Above €20 million the market is concentrated in four communes — Cap Ferrat, Cap d’Antibes, Saint-Jean and the Saint-Tropez peninsula — where fewer than sixty properties trade in a typical year.</p>
+        </div>
+        <table class="mstats">
+          <tr><th>Indicator</th><th style="text-align:right">Value</th><th style="text-align:right">Source · as of</th></tr>
+          <tr><td>Prime entry price</td><td class="num">€19,400 / m²</td><td>Notaires de France · Q4 2025</td></tr>
+          <tr><td>Twelve-month change</td><td class="num">+4.1 %</td><td>Notaires de France · Q4 2025</td></tr>
+          <tr><td>Median transaction, Alpes-Maritimes</td><td class="num">€1.24 M</td><td>DVF, data.gouv.fr · 2025</td></tr>
+          <tr><td>Published above €20 M</td><td class="num">37</td><td>Lawrence · live</td></tr>
+          <tr><td>Held off-market</td><td class="num">14</td><td>Lawrence · live</td></tr>
+        </table>
+        <div class="sec">
+          <div class="sec-head"><h2>Available on the Côte d’Azur</h2><a>All 37 →</a></div>
+          <div class="grid3">
+            <div class="card"><div class="img"><div class="ph p-b"></div></div><h3>Belle Époque villa above the bay</h3><div class="meta">Cap Ferrat · 9 bed · 1,240 m²</div><div class="price num">€64,000,000</div></div>
+            <div class="card"><div class="img"><div class="ph p-f"></div></div><h3>Contemporary villa, sea frontage</h3><div class="meta">Théoule-sur-Mer · 6 bed · 720 m²</div><div class="price num">€23,500,000</div></div>
+            <div class="card"><div class="img"><div class="ph p-d"></div></div><h3>Hillside estate with olive terraces</h3><div class="meta">Saint-Tropez · 10 bed · 1,100 m²</div><div class="price num">Guide €30–34 M</div></div>
+          </div>
+        </div>
+        <div class="links">
+          <a>Waterfront estates, Côte d’Azur</a><a>Saint-Tropez</a><a>Monaco</a><a>Cap Ferrat</a><a>Penthouses, Côte d’Azur</a><a>Prime property in Provence</a><a>Report: prime entry prices</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 JOIN -->
+  <section class="screen" id="s6">
+    <div class="screen-head">
+      <span class="screen-num">06</span>
+      <h2>Create an account</h2>
+      <p class="note">Two fields. No application, no NDA, no documents, no waiting list. Everything else on the screen is optional and clearly marked as such. This is the conversion event of the whole business.</p>
+    </div>
+    <div class="frame">
+      <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">lawrenceprivatecollection.com/en/join</span></div>
+      <div class="view">
+        <div class="join">
+          <div class="joinimg"><div class="ph p-c"></div>
+            <div style="position:absolute;z-index:2;bottom:0;padding:32px;color:#fff">
+              <div class="brand" style="margin-bottom:14px">Lawrence<small>Private Collection</small></div>
+              <p style="font-size:13px;color:rgba(255,255,255,.8);max-width:34ch;margin:0">Forty-one properties are currently held off-market. Members see them all.</p>
+            </div>
+          </div>
+          <div class="joinform">
+            <h1>Create an account</h1>
+            <p>It takes an email address. You will see the off-market collection immediately, and you can save properties and tell us what you are looking for.</p>
+            <div class="input">Email</div>
+            <div class="input">Password</div>
+            <div class="check"><i></i><span>Send me new properties matching my requirements.</span></div>
+            <div class="btn" style="margin-top:0">Create account</div>
+            <div class="alt">Or continue with a one-time link</div>
+            <p class="label" style="margin-top:22px;line-height:1.6">Optional, and only if it helps us show you the right properties: name, telephone, country, what you are looking for.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 MOBILE -->
+  <section class="screen" id="s7">
+    <div class="screen-head">
+      <span class="screen-num">07</span>
+      <h2>Mobile</h2>
+      <p class="note">Hero at 4:5, the off-market invitation as a full panel, and the fact table as the first block under the gallery. Public pages must hold LCP under 1.2 s on throttled 4G.</p>
+    </div>
+    <div class="phones">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="view">
+          <div class="mhero">
+            <div class="ph p-a"></div>
+            <div style="position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-start"><div class="brand" style="font-size:13px">Lawrence<small>Private Collection</small></div><span style="font-size:18px">≡</span></div>
+            <h1>Exceptional property, openly and otherwise.</h1>
+            <p style="position:relative;z-index:2;font-size:11.5px;color:rgba(255,255,255,.82);margin:0 0 14px">The world’s finest homes from €20 million.</p>
+            <div style="position:relative;z-index:2;display:flex;gap:8px">
+              <span class="act solid" style="font-size:9px;padding:10px 12px">View the collection</span>
+              <span class="act" style="font-size:9px;padding:10px 12px">Off-market</span>
+            </div>
+          </div>
+          <div style="background:var(--obsidian);color:#fff;padding:22px 16px;text-align:center">
+            <div class="offcount num" style="font-size:56px">41</div>
+            <p style="font-size:11.5px;color:rgba(255,255,255,.66);margin:6px 0 14px">properties are not publicly listed.</p>
+            <span class="act solid" style="font-size:9px;padding:10px 14px">Create an account</span>
+          </div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="view">
+          <div style="height:190px;position:relative"><div class="ph p-b"></div>
+            <span style="position:absolute;right:10px;bottom:10px;z-index:2;background:rgba(10,11,13,.72);color:#fff;font-size:10px;padding:4px 8px" class="num">1 / 26</span></div>
+          <div style="padding:16px">
+            <span class="label">Cap Ferrat · Côte d’Azur</span>
+            <h1 style="font-family:var(--display);font-weight:300;font-size:24px;margin:8px 0 6px;line-height:1.15">Belle Époque villa above the bay</h1>
+            <div class="num" style="font-family:var(--display);font-size:24px;margin:10px 0 16px">€64,000,000</div>
+            <div class="facts" style="border-top:1px solid var(--obsidian)">
+              <div class="frow"><span>Bedrooms</span><b class="num">9</b></div>
+              <div class="frow"><span>Built area</span><b class="num">1,240 m²</b></div>
+              <div class="frow"><span>Grounds</span><b class="num">1.8 ha</b></div>
+              <div class="frow"><span>Heritage</span><b>Protected</b></div>
+            </div>
+            <div class="memberbox" style="display:block">
+              <b style="font-size:15px">22 further images and floor plans</b>
+              <p>Available to members.</p>
+              <span class="qlink" style="display:inline-block;margin-top:10px">Create an account</span>
+            </div>
+            <div class="btn">Request details</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 TOKENS -->
+  <section class="screen" id="s8">
+    <div class="screen-head">
+      <span class="screen-num">08</span>
+      <h2>Tokens</h2>
+      <p class="note">The values in §10.2. The warm accent never exceeds two per cent of the surface — it appears on links, the off-market count and the small-caps markers, and nowhere else.</p>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#0A0B0D"></i><b>obsidian</b><small>#0A0B0D</small></div>
+      <div class="sw"><i style="background:#15171A"></i><b>ink</b><small>#15171A</small></div>
+      <div class="sw"><i style="background:#4A4D52"></i><b>graphite</b><small>#4A4D52</small></div>
+      <div class="sw"><i style="background:#9A9A94"></i><b>mist</b><small>#9A9A94</small></div>
+      <div class="sw"><i style="background:#7E6B4F"></i><b>patina</b><small>#7E6B4F</small></div>
+      <div class="sw"><i style="background:#B9A888"></i><b>patina soft</b><small>#B9A888</small></div>
+      <div class="sw"><i style="background:#F3F0EA"></i><b>bone</b><small>#F3F0EA</small></div>
+      <div class="sw"><i style="background:#FAF8F4"></i><b>vellum</b><small>#FAF8F4</small></div>
+    </div>
+    <div class="notes">
+      <h3>What this preview is, and is not</h3>
+      <ul>
+        <li><b>Is:</b> the real layout, hierarchy, type scale, spacing and colour. The wordmark shown is the type-only lockup described in §13.4 — display face, all caps, 0.18em tracking, second line at 38 %.</li>
+        <li><b>Is not:</b> final photography. Images are tonal gradients standing in for imagery the generator sources automatically (§13.2). Cormorant Garamond stands in for Canela; Inter is the production body face.</li>
+        <li>Note what is deliberately absent: no lock icons, no blurred cards, no countdowns, no chat widget. Restriction is expressed as a quiet line and a real number.</li>
+        <li>Every statistic shown carries a source and a date, exactly as the specification requires — that discipline is what makes the market pages citable.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+</body>
+</html>
