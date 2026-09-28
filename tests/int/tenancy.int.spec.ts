@@ -25,7 +25,7 @@ async function makeUser(role: string, agency?: number, agentProfile?: number) {
     collection: 'users',
     overrideAccess: true,
     data: {
-      email: `${role}-${agency ?? 'hq'}-${suffix}@test.waterline`,
+      email: `${role}-${agency ?? 'hq'}-${suffix}@test.lawrence`,
       password: 'test-password-123',
       name: `${role} test`,
       role: role as 'admin',
@@ -62,12 +62,15 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
     });
     agentAUser = await makeUser('agency_agent', agencyA.id, agentProfileA.id);
 
+    // The agent must be named on the listing: tenant({ agentField: 'agent' })
+    // scopes agency_agent updates to their own docs (spec §8.1 row 1).
     listingA = await payload.create({
       collection: 'properties',
       overrideAccess: true,
       data: {
         title: 'Agency A listing',
         agency: agencyA.id,
+        agent: agentProfileA.id,
         propertyType: 'villa',
         priceType: 'fixed',
         currency: 'EUR',
@@ -88,7 +91,7 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
       overrideAccess: true,
       data: {
         name: 'Buyer',
-        email: `buyer-${suffix}@test.waterline`,
+        email: `buyer-${suffix}@test.lawrence`,
         source: 'property',
         status: 'new',
         property: listingA.id,
@@ -99,10 +102,10 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
 
   afterAll(async () => {
     for (const [collection, where] of [
-      ['leads', { email: { like: `%${suffix}@test.waterline` } }],
+      ['leads', { email: { like: `%${suffix}@test.lawrence` } }],
       ['properties', { title: { equals: 'Agency A listing' } }],
       ['agents', { name: { equals: 'Agent A' } }],
-      ['users', { email: { like: `%${suffix}@test.waterline` } }],
+      ['users', { email: { like: `%${suffix}@test.lawrence` } }],
       ['agencies', { slug: { like: `%${suffix}` } }],
     ] as const) {
       await payload.delete({ collection, where, overrideAccess: true });
@@ -199,11 +202,10 @@ describe('Multi-tenancy (Prompt 4 acceptance)', () => {
       id: agentAUser.id,
       overrideAccess: true,
     });
-    const agentLogs = await payload.find({
-      collection: 'audit-logs',
-      overrideAccess: false,
-      user: asAgent,
-    });
-    expect(agentLogs.docs).toHaveLength(0);
+    // Audit-log access denies agents outright (boolean false), and Payload
+    // rejects a denied find with Forbidden rather than returning an empty page.
+    await expect(
+      payload.find({ collection: 'audit-logs', overrideAccess: false, user: asAgent }),
+    ).rejects.toThrow(/not allowed/i);
   });
 });

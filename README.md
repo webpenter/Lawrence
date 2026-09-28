@@ -11,7 +11,9 @@ Read `CLAUDE.md` before writing any feature code — it is the project's non-neg
 - A Postgres 16 database with the `postgis` and `pg_trgm` extensions enabled
 - A Typesense instance (Typesense Cloud, or `typesense/typesense:27.1` locally)
 
-Either run `docker compose up -d` (starts Postgres+PostGIS and Typesense locally, and auto-enables the two extensions via `docker/postgres-init/`), or point `DATABASE_URL` / `TYPESENSE_*` at existing cloud instances (e.g. Neon + Typesense Cloud) — see `DECISIONS.md` for why this repo defaults to cloud services in some development environments.
+Either run `docker compose up -d` (starts Postgres+PostGIS and Typesense locally, and auto-enables the two extensions via `docker/postgres-init/`), or point `DATABASE_URL` / `TYPESENSE_*` at existing cloud instances (e.g. Neon + Typesense Cloud).
+
+On machines without Docker or root access, `scripts/dev-services.sh start|stop|status` drives a rootless stack in `~/lawrence-devstack` (PostgreSQL 16 + PostGIS 3.5 via micromamba, Typesense 27.1 static binary) serving the same ports and credentials as the compose file — see `DECISIONS.md`.
 
 ## Setup
 

@@ -8,7 +8,27 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
-    include: ['tests/int/**/*.int.spec.ts', 'src/**/*.test.ts', 'src/**/*.test.tsx'],
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+        },
+      },
+      {
+        // Each int file boots its own Payload + pg pool; running them in
+        // parallel starves small dev machines and flakes on timeouts.
+        extends: true,
+        test: {
+          name: 'int',
+          include: ['tests/int/**/*.int.spec.ts'],
+          fileParallelism: false,
+        },
+      },
+    ],
   },
   resolve: {
     alias: {

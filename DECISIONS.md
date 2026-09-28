@@ -57,3 +57,19 @@ Badge tones all use vellum now.
 and the accent is rarely body text.
 
 **Reversibility**: full; all values live in tokens.ts and one Badge map.
+
+## 2026-09-28 — Fresh, isolated local database; no git remotes
+
+**Decision**: Development runs against a brand-new PostgreSQL 16 + PostGIS 3.5 cluster and a new
+Typesense 27.1 node, both created for Lawrence only (`~/lawrence-devstack`, rootless via
+micromamba + the Typesense static binary — this machine has no Docker and no sudo). The database
+is `lawrence` on `localhost:5432`; nothing is shared with the Waterline project or the machine's
+MySQL. `scripts/dev-services.sh` starts/stops the stack. Both git remotes (which pointed at the
+Waterline GitHub repos) were removed — the project stays local until the client's new repository
+exists, at which point `git remote add origin <url>` is the only step.
+
+**Alternatives**: Docker compose (no Docker on this machine), cloud Postgres/Typesense (needless
+external dependency for local work), reusing the Waterline database (explicitly ruled out).
+
+**Reversibility**: full — the stack is a disposable directory; the compose file remains the
+canonical definition for machines that have Docker.
