@@ -63,10 +63,10 @@ export function CookieConsent({ labels, locale }: CookieConsentProps) {
     <aside
       role="region"
       aria-label={labels.title}
-      className="fixed inset-x-3 bottom-3 z-toast mx-auto max-w-xl border border-line bg-white p-5 shadow-pop"
+      className="fixed inset-x-3 bottom-3 z-toast mx-auto max-w-xl border border-line bg-vellum p-5 shadow-pop"
     >
       <h2 className="mb-1 font-display text-base text-ink">{labels.title}</h2>
-      <p className="mb-4 text-xs leading-relaxed text-ink-soft">{labels.description}</p>
+      <p className="mb-4 text-xs leading-relaxed text-graphite">{labels.description}</p>
 
       {expanded ? (
         <div className="mb-4 flex flex-col gap-2">
@@ -93,7 +93,7 @@ export function CookieConsent({ labels, locale }: CookieConsentProps) {
         <button
           type="button"
           onClick={() => decide(true, true)}
-          className="bg-abyss px-4 py-2.5 text-xs uppercase tracking-[0.14em] text-white"
+          className="bg-obsidian px-4 py-2.5 text-xs uppercase tracking-[0.14em] text-vellum"
         >
           {labels.acceptAll}
         </button>
@@ -101,7 +101,7 @@ export function CookieConsent({ labels, locale }: CookieConsentProps) {
           <button
             type="button"
             onClick={() => decide(analytics, marketing)}
-            className="border border-abyss px-4 py-2.5 text-xs uppercase tracking-[0.14em] text-abyss"
+            className="border border-obsidian px-4 py-2.5 text-xs uppercase tracking-[0.14em] text-obsidian"
           >
             {labels.save}
           </button>
@@ -109,7 +109,7 @@ export function CookieConsent({ labels, locale }: CookieConsentProps) {
           <button
             type="button"
             onClick={() => decide(false, false)}
-            className="border border-abyss px-4 py-2.5 text-xs uppercase tracking-[0.14em] text-abyss"
+            className="border border-obsidian px-4 py-2.5 text-xs uppercase tracking-[0.14em] text-obsidian"
           >
             {labels.necessaryOnly}
           </button>
@@ -118,7 +118,7 @@ export function CookieConsent({ labels, locale }: CookieConsentProps) {
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="text-xs text-tide underline-offset-2 hover:underline"
+            className="text-xs text-patina underline-offset-2 hover:underline"
           >
             {labels.customize}
           </button>

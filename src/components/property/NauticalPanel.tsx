@@ -8,10 +8,10 @@ import type { Property } from '@/payload-types';
 function Row({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
   return (
     <div
-      className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5 py-2 text-xs ${last ? '' : 'border-b border-white/15'}`}
+      className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5 py-2 text-xs ${last ? '' : 'border-b border-vellum/15'}`}
     >
-      <span className="tracking-[0.04em] text-white/55">{label}</span>
-      <b className="font-medium tabular-nums text-white [overflow-wrap:anywhere] sm:text-right">
+      <span className="tracking-[0.04em] text-vellum/55">{label}</span>
+      <b className="font-medium tabular-nums text-vellum [overflow-wrap:anywhere] sm:text-right">
         {value}
       </b>
     </div>
@@ -62,13 +62,13 @@ export async function NauticalPanel({ property }: { property: Property }) {
   if (rows.length === 0) return null;
 
   return (
-    <section className="mt-5 bg-abyss p-4 text-white sm:p-5">
+    <section className="mt-5 bg-obsidian p-4 text-vellum sm:p-5">
       {property.maxBoatLoaM != null ? (
-        <span className="mb-3 inline-block bg-sand px-3 py-1.5 text-[length:var(--text-xs)] uppercase tracking-[0.12em] text-abyss">
+        <span className="mb-3 inline-block bg-patina-soft px-3 py-1.5 text-[length:var(--text-xs)] uppercase tracking-[0.12em] text-obsidian">
           {t('badgeFitsYacht', { n: property.maxBoatLoaM })}
         </span>
       ) : null}
-      <h2 className="mb-3 font-display text-base text-white">{t('nauticalTitle')}</h2>
+      <h2 className="mb-3 font-display text-base text-vellum">{t('nauticalTitle')}</h2>
       {rows.map(([label, value], index) => (
         <Row key={label} label={label} value={value} last={index === rows.length - 1} />
       ))}

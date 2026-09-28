@@ -26,10 +26,10 @@ export default async function GonePage({
       <SiteHeader />
       <main className="mx-auto flex min-h-[50vh] max-w-xl flex-col items-start justify-center gap-4 px-7">
         <h1 className="font-display text-2xl text-ink">{t('expiredNotice')}</h1>
-        <p className="text-sm text-ink-soft">{t('similarTitle')}:</p>
+        <p className="text-sm text-graphite">{t('similarTitle')}:</p>
         <Link
           href="/search"
-          className="bg-abyss px-5 py-3 text-xs uppercase tracking-[0.14em] text-white"
+          className="bg-obsidian px-5 py-3 text-xs uppercase tracking-[0.14em] text-vellum"
         >
           {ts('pageTitle')}
         </Link>

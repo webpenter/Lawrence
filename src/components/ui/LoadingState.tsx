@@ -4,10 +4,10 @@ export interface LoadingStateProps {
 
 export function LoadingState({ label = 'Loading…' }: LoadingStateProps) {
   return (
-    <div role="status" aria-live="polite" className="flex items-center gap-3 py-8 text-ink-soft">
+    <div role="status" aria-live="polite" className="flex items-center gap-3 py-8 text-graphite">
       <svg
         aria-hidden="true"
-        className="h-5 w-5 animate-spin text-tide"
+        className="h-5 w-5 animate-spin text-patina"
         viewBox="0 0 24 24"
         fill="none"
       >

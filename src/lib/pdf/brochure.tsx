@@ -27,7 +27,7 @@ const pt = (rem: string): number => Math.round(parseFloat(rem) * 12 * 10) / 10;
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: tokens.color.shell,
+    backgroundColor: tokens.color.bone,
     color: tokens.color.ink,
     fontFamily: 'Helvetica',
     fontSize: pt(tokens.size.xs),
@@ -38,12 +38,12 @@ const styles = StyleSheet.create({
     fontSize: pt(tokens.size.base),
     letterSpacing: 3,
     textTransform: 'uppercase',
-    color: tokens.color.abyss,
+    color: tokens.color.obsidian,
   },
   cover: {
     height: 240,
     marginTop: 12,
-    backgroundColor: tokens.color.abyss,
+    backgroundColor: tokens.color.obsidian,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -54,11 +54,11 @@ const styles = StyleSheet.create({
     right: 0,
     top: '46%',
     height: 1,
-    backgroundColor: tokens.color.surf,
+    backgroundColor: tokens.color.patinaSoft,
   },
   sampleBanner: {
-    backgroundColor: tokens.color.sand,
-    color: tokens.color.abyss,
+    backgroundColor: tokens.color.patinaSoft,
+    color: tokens.color.obsidian,
     padding: 6,
     fontSize: pt(tokens.size.xs) - 2,
     textTransform: 'uppercase',
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   locality: {
     marginTop: 4,
     fontSize: pt(tokens.size.xs) - 1,
-    color: tokens.color.inkSoft,
+    color: tokens.color.graphite,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
   },
@@ -109,26 +109,26 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: tokens.color.line,
   },
-  rowLabel: { color: tokens.color.inkSoft },
+  rowLabel: { color: tokens.color.graphite },
   rowValue: { color: tokens.color.ink },
   nautical: {
-    backgroundColor: tokens.color.abyss,
+    backgroundColor: tokens.color.obsidian,
     padding: 10,
     marginTop: 10,
   },
   nauticalTitle: {
     fontFamily: 'Times-Roman',
     fontSize: pt(tokens.size.sm),
-    color: tokens.color.white,
+    color: tokens.color.vellum,
     marginBottom: 6,
   },
-  nauticalLabel: { color: tokens.color.surf },
-  nauticalValue: { color: tokens.color.white },
+  nauticalLabel: { color: tokens.color.patinaSoft },
+  nauticalValue: { color: tokens.color.vellum },
   gallery: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 14 },
   galleryCell: {
     width: '32%',
     height: 84,
-    backgroundColor: tokens.color.tide,
+    backgroundColor: tokens.color.patina,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   agency: {
     marginTop: 14,
     padding: 10,
-    backgroundColor: tokens.color.white,
+    backgroundColor: tokens.color.vellum,
     borderWidth: 1,
     borderColor: tokens.color.line,
   },
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     right: 36,
     bottom: 20,
     fontSize: 6.5,
-    color: tokens.color.inkSoft,
+    color: tokens.color.graphite,
     borderTopWidth: 0.5,
     borderTopColor: tokens.color.line,
     paddingTop: 6,
@@ -165,7 +165,7 @@ export interface BrochureProps {
 
 function Row({ label, value, dark = false }: { label: string; value: string; dark?: boolean }) {
   return (
-    <View style={[styles.row, dark ? { borderBottomColor: tokens.color.tide } : {}]}>
+    <View style={[styles.row, dark ? { borderBottomColor: tokens.color.patina } : {}]}>
       <Text style={dark ? styles.nauticalLabel : styles.rowLabel}>{label}</Text>
       <Text style={dark ? styles.nauticalValue : styles.rowValue}>{value}</Text>
     </View>

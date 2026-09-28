@@ -45,14 +45,14 @@ export default async function DestinationsHub({ params }: HubProps) {
       <SiteHeader />
       <main className="px-7 py-8">
         <h1 className="mb-2 font-display text-2xl text-ink">{t('hubTitle')}</h1>
-        <p className="mb-6 max-w-[62ch] text-sm text-ink-soft">{t('hubSub')}</p>
+        <p className="mb-6 max-w-[62ch] text-sm text-graphite">{t('hubSub')}</p>
         {destinations.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {destinations.map((destination) => (
               <Link
                 key={destination.id}
                 href={`/destinations/${destination.slug}`}
-                className="group relative flex aspect-[3/2] items-end overflow-hidden text-white"
+                className="group relative flex aspect-[3/2] items-end overflow-hidden text-vellum"
               >
                 <span
                   aria-hidden="true"
@@ -62,7 +62,7 @@ export default async function DestinationsHub({ params }: HubProps) {
                 <span aria-hidden="true" className="absolute inset-0" style={{ background: HERO_SCRIM }} />
                 <span className="relative z-10 p-3 text-[length:var(--text-xs)] uppercase tracking-[0.1em]">
                   {destination.name}
-                  <small className="mt-0.5 block normal-case tracking-[0.06em] text-white/75">
+                  <small className="mt-0.5 block normal-case tracking-[0.06em] text-vellum/75">
                     {ts('resultsCount', { count: destination.count })}
                   </small>
                 </span>
@@ -70,7 +70,7 @@ export default async function DestinationsHub({ params }: HubProps) {
             ))}
           </div>
         ) : (
-          <p className="border border-line bg-white p-6 text-sm text-ink-soft">
+          <p className="border border-line bg-vellum p-6 text-sm text-graphite">
             {ts('emptyStateNoResults')}
           </p>
         )}

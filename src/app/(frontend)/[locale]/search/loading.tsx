@@ -6,7 +6,7 @@ import { layout } from '@/tokens/layout';
 export default function SearchLoading() {
   return (
     <div className="grid lg:grid-cols-[1.25fr_1fr]" style={{ minHeight: layout.searchSplitMinH }}>
-      <section className="bg-shell px-5 py-4">
+      <section className="bg-bone px-5 py-4">
         <div className="mb-3 flex items-baseline justify-between">
           <Skeleton className="h-4 w-28" />
           <Skeleton className="h-8 w-36" />
@@ -15,7 +15,7 @@ export default function SearchLoading() {
           {Array.from({ length: 6 }, (_, i) => (
             <div
               key={i}
-              className="grid gap-4 border border-line bg-white p-3"
+              className="grid gap-4 border border-line bg-vellum p-3"
               style={{ gridTemplateColumns: `${layout.searchRowImageW} 1fr` }}
             >
               <div className="relative aspect-[3/2]">

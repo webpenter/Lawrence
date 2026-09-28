@@ -26,12 +26,12 @@ export function SortSelect({ label, options, current }: SortSelectProps) {
   }
 
   return (
-    <label className="inline-flex items-center gap-2 text-xs text-ink-soft">
+    <label className="inline-flex items-center gap-2 text-xs text-graphite">
       <span className="uppercase tracking-[0.14em]">{label}</span>
       <select
         value={current}
         onChange={(event) => onChange(event.target.value)}
-        className="py-1.5 rounded-sm border border-line bg-white px-2 text-xs text-ink"
+        className="py-1.5 rounded-sm border border-line bg-vellum px-2 text-xs text-ink"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

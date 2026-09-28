@@ -39,3 +39,21 @@ subsequent phase (emails, JSON-LD, OG images).
 
 **Reversibility**: Full — identity lives in `src/config/brand.ts`, env defaults and compose/CI
 files only.
+
+## 2026-09-28 — Phase 2: token swap, palette remap and the patina contrast rule
+
+**Decision**: Replaced `/src/tokens/tokens.ts` with the spec §10.2 set verbatim and remapped the
+inherited palette classes mechanically: ink-soft→graphite, abyss→obsidian, tide→patina,
+surf/sand→patina-soft, shell→bone, white→vellum, rounded-pill→rounded-sm. Display font switched
+to Cormorant Garamond (Canela remains the paid upgrade slot). Brand constant aligned to §10.1.
+
+**Contrast rule discovered by axe**: patina `#7E6B4F` on bone `#F3F0EA` measures **4.49:1** — a
+hair under WCAG AA. Rule going forward: patina text is fine on vellum (4.86:1) and obsidian;
+on bone the accent moves into an underline/border and the text stays ink or graphite. The three
+status colours are dark enough to carry vellum text (success 5.9, warning 4.8, danger 7.2), so
+Badge tones all use vellum now.
+
+**Alternatives**: darkening the patina token to clear 4.5 on bone — rejected, §10.2 freezes the hex
+and the accent is rarely body text.
+
+**Reversibility**: full; all values live in tokens.ts and one Badge map.

@@ -112,7 +112,7 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
       />
       <main>
         <div
-          className="relative flex items-end text-white"
+          className="relative flex items-end text-vellum"
           style={{ minHeight: layout.heroMinH }}
         >
           <span
@@ -131,7 +131,7 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
         </div>
 
         {destination.description ? (
-          <section className="max-w-[74ch] px-7 pb-4 text-sm leading-relaxed text-ink-soft">
+          <section className="max-w-[74ch] px-7 pb-4 text-sm leading-relaxed text-graphite">
             <RichText data={destination.description} />
           </section>
         ) : null}
@@ -154,7 +154,7 @@ export default async function DestinationPage({ params }: DestinationPageProps) 
                 <Link
                   key={page.id}
                   href={`/waterfront/${page.slug}`}
-                  className="border border-line px-3 py-1.5 text-xs text-tide hover:bg-shell"
+                  className="border border-line px-3 py-1.5 text-xs text-patina hover:bg-bone"
                 >
                   {page.title}
                 </Link>

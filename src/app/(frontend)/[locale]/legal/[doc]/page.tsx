@@ -76,13 +76,13 @@ export default async function LegalPage({ params }: LegalPageProps) {
           </div>
         ) : (
           <>
-            <p className="mb-8 border border-line bg-white p-3 text-xs text-ink-soft">
+            <p className="mb-8 border border-line bg-vellum p-3 text-xs text-graphite">
               {t('reviewNote')}
             </p>
             {builtIn.sections.map((section) => (
               <section key={section.heading} className="mb-8">
                 <h2 className="mb-3 font-display text-lg text-ink">{section.heading}</h2>
-                <div className="flex flex-col gap-3 text-sm leading-relaxed text-ink-soft">
+                <div className="flex flex-col gap-3 text-sm leading-relaxed text-graphite">
                   {section.paragraphs.map((paragraph) => (
                     <p key={paragraph.slice(0, 40)}>{paragraph}</p>
                   ))}

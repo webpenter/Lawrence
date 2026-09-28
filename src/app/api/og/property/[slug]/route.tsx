@@ -51,7 +51,7 @@ export async function GET(
           justifyContent: 'flex-end',
           backgroundImage: HORIZON_GRADIENTS[0],
           fontFamily: 'Georgia, serif',
-          color: tokens.color.white,
+          color: tokens.color.vellum,
         }}
       >
         <div
@@ -74,7 +74,7 @@ export async function GET(
               justifyContent: 'space-between',
               marginTop: 22,
               fontSize: 30,
-              color: tokens.color.sand,
+              color: tokens.color.patinaSoft,
             }}
           >
             <span>{subtitle}</span>

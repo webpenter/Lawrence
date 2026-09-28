@@ -81,14 +81,14 @@ export function Lightbox({ images, currentIndex, labels, onClose, onNavigate }: 
       role="dialog"
       aria-modal="true"
       aria-label={labels.dialog}
-      className="fixed inset-0 z-modal flex items-center justify-center bg-abyss/95 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-obsidian/95 p-4"
     >
       <button
         ref={closeRef}
         type="button"
         onClick={onClose}
         aria-label={labels.close}
-        className="absolute right-4 top-4 z-10 flex p-3 items-center justify-center rounded-pill bg-white/10 text-white hover:bg-white/20"
+        className="absolute right-4 top-4 z-10 flex p-3 items-center justify-center rounded-sm bg-vellum/10 text-vellum hover:bg-vellum/20"
       >
         <span aria-hidden="true">×</span>
       </button>
@@ -98,7 +98,7 @@ export function Lightbox({ images, currentIndex, labels, onClose, onNavigate }: 
           type="button"
           onClick={() => onNavigate(currentIndex - 1)}
           aria-label={labels.prev}
-          className="absolute left-4 top-1/2 flex p-3 -translate-y-1/2 items-center justify-center rounded-pill bg-white/10 text-white hover:bg-white/20"
+          className="absolute left-4 top-1/2 flex p-3 -translate-y-1/2 items-center justify-center rounded-sm bg-vellum/10 text-vellum hover:bg-vellum/20"
         >
           <span aria-hidden="true">‹</span>
         </button>
@@ -115,7 +115,7 @@ export function Lightbox({ images, currentIndex, labels, onClose, onNavigate }: 
         />
         <figcaption
           aria-live="polite"
-          className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-abyss/70 px-3 py-1 text-xs text-white"
+          className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-obsidian/70 px-3 py-1 text-xs text-vellum"
         >
           {labels.counterTemplate
             .replace('{n}', String(currentIndex + 1))
@@ -128,7 +128,7 @@ export function Lightbox({ images, currentIndex, labels, onClose, onNavigate }: 
           type="button"
           onClick={() => onNavigate(currentIndex + 1)}
           aria-label={labels.next}
-          className="absolute right-4 top-1/2 flex p-3 -translate-y-1/2 items-center justify-center rounded-pill bg-white/10 text-white hover:bg-white/20"
+          className="absolute right-4 top-1/2 flex p-3 -translate-y-1/2 items-center justify-center rounded-sm bg-vellum/10 text-vellum hover:bg-vellum/20"
         >
           <span aria-hidden="true">›</span>
         </button>

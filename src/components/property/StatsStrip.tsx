@@ -45,7 +45,7 @@ export async function StatsStrip({ aggregates }: { aggregates: ScopeAggregates }
           className={`p-4 ${index < cells.length - 1 ? 'md:border-r md:border-line' : ''}`}
         >
           <dd className="font-display text-xl tabular-nums text-ink">{cell.value}</dd>
-          <dt className="text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-ink-soft">
+          <dt className="text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-graphite">
             {cell.label}
           </dt>
         </div>

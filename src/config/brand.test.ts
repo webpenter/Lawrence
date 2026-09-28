@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { brand } from './brand';
 
 describe('Brand Config', () => {
-  it('should have LAWRENCE PRIVATE COLLECTION as brand name', () => {
-    expect(brand.name).toBe('LAWRENCE PRIVATE COLLECTION');
+  it('should have Lawrence Private Collection as brand name', () => {
+    expect(brand.name).toBe('Lawrence Private Collection');
   });
 
   it('should have valid email addresses', () => {

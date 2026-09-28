@@ -40,14 +40,14 @@ export function BoatFitStrip({
   const [middle, afterLoa] = (afterCount ?? '').split('{loa}');
 
   return (
-    <section className="grid gap-8 bg-abyss px-7 py-8 text-white md:grid-cols-[1fr_1.2fr] md:items-center">
+    <section className="grid gap-8 bg-obsidian px-7 py-8 text-vellum md:grid-cols-[1fr_1.2fr] md:items-center">
       <div>
         {/* Preview .boatstrip h2: 26px — --text-xl. */}
         <h2 className="mb-2 font-display text-xl">{title}</h2>
-        <p className="max-w-[38ch] text-sm text-white/70">{sub}</p>
+        <p className="max-w-[38ch] text-sm text-vellum/70">{sub}</p>
       </div>
       <div>
-        <div className="mb-1 flex justify-between text-[length:var(--text-xs)] tabular-nums text-white/50">
+        <div className="mb-1 flex justify-between text-[length:var(--text-xs)] tabular-nums text-vellum/50">
           {BOAT_BUCKETS.map((bucket) => (
             <span key={bucket}>{bucket} m</span>
           ))}
@@ -60,18 +60,18 @@ export function BoatFitStrip({
           value={loa}
           onChange={(event) => setLoa(Number(event.target.value))}
           aria-label={lengthLabel}
-          className="w-full accent-sand"
+          className="w-full accent-patina-soft"
         />
         <div className="mt-1 flex justify-between text-[length:var(--text-xs)] tabular-nums">
-          <span className="text-sand">
+          <span className="text-patina-soft">
             {lengthLabel} · {loa} m
           </span>
-          <span className="text-white/50">{draftLabel}</span>
+          <span className="text-vellum/50">{draftLabel}</span>
         </div>
         {/* Preview .result: 30px — --text-2xl. */}
         <p aria-live="polite" className="mt-3 font-display text-2xl">
           {before}
-          <em className="not-italic text-sand tabular-nums">
+          <em className="not-italic text-patina-soft tabular-nums">
             {new Intl.NumberFormat(locale).format(count)}
           </em>
           {middle}
@@ -80,7 +80,7 @@ export function BoatFitStrip({
         </p>
         <a
           href={`/${locale}/search?boatLoa=${loa}`}
-          className="mt-3 inline-block border border-sand px-4 py-2 text-xs uppercase tracking-[0.14em] text-sand hover:bg-sand hover:text-abyss"
+          className="mt-3 inline-block border border-patina-soft px-4 py-2 text-xs uppercase tracking-[0.14em] text-patina-soft hover:bg-patina-soft hover:text-obsidian"
         >
           {searchCta}
         </a>

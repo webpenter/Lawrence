@@ -63,8 +63,8 @@ export function Tabs({ items, defaultTabId, className }: TabsProps) {
               onClick={() => setActiveId(item.id)}
               className={clsx(
                 'px-4 py-2 text-sm font-medium transition-colors duration-[var(--motion-fast)]',
-                selected ? 'border-b-2 border-tide text-abyss' : 'text-ink-soft hover:text-abyss',
-                item.disabled && 'cursor-not-allowed text-ink-soft/40',
+                selected ? 'border-b-2 border-patina text-obsidian' : 'text-graphite hover:text-obsidian',
+                item.disabled && 'cursor-not-allowed text-graphite/40',
               )}
             >
               {item.label}

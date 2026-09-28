@@ -46,7 +46,7 @@ export async function GET(
           justifyContent: 'flex-end',
           backgroundImage: HORIZON_GRADIENTS[2],
           fontFamily: 'Georgia, serif',
-          color: tokens.color.white,
+          color: tokens.color.vellum,
         }}
       >
         <div
@@ -64,7 +64,7 @@ export async function GET(
             {title}
           </div>
           {count != null ? (
-            <div style={{ fontSize: 32, marginTop: 22, color: tokens.color.sand }}>
+            <div style={{ fontSize: 32, marginTop: 22, color: tokens.color.patinaSoft }}>
               {count} verified waterfront listings
             </div>
           ) : null}

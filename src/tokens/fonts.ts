@@ -1,8 +1,8 @@
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Cormorant_Garamond, Inter } from 'next/font/google';
 
-export const displayFont = Playfair_Display({
+export const displayFont = Cormorant_Garamond({
   subsets: ['latin', 'cyrillic'],
-  weight: ['400', '700'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-display-loaded',
   display: 'swap',
   preload: true,

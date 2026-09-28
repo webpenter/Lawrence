@@ -34,7 +34,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
       <SiteHeader />
       <main className="mx-auto max-w-xl px-7 py-10">
         <h1 className="mb-2 font-display text-2xl text-ink">{t('title')}</h1>
-        <p className="mb-6 text-sm text-ink-soft">{t('sub')}</p>
+        <p className="mb-6 text-sm text-graphite">{t('sub')}</p>
         <EnquiryForm
           source="contact"
           locale={locale}
@@ -54,7 +54,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
             errorEmail: tl('formErrorEmail'),
           }}
         />
-        <p className="mt-8 text-xs text-ink-soft">
+        <p className="mt-8 text-xs text-graphite">
           {brand.email.contact} · {brand.phone}
         </p>
       </main>

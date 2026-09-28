@@ -54,7 +54,7 @@ export function WaterChips({ property, units, locale }: WaterChipsProps) {
           key={chip.label}
           className={clsx(
             'border px-2 py-0.5 text-[length:var(--text-xs)] uppercase tracking-[0.1em]',
-            chip.key ? 'border-tide text-tide' : 'border-line text-ink-soft',
+            chip.key ? 'border-patina text-patina' : 'border-line text-graphite',
           )}
         >
           {chip.label}

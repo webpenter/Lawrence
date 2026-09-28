@@ -36,7 +36,7 @@ function highlightCard(id: string, on: boolean) {
   if (card instanceof HTMLElement) {
     card.classList.toggle('outline', on);
     card.classList.toggle('outline-2', on);
-    card.classList.toggle('outline-tide', on);
+    card.classList.toggle('outline-patina', on);
   }
 }
 
@@ -83,8 +83,8 @@ export function ResultsMap({ markers, panelLabel, unavailableNote }: ResultsMapP
         el.type = 'button';
         el.setAttribute('aria-label', marker.label);
         el.className = marker.approximate
-          ? 'h-6 w-6 rounded-pill border border-tide bg-tide/20'
-          : 'rounded-sm bg-white px-2 py-1 text-xs font-medium tabular-nums text-abyss shadow-card';
+          ? 'h-6 w-6 rounded-sm border border-patina bg-patina/20'
+          : 'rounded-sm bg-vellum px-2 py-1 text-xs font-medium tabular-nums text-obsidian shadow-card';
         if (!marker.approximate) el.textContent = marker.label;
         el.addEventListener('mouseenter', () => highlightCard(marker.id, true));
         el.addEventListener('mouseleave', () => highlightCard(marker.id, false));
@@ -132,10 +132,10 @@ export function ResultsMap({ markers, panelLabel, unavailableNote }: ResultsMapP
     <div
       role="region"
       aria-label={panelLabel}
-      className="relative h-full overflow-hidden bg-surf/25"
+      className="relative h-full overflow-hidden bg-patina-soft/25"
       style={{ minHeight: layout.searchSplitMinH }}
     >
-      <p className="absolute inset-x-0 bottom-2 z-10 text-center text-[length:var(--text-xs)] text-ink-soft">
+      <p className="absolute inset-x-0 bottom-2 z-10 text-center text-[length:var(--text-xs)] text-graphite">
         {unavailableNote}
       </p>
       {b
@@ -152,8 +152,8 @@ export function ResultsMap({ markers, panelLabel, unavailableNote }: ResultsMapP
                 style={{ left: `${left}%`, top: `${top}%` }}
                 className={
                   marker.approximate
-                    ? 'absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-pill border border-tide bg-tide/20'
-                    : 'absolute -translate-x-1/2 -translate-y-full rounded-sm bg-white px-2 py-1 text-xs font-medium tabular-nums text-abyss shadow-card'
+                    ? 'absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-sm border border-patina bg-patina/20'
+                    : 'absolute -translate-x-1/2 -translate-y-full rounded-sm bg-vellum px-2 py-1 text-xs font-medium tabular-nums text-obsidian shadow-card'
                 }
               >
                 {marker.approximate ? null : marker.label}

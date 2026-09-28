@@ -11,6 +11,8 @@ import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { Modal } from '@/components/ui/Modal';
+import { OffMarketInvite } from '@/components/ui/OffMarketInvite';
+import { SaveButton } from '@/components/ui/SaveButton';
 import { Select } from '@/components/ui/Select';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Tabs } from '@/components/ui/Tabs';
@@ -18,7 +20,7 @@ import { Tabs } from '@/components/ui/Tabs';
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-4 border-b border-line pb-10">
-      <h2 className="font-display text-2xl text-abyss">{title}</h2>
+      <h2 className="font-display text-2xl text-obsidian">{title}</h2>
       <div className="flex flex-wrap items-start gap-4">{children}</div>
     </section>
   );
@@ -32,12 +34,13 @@ const CloseIcon = (
 
 export function StyleguideContent() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-12">
       <header>
-        <h1 className="font-display text-4xl text-abyss">WATERLINE styleguide</h1>
-        <p className="mt-2 text-ink-soft">
+        <h1 className="font-display text-4xl text-obsidian">Lawrence styleguide</h1>
+        <p className="mt-2 text-graphite">
           Dev-only reference for every base component in every state. Not indexed, not linked from
           the public site.
         </p>
@@ -108,12 +111,44 @@ export function StyleguideContent() {
         <Badge tone="sample">Sample</Badge>
       </Section>
 
+      <Section title="OffMarketInvite">
+        <OffMarketInvite
+          className="w-full"
+          label="Held off-market"
+          message="41 properties are held off-market."
+          ctaLabel="Create an account to view them."
+          href="/join"
+        />
+      </Section>
+
+      <Section title="SaveButton">
+        <SaveButton
+          saved={saved}
+          saveLabel="Save this property"
+          savedLabel="Saved — remove from your list"
+          onToggle={() => setSaved((s) => !s)}
+        />
+        <SaveButton
+          saved
+          saveLabel="Save this property"
+          savedLabel="Saved — remove from your list"
+          onToggle={() => undefined}
+        />
+        <SaveButton
+          saved={false}
+          disabled
+          saveLabel="Save this property"
+          savedLabel="Saved — remove from your list"
+          onToggle={() => undefined}
+        />
+      </Section>
+
       <Section title="Modal">
         <Button variant="primary" onClick={() => setModalOpen(true)}>
           Open modal
         </Button>
         <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Confirm enquiry">
-          <p className="text-sm text-ink-soft">
+          <p className="text-sm text-graphite">
             This is the modal body. Escape, the backdrop, and the close button all dismiss it.
           </p>
         </Modal>
@@ -133,7 +168,7 @@ export function StyleguideContent() {
       <Section title="Skeleton">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-24 w-40" />
-        <Skeleton className="h-10 w-10 rounded-pill" />
+        <Skeleton className="h-10 w-10 rounded-sm" />
       </Section>
 
       <Section title="Loading state">
@@ -149,23 +184,23 @@ export function StyleguideContent() {
       </Section>
 
       <Section title="AspectBox">
-        <AspectBox ratio="card" className="w-40 bg-tide/20">
-          <span className="absolute inset-0 flex items-center justify-center text-xs text-ink-soft">
+        <AspectBox ratio="card" className="w-40 bg-patina/20">
+          <span className="absolute inset-0 flex items-center justify-center text-xs text-graphite">
             3:2 card
           </span>
         </AspectBox>
-        <AspectBox ratio="gallery" className="w-40 bg-tide/20">
-          <span className="absolute inset-0 flex items-center justify-center text-xs text-ink-soft">
+        <AspectBox ratio="gallery" className="w-40 bg-patina/20">
+          <span className="absolute inset-0 flex items-center justify-center text-xs text-graphite">
             3:2 gallery
           </span>
         </AspectBox>
-        <AspectBox ratio="editorial" className="w-40 bg-tide/20">
-          <span className="absolute inset-0 flex items-center justify-center text-xs text-ink-soft">
+        <AspectBox ratio="editorial" className="w-40 bg-patina/20">
+          <span className="absolute inset-0 flex items-center justify-center text-xs text-graphite">
             16:9 editorial
           </span>
         </AspectBox>
-        <AspectBox ratio="heroMobile" className="w-40 bg-tide/20">
-          <span className="absolute inset-0 flex items-center justify-center text-xs text-ink-soft">
+        <AspectBox ratio="heroMobile" className="w-40 bg-patina/20">
+          <span className="absolute inset-0 flex items-center justify-center text-xs text-graphite">
             4:5 hero mobile
           </span>
         </AspectBox>

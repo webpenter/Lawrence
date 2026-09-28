@@ -89,7 +89,7 @@ describe('organization + website JSON-LD (§14.3)', async () => {
   it('Organization carries identity and sameAs links', () => {
     const jsonLd = organizationJsonLd();
     expect(jsonLd['@type']).toBe('Organization');
-    expect(jsonLd.name).toBe('LAWRENCE PRIVATE COLLECTION');
+    expect(jsonLd.name).toBe('Lawrence Private Collection');
     expect(Array.isArray(jsonLd.sameAs)).toBe(true);
     expect((jsonLd.sameAs as string[]).length).toBeGreaterThan(0);
   });

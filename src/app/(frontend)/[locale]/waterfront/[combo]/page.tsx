@@ -204,7 +204,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
         {/* Editorial first (§10.4): the intro opens with a direct answer (§14.6). */}
         <div className="max-w-[74ch] px-7 pb-2 pt-7">
           {/* Preview .prose label: "Waterfront · Villas · Liguria". */}
-          <p className="mb-2 text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-ink-soft">
+          <p className="mb-2 text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-graphite">
             {[
               t('kicker'),
               page.combo?.propertyType ? humanizeEnum(page.combo.propertyType) : null,
@@ -214,7 +214,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
               .join(' · ')}
           </p>
           <h1 className="mb-3 font-display text-2xl text-ink">{page.title}</h1>
-          <div className="text-sm leading-relaxed text-ink-soft">
+          <div className="text-sm leading-relaxed text-graphite">
             {page.intro ? <RichText data={page.intro} /> : null}
           </div>
         </div>
@@ -233,7 +233,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
             </div>
             <Link
               href={`/search${comboToSearchQuery(page)}`}
-              className="mt-5 inline-block bg-abyss px-5 py-3 text-xs uppercase tracking-[0.14em] text-white"
+              className="mt-5 inline-block bg-obsidian px-5 py-3 text-xs uppercase tracking-[0.14em] text-vellum"
             >
               {t('viewAllCta', { count: aggregates.count })}
             </Link>
@@ -241,7 +241,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
         ) : null}
 
         {page.body ? (
-          <section className="max-w-[74ch] px-7 pb-4 text-sm leading-relaxed text-ink-soft">
+          <section className="max-w-[74ch] px-7 pb-4 text-sm leading-relaxed text-graphite">
             <RichText data={page.body} />
           </section>
         ) : null}
@@ -254,7 +254,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
                 <Link
                   key={sibling.id}
                   href={`/waterfront/${sibling.slug}`}
-                  className="border border-line px-3 py-1.5 text-xs text-tide hover:bg-shell"
+                  className="border border-line px-3 py-1.5 text-xs text-patina hover:bg-bone"
                 >
                   {sibling.title}
                 </Link>
@@ -271,7 +271,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
                 <summary className="cursor-pointer text-sm font-medium text-ink">
                   {entry.question}
                 </summary>
-                <p className="pt-2 text-sm leading-relaxed text-ink-soft">{entry.answer}</p>
+                <p className="pt-2 text-sm leading-relaxed text-graphite">{entry.answer}</p>
               </details>
             ))}
           </section>
@@ -279,7 +279,7 @@ export default async function ComboPage({ params }: ComboPageProps) {
 
         <section className="max-w-md px-7 py-7">
           <h2 className="mb-1 font-display text-lg text-ink">{t('enquiryTitle')}</h2>
-          <p className="mb-4 text-xs text-ink-soft">{t('enquirySub')}</p>
+          <p className="mb-4 text-xs text-graphite">{t('enquirySub')}</p>
           <EnquiryForm
             source="landing"
             locale={locale}

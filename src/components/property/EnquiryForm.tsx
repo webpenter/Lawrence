@@ -167,7 +167,7 @@ export function EnquiryForm({ propertyId, source = 'property', locale, labels }:
           autoComplete="name"
           aria-invalid={fieldErrors.name ? true : undefined}
           aria-describedby={fieldErrors.name ? errorId('name') : undefined}
-          className="py-3 rounded-md border border-line bg-white px-3 text-base text-ink"
+          className="py-3 rounded-md border border-line bg-vellum px-3 text-base text-ink"
         />
         {fieldErrors.name ? (
           <span id={errorId('name')} className="text-xs text-danger">
@@ -185,7 +185,7 @@ export function EnquiryForm({ propertyId, source = 'property', locale, labels }:
           autoComplete="email"
           aria-invalid={fieldErrors.email ? true : undefined}
           aria-describedby={fieldErrors.email ? errorId('email') : undefined}
-          className="py-3 rounded-md border border-line bg-white px-3 text-base text-ink"
+          className="py-3 rounded-md border border-line bg-vellum px-3 text-base text-ink"
         />
         {fieldErrors.email ? (
           <span id={errorId('email')} className="text-xs text-danger">
@@ -199,7 +199,7 @@ export function EnquiryForm({ propertyId, source = 'property', locale, labels }:
           name="phone"
           type="tel"
           autoComplete="tel"
-          className="py-3 rounded-md border border-line bg-white px-3 text-base text-ink"
+          className="py-3 rounded-md border border-line bg-vellum px-3 text-base text-ink"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-ink">
@@ -207,7 +207,7 @@ export function EnquiryForm({ propertyId, source = 'property', locale, labels }:
         <textarea
           name="message"
           rows={4}
-          className="rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
+          className="rounded-md border border-line bg-vellum px-3 py-2 text-base text-ink"
         />
       </label>
       {/* Honeypot: visually hidden, tab-skipped; bots fill it, humans never see it. */}
@@ -219,7 +219,7 @@ export function EnquiryForm({ propertyId, source = 'property', locale, labels }:
         aria-hidden="true"
         className="sr-only"
       />
-      <label className="flex items-start gap-2 text-xs text-ink-soft" htmlFor={fieldId('consent')}>
+      <label className="flex items-start gap-2 text-xs text-graphite" htmlFor={fieldId('consent')}>
         <input
           id={fieldId('consent')}
           type="checkbox"
@@ -243,7 +243,7 @@ export function EnquiryForm({ propertyId, source = 'property', locale, labels }:
       <button
         type="submit"
         disabled={status === 'sending'}
-        className="bg-abyss px-4 py-3 text-xs uppercase tracking-[0.14em] text-white disabled:opacity-60"
+        className="bg-obsidian px-4 py-3 text-xs uppercase tracking-[0.14em] text-vellum disabled:opacity-60"
       >
         {status === 'sending' ? labels.sending : labels.submit}
       </button>

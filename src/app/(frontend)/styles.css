@@ -7,7 +7,7 @@
   }
 
   body {
-    background-color: var(--color-shell);
+    background-color: var(--color-bone);
     color: var(--color-ink);
     font-family: var(--font-body);
   }

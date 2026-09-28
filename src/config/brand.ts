@@ -22,12 +22,12 @@ export interface BrandConfig {
 }
 
 export const brand: BrandConfig = {
-  name: 'LAWRENCE PRIVATE COLLECTION',
-  codename: 'LAWRENCE',
+  name: 'Lawrence Private Collection',
+  codename: 'Lawrence',
   legalName: 'Lawrence Private Collection Limited',
   domain: 'lawrenceprivatecollection.com',
   siteUrl: process.env['NEXT_PUBLIC_SITE_URL'] || 'https://lawrenceprivatecollection.com',
-  tagline: "The world's trophy homes, published openly — and the ones that are not, kept for members.",
+  tagline: 'Exceptional property, openly and otherwise.',
   description:
     'A portal for exceptional property from roughly €20 million: a fully public Collection, and a members-only Off-Market section.',
   email: {

@@ -21,7 +21,7 @@ export async function PreferenceBar({ dark = false }: { dark?: boolean }) {
   const dot = dark ? <span aria-hidden="true">·</span> : null;
 
   return (
-    <div className={`flex flex-wrap items-center ${dark ? 'gap-2 text-white' : 'gap-4'}`}>
+    <div className={`flex flex-wrap items-center ${dark ? 'gap-2 text-vellum' : 'gap-4'}`}>
       <Suspense>
         <LocaleSwitcher label={t('language')} currentLocale={locale} dark={dark} />
       </Suspense>

@@ -55,10 +55,10 @@ export async function PropertyCard({
 
   const body = (
     <>
-      <h3 className="font-display text-base text-ink group-hover:text-tide">
+      <h3 className="font-display text-base text-ink group-hover:text-patina">
         {property.title}
       </h3>
-      <div className="flex flex-wrap gap-x-3 text-xs text-ink-soft">
+      <div className="flex flex-wrap gap-x-3 text-xs text-graphite">
         {meta.map((item) => (
           <span key={item}>{item}</span>
         ))}
@@ -72,7 +72,7 @@ export async function PropertyCard({
     return (
       <Link
         href={`/property/${property.slug}`}
-        className="group grid grid-cols-[150px_1fr] gap-4 border border-line bg-white p-3"
+        className="group grid grid-cols-[150px_1fr] gap-4 border border-line bg-vellum p-3"
       >
         <AspectBox ratio="card">{image}</AspectBox>
         <div className="flex flex-col gap-1">{body}</div>

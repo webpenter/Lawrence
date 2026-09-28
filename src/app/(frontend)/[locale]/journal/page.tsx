@@ -37,34 +37,34 @@ export default async function JournalPage({ params }: JournalPageProps) {
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-7 py-10">
         <h1 className="mb-2 font-display text-2xl text-ink">{t('title')}</h1>
-        <p className="mb-8 text-sm text-ink-soft">{t('sub')}</p>
+        <p className="mb-8 text-sm text-graphite">{t('sub')}</p>
 
         {articles.length === 0 ? (
-          <p className="border border-line bg-white p-6 text-sm text-ink-soft">{t('empty')}</p>
+          <p className="border border-line bg-vellum p-6 text-sm text-graphite">{t('empty')}</p>
         ) : (
           <ul className="flex flex-col gap-6">
             {articles.map((article) => (
-              <li key={article.slug} className="border border-line bg-white p-6">
+              <li key={article.slug} className="border border-line bg-vellum p-6">
                 {isFallbackContent(article) ? (
-                  <p className="mb-2 inline-block bg-sand px-2 py-0.5 text-[length:var(--text-xs)] font-medium uppercase tracking-[0.14em] text-ink">
+                  <p className="mb-2 inline-block bg-patina-soft px-2 py-0.5 text-[length:var(--text-xs)] font-medium uppercase tracking-[0.14em] text-ink">
                     {t('sampleNotice')}
                   </p>
                 ) : null}
                 <h2 className="font-display text-lg text-ink">
                   <Link
                     href={`/${locale}/journal/${article.slug}`}
-                    className="hover:text-tide"
+                    className="hover:text-patina"
                   >
                     {article.title}
                   </Link>
                 </h2>
                 {article.publishedAt ? (
-                  <p className="mt-1 text-xs text-ink-soft">
+                  <p className="mt-1 text-xs text-graphite">
                     {t('publishedOn', { date: formatDate(article.publishedAt, locale) })}
                   </p>
                 ) : null}
                 {article.excerpt ? (
-                  <p className="mt-3 text-sm text-ink-soft">{article.excerpt}</p>
+                  <p className="mt-3 text-sm text-graphite">{article.excerpt}</p>
                 ) : null}
               </li>
             ))}

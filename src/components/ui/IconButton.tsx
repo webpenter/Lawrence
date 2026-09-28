@@ -30,7 +30,7 @@ export function IconButton({
       title={label}
       disabled={disabled}
       className={clsx(
-        'inline-flex items-center justify-center rounded-full text-abyss transition-colors duration-[var(--motion-fast)] hover:bg-shell disabled:cursor-not-allowed disabled:text-ink-soft/40',
+        'inline-flex items-center justify-center rounded-full text-obsidian transition-colors duration-[var(--motion-fast)] hover:bg-bone disabled:cursor-not-allowed disabled:text-graphite/40',
         SIZE_CLASSES[size],
         className,
       )}

@@ -47,7 +47,7 @@ export async function SearchResultCard({ hit }: { hit: SearchHit }) {
     <Link
       href={`/property/${hit.slug}`}
       data-property-id={hit.id}
-      className="group grid gap-4 border border-line bg-white p-3"
+      className="group grid gap-4 border border-line bg-vellum p-3"
       style={{ gridTemplateColumns: `${layout.searchRowImageW} 1fr` }}
     >
       <AspectBox ratio="card">
@@ -69,15 +69,15 @@ export async function SearchResultCard({ hit }: { hit: SearchHit }) {
             .join(' · ');
           const label = locality || (typeof hit.country === 'string' ? hit.country : '');
           return label ? (
-            <span className="text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-ink-soft">
+            <span className="text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-graphite">
               {label}
             </span>
           ) : null;
         })()}
-        <h3 className="font-display text-[length:var(--text-base)] text-ink group-hover:text-tide">
+        <h3 className="font-display text-[length:var(--text-base)] text-ink group-hover:text-patina">
           {hit.title}
         </h3>
-        <div className="flex flex-wrap gap-x-3 text-xs text-ink-soft">
+        <div className="flex flex-wrap gap-x-3 text-xs text-graphite">
           {meta.map((item) => (
             <span key={item}>{item}</span>
           ))}
@@ -89,7 +89,7 @@ export async function SearchResultCard({ hit }: { hit: SearchHit }) {
                 key={chip.label}
                 className={clsx(
                   'border px-2 py-0.5 text-[length:var(--text-xs)] uppercase tracking-[0.1em]',
-                  chip.key ? 'border-tide text-tide' : 'border-line text-ink-soft',
+                  chip.key ? 'border-patina text-patina' : 'border-line text-graphite',
                 )}
               >
                 {chip.label}

@@ -26,7 +26,7 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
     <nav
       className={clsx(
         'relative z-header flex items-center justify-between gap-3 px-5 py-4 sm:px-7',
-        onHero ? 'text-white' : 'border-b border-line bg-white text-abyss',
+        onHero ? 'text-vellum' : 'border-b border-line bg-vellum text-obsidian',
       )}
     >
       <Link
@@ -66,19 +66,19 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
             <span className="block h-0.5 w-5 bg-current" />
           </span>
         </summary>
-        <div className="absolute right-0 top-full z-header mt-2 flex w-48 flex-col gap-1 border border-line bg-white p-2 text-abyss shadow-pop">
+        <div className="absolute right-0 top-full z-header mt-2 flex w-48 flex-col gap-1 border border-line bg-vellum p-2 text-obsidian shadow-pop">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="px-3 py-2 text-xs uppercase tracking-[0.12em] hover:bg-shell"
+              className="px-3 py-2 text-xs uppercase tracking-[0.12em] hover:bg-bone"
             >
               {link.label}
             </Link>
           ))}
           <Link
             href="/list-with-us"
-            className="mt-1 bg-abyss px-3 py-2.5 text-center text-xs uppercase tracking-[0.14em] text-white"
+            className="mt-1 bg-obsidian px-3 py-2.5 text-center text-xs uppercase tracking-[0.14em] text-vellum"
           >
             {t('listWithUs')}
           </Link>

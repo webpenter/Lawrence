@@ -38,7 +38,7 @@ export default async function ListWithUsPage({ params }: ListWithUsPageProps) {
     <>
       <SiteHeader />
       <main>
-        <div className="relative flex min-h-64 items-end text-white">
+        <div className="relative flex min-h-64 items-end text-vellum">
           <span
             aria-hidden="true"
             className="absolute inset-0"
@@ -47,13 +47,13 @@ export default async function ListWithUsPage({ params }: ListWithUsPageProps) {
           <span aria-hidden="true" className="absolute inset-0" style={{ background: HERO_SCRIM }} />
           <div className="relative z-10 px-7 pb-7">
             <h1 className="mb-2 font-display text-3xl tracking-[-0.02em]">{t('title')}</h1>
-            <p className="max-w-[52ch] text-sm text-white/85">{home('supplyCtaSub')}</p>
+            <p className="max-w-[52ch] text-sm text-vellum/85">{home('supplyCtaSub')}</p>
           </div>
         </div>
 
         <section className="grid gap-8 px-7 py-8 md:grid-cols-3">
           {(['whyVerified', 'whyFrontage', 'whyBerth'] as const).map((key) => (
-            <p key={key} className="border-t border-ink pt-3 text-sm text-ink-soft">
+            <p key={key} className="border-t border-ink pt-3 text-sm text-graphite">
               {home(key)}
             </p>
           ))}
@@ -61,7 +61,7 @@ export default async function ListWithUsPage({ params }: ListWithUsPageProps) {
 
         <section className="mx-auto max-w-xl px-7 pb-10">
           <h2 className="mb-1 font-display text-lg text-ink">{t('formTitle')}</h2>
-          <p className="mb-5 text-xs text-ink-soft">{t('formSub')}</p>
+          <p className="mb-5 text-xs text-graphite">{t('formSub')}</p>
           <EnquiryForm
             source="list_with_us"
             locale={locale}

@@ -3,9 +3,9 @@ import Link from 'next/link';
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
 
 const VARIANT_CLASSES = {
-  primary: 'bg-abyss text-shell hover:bg-ink disabled:bg-ink-soft/40',
-  secondary: 'bg-transparent text-abyss border border-line hover:bg-shell disabled:text-ink-soft/40',
-  ghost: 'bg-transparent text-abyss hover:bg-shell disabled:text-ink-soft/40',
+  primary: 'bg-obsidian text-bone hover:bg-ink disabled:bg-graphite/40',
+  secondary: 'bg-transparent text-obsidian border border-line hover:bg-bone disabled:text-graphite/40',
+  ghost: 'bg-transparent text-obsidian hover:bg-bone disabled:text-graphite/40',
 } as const;
 
 const SIZE_CLASSES = {

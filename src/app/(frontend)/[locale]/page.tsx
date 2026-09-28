@@ -87,7 +87,7 @@ export default async function HomePage({
           §11.1). min-h-svh so the whole hero (nav → search) fills the first
           screen and Signature properties stays below the fold; svh handles
           mobile browser chrome correctly. */}
-      <section className="relative flex min-h-svh flex-col text-white">
+      <section className="relative flex min-h-svh flex-col text-vellum">
         <div
           aria-hidden="true"
           className="absolute inset-0"
@@ -104,17 +104,17 @@ export default async function HomePage({
             <h1 className="mb-3 max-w-[15ch] font-display text-3xl leading-[1.08] tracking-[-0.02em] sm:mb-4 sm:text-4xl sm:leading-[1.06] md:text-5xl">
               {t('heroTitle')}
             </h1>
-            <p className="max-w-[52ch] text-sm leading-relaxed text-white/85 md:text-base">
+            <p className="max-w-[52ch] text-sm leading-relaxed text-vellum/85 md:text-base">
               {t('heroSub')}
             </p>
           </div>
           <form
             action={`/${locale}/search`}
             method="GET"
-            className="mt-auto grid items-end border border-white/40 bg-white/95 text-ink shadow-pop md:grid-cols-[1.4fr_1fr_1fr_auto]"
+            className="mt-auto grid items-end border border-vellum/40 bg-vellum/95 text-ink shadow-pop md:grid-cols-[1.4fr_1fr_1fr_auto]"
           >
           <label className="flex flex-col gap-1 border-b border-line p-3 md:border-b-0 md:border-r">
-            <span className="text-[length:var(--text-xs)] uppercase tracking-[0.16em] text-ink-soft">
+            <span className="text-[length:var(--text-xs)] uppercase tracking-[0.16em] text-graphite">
               {ts('fieldWater')}
             </span>
             <select name="water" className="bg-transparent text-sm text-ink">
@@ -127,7 +127,7 @@ export default async function HomePage({
             </select>
           </label>
           <label className="flex flex-col gap-1 border-b border-line p-3 md:border-b-0 md:border-r">
-            <span className="text-[length:var(--text-xs)] uppercase tracking-[0.16em] text-ink-soft">
+            <span className="text-[length:var(--text-xs)] uppercase tracking-[0.16em] text-graphite">
               {ts('fieldPrice')}
             </span>
             <select name="price" className="bg-transparent text-sm text-ink">
@@ -137,8 +137,8 @@ export default async function HomePage({
               <option value="10000000-">€ 10M+</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1 bg-surf/15 p-3">
-            <span className="text-[length:var(--text-xs)] uppercase tracking-[0.16em] text-ink-soft">
+          <label className="flex flex-col gap-1 bg-patina-soft/15 p-3">
+            <span className="text-[length:var(--text-xs)] uppercase tracking-[0.16em] text-graphite">
               {ts('fieldBoatLength')}
             </span>
             <input
@@ -152,7 +152,7 @@ export default async function HomePage({
           </label>
           <button
             type="submit"
-            className="h-full min-h-12 bg-abyss px-7 text-xs uppercase tracking-[0.16em] text-white"
+            className="h-full min-h-12 bg-obsidian px-7 text-xs uppercase tracking-[0.16em] text-vellum"
           >
             {t('searchCta')}
           </button>
@@ -167,7 +167,7 @@ export default async function HomePage({
             <h2 className="font-display text-xl text-ink">{t('signatureTitle')}</h2>
             <Link
               href="/search"
-              className="text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-tide"
+              className="text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-patina"
             >
               {ts('pageTitle')} →
             </Link>
@@ -191,7 +191,7 @@ export default async function HomePage({
             <Link
               key={tile.key}
               href={`/search?${tile.query}`}
-              className="group relative flex aspect-[3/4] items-end overflow-hidden text-white"
+              className="group relative flex aspect-[3/4] items-end overflow-hidden text-vellum"
             >
               <span
                 aria-hidden="true"
@@ -222,7 +222,7 @@ export default async function HomePage({
               <Link
                 key={destination.id}
                 href={`/destinations/${destination.slug}`}
-                className="group relative flex aspect-[3/2] items-end overflow-hidden text-white"
+                className="group relative flex aspect-[3/2] items-end overflow-hidden text-vellum"
               >
                 <span
                   aria-hidden="true"
@@ -236,7 +236,7 @@ export default async function HomePage({
                 />
                 <span className="relative z-10 p-3 text-[length:var(--text-xs)] uppercase tracking-[0.1em]">
                   {destination.name}
-                  <small className="mt-0.5 block normal-case tracking-[0.06em] text-white/75">
+                  <small className="mt-0.5 block normal-case tracking-[0.06em] text-vellum/75">
                     {ts('resultsCount', { count: destination.count })}
                   </small>
                 </span>
@@ -250,7 +250,7 @@ export default async function HomePage({
       {/* 6 · Why WATERLINE (§10.1 / §11.1). */}
       <section className="grid gap-6 px-7 py-9 md:grid-cols-3">
         {(['whyVerified', 'whyFrontage', 'whyBerth'] as const).map((key) => (
-          <p key={key} className="border-t border-ink pt-3 text-sm text-ink-soft">
+          <p key={key} className="border-t border-ink pt-3 text-sm text-graphite">
             {t(key)}
           </p>
         ))}
@@ -259,10 +259,10 @@ export default async function HomePage({
       {/* 8 · List with us (§10.1; journal lands with its first articles). */}
       <section className="border-t border-line px-7 py-9 text-center">
         <h2 className="mb-2 font-display text-xl text-ink">{t('supplyCtaTitle')}</h2>
-        <p className="mx-auto mb-5 max-w-[52ch] text-sm text-ink-soft">{t('supplyCtaSub')}</p>
+        <p className="mx-auto mb-5 max-w-[52ch] text-sm text-graphite">{t('supplyCtaSub')}</p>
         <Link
           href="/list-with-us"
-          className="inline-block bg-abyss px-6 py-3 text-xs uppercase tracking-[0.14em] text-white"
+          className="inline-block bg-obsidian px-6 py-3 text-xs uppercase tracking-[0.14em] text-vellum"
         >
           {nav('listWithUs')}
         </Link>

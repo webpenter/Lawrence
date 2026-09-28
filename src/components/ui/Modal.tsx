@@ -26,11 +26,11 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       ref={dialogRef}
       onClose={onClose}
       onCancel={onClose}
-      className="z-modal w-full max-w-lg rounded-lg border border-line bg-white p-6 shadow-pop backdrop:bg-ink/60"
+      className="z-modal w-full max-w-lg rounded-lg border border-line bg-vellum p-6 shadow-pop backdrop:bg-ink/60"
       aria-labelledby="modal-title"
     >
       <div className="flex items-start justify-between gap-4">
-        <h2 id="modal-title" className="font-display text-xl text-abyss">
+        <h2 id="modal-title" className="font-display text-xl text-obsidian">
           {title}
         </h2>
         <IconButton

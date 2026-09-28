@@ -11,7 +11,7 @@ import type { MapMarker } from './ResultsMap';
 const ResultsMap = dynamic(() => import('./ResultsMap').then((m) => m.ResultsMap), {
   ssr: false,
   loading: () => (
-    <div className="h-full animate-pulse bg-surf/20" style={{ minHeight: layout.searchSplitMinH }} />
+    <div className="h-full animate-pulse bg-patina-soft/20" style={{ minHeight: layout.searchSplitMinH }} />
   ),
 });
 

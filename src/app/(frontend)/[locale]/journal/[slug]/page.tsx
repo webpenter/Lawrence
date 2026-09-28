@@ -48,14 +48,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <>
       <SiteHeader />
       <main className="mx-auto max-w-2xl px-7 py-10">
-        <nav aria-label={t('breadcrumbLabel')} className="mb-6 text-xs text-ink-soft">
-          <Link href={`/${locale}/journal`} className="hover:text-tide">
+        <nav aria-label={t('breadcrumbLabel')} className="mb-6 text-xs text-graphite">
+          <Link href={`/${locale}/journal`} className="hover:text-patina">
             {t('backToJournal')}
           </Link>
         </nav>
 
         {isFallbackContent(article) ? (
-          <p className="mb-4 inline-block bg-sand px-2 py-0.5 text-[length:var(--text-xs)] font-medium uppercase tracking-[0.14em] text-ink">
+          <p className="mb-4 inline-block bg-patina-soft px-2 py-0.5 text-[length:var(--text-xs)] font-medium uppercase tracking-[0.14em] text-ink">
             {t('sampleNotice')}
           </p>
         ) : null}
@@ -63,7 +63,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <article>
           <h1 className="font-display text-3xl leading-tight text-ink">{article.title}</h1>
           {article.publishedAt ? (
-            <p className="mt-2 text-xs text-ink-soft">
+            <p className="mt-2 text-xs text-graphite">
               {t('publishedOn', { date: formatDate(article.publishedAt, locale) })}
             </p>
           ) : null}

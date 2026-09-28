@@ -209,17 +209,17 @@ export default async function PropertyPage({ params }: DetailPageProps) {
       <main>
 
       {property.isSample ? (
-        <p className="bg-sand px-4 sm:px-7 py-2 text-center text-xs uppercase tracking-[0.12em] text-abyss">
+        <p className="bg-patina-soft px-4 sm:px-7 py-2 text-center text-xs uppercase tracking-[0.12em] text-obsidian">
           {t('sampleBadge')}
         </p>
       ) : null}
       {property.visibility === 'unlisted' ? (
-        <p className="bg-shell px-4 sm:px-7 py-2 text-center text-xs text-ink-soft">
+        <p className="bg-bone px-4 sm:px-7 py-2 text-center text-xs text-graphite">
           {t('unlistedNotice')}
         </p>
       ) : null}
       {stateNotice ? (
-        <p className="bg-abyss px-4 sm:px-7 py-2.5 text-center text-xs uppercase tracking-[0.12em] text-white">
+        <p className="bg-obsidian px-4 sm:px-7 py-2.5 text-center text-xs uppercase tracking-[0.12em] text-vellum">
           {stateNotice}
         </p>
       ) : null}
@@ -228,7 +228,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
 
       <header className="grid gap-3 border-b border-line px-4 pb-5 pt-6 sm:px-7 md:grid-cols-[1fr_auto] md:items-end md:gap-6">
         <div>
-          <p className="text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-ink-soft">
+          <p className="text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-graphite">
             {locality}
             {property.reference ? ` · ${t('factReference')} ${property.reference}` : ''}
           </p>
@@ -236,10 +236,10 @@ export default async function PropertyPage({ params }: DetailPageProps) {
             {property.title}
           </h1>
           {property.subtitle ? (
-            <p className="text-xs text-ink-soft">{property.subtitle}</p>
+            <p className="text-xs text-graphite">{property.subtitle}</p>
           ) : null}
           {/* Preview .ltitle .loc: "6 bedrooms · 5 bathrooms · 740 m² · plot 2,100 m² · built 1964, renovated 2021" */}
-          <p className="mt-1 text-xs text-ink-soft">
+          <p className="mt-1 text-xs text-graphite">
             {[
               property.bedrooms != null ? t('locBedrooms', { n: property.bedrooms }) : null,
               property.bathrooms != null ? t('locBathrooms', { n: property.bathrooms }) : null,
@@ -273,7 +273,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
               <dl className="grid grid-cols-2 gap-x-6 md:grid-cols-3">
                 {facts.map(([label, value]) => (
                   <div key={label} className="border-b border-line py-2">
-                    <dt className="text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-ink-soft">
+                    <dt className="text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-graphite">
                       {label}
                     </dt>
                     <dd className="text-sm tabular-nums text-ink">{value}</dd>
@@ -286,7 +286,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
           {property.highlights?.length ? (
             <section className="mt-6">
               <h2 className="mb-3 font-display text-lg text-ink">{t('highlightsTitle')}</h2>
-              <ul className="list-disc pl-5 text-sm text-ink-soft">
+              <ul className="list-disc pl-5 text-sm text-graphite">
                 {property.highlights.map((highlight) => (
                   <li key={highlight.id ?? highlight.text}>{highlight.text}</li>
                 ))}
@@ -295,7 +295,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
           ) : null}
 
           {property.description ? (
-            <section className="prose-waterline mt-6 max-w-prose text-sm text-ink-soft">
+            <section className="prose-waterline mt-6 max-w-prose text-sm text-graphite">
               <RichText data={property.description} />
             </section>
           ) : null}
@@ -315,18 +315,18 @@ export default async function PropertyPage({ params }: DetailPageProps) {
         </div>
 
         <aside>
-          <div className="border border-line bg-white p-5">
+          <div className="border border-line bg-vellum p-5">
             {agency ? (
               <div className="mb-4 flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="flex size-7 items-center justify-center rounded-pill bg-abyss font-display text-sm text-white"
+                  className="flex size-7 items-center justify-center rounded-sm bg-obsidian font-display text-sm text-vellum"
                 >
                   {(agent?.name ?? agency.name).slice(0, 1)}
                 </span>
                 <div>
                   <p className="text-sm font-medium text-ink">{agent?.name ?? agency.name}</p>
-                  <p className="text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-ink-soft">
+                  <p className="text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-graphite">
                     {agency.name}
                     {agency.verified ? ` · ${t('verifiedAgency')}` : ''}
                   </p>
@@ -334,7 +334,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
               </div>
             ) : null}
             <h2 className="mb-1 font-display text-lg text-ink">{t('enquiryCta')}</h2>
-            <p className="mb-4 text-xs text-ink-soft">{t('enquirySub')}</p>
+            <p className="mb-4 text-xs text-graphite">{t('enquirySub')}</p>
             <EnquiryForm
               propertyId={property.id}
               locale={locale}
@@ -358,7 +358,7 @@ export default async function PropertyPage({ params }: DetailPageProps) {
               event="brochure_downloaded"
               eventProps={{ propertyId: property.id, locale }}
               href={`/api/property/${slug}/brochure.pdf?locale=${locale}`}
-              className="mt-3 block border border-abyss px-4 py-3 text-center text-xs uppercase tracking-[0.14em] text-abyss"
+              className="mt-3 block border border-obsidian px-4 py-3 text-center text-xs uppercase tracking-[0.14em] text-obsidian"
             >
               {t('brochureCta')}
             </TrackedLink>
@@ -367,12 +367,12 @@ export default async function PropertyPage({ params }: DetailPageProps) {
                 event="whatsapp_clicked"
                 eventProps={{ propertyId: property.id, agencyId: agency?.id }}
                 href={`https://wa.me/${(agent?.whatsapp ?? agency?.whatsapp ?? '').replace(/[^\d]/g, '')}`}
-                className="mt-3 block border border-abyss px-4 py-3 text-center text-xs uppercase tracking-[0.14em] text-abyss"
+                className="mt-3 block border border-obsidian px-4 py-3 text-center text-xs uppercase tracking-[0.14em] text-obsidian"
               >
                 {t('whatsappCta')}
               </TrackedLink>
             ) : null}
-            <p className="mt-4 text-[length:var(--text-xs)] leading-relaxed text-ink-soft">
+            <p className="mt-4 text-[length:var(--text-xs)] leading-relaxed text-graphite">
               {t('disclaimer')}
             </p>
           </div>
@@ -390,12 +390,12 @@ export default async function PropertyPage({ params }: DetailPageProps) {
         </section>
       ) : null}
 
-      <nav aria-label={t('breadcrumbHome')} className="px-4 sm:px-7 pb-6 text-xs text-ink-soft">
-        <Link href="/" className="hover:text-tide">
+      <nav aria-label={t('breadcrumbHome')} className="px-4 sm:px-7 pb-6 text-xs text-graphite">
+        <Link href="/" className="hover:text-patina">
           {t('breadcrumbHome')}
         </Link>
         {' / '}
-        <Link href="/search" className="hover:text-tide">
+        <Link href="/search" className="hover:text-patina">
           {t('breadcrumbSearch')}
         </Link>
         {' / '}

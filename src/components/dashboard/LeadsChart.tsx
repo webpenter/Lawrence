@@ -31,25 +31,25 @@ export function LeadsChart({ weeks }: { weeks: WeekBucket[] }) {
           <CartesianGrid stroke={tokens.color.line} vertical={false} />
           <XAxis
             dataKey="week"
-            tick={{ fill: tokens.color.inkSoft, fontSize: 11 }}
+            tick={{ fill: tokens.color.graphite, fontSize: 11 }}
             axisLine={{ stroke: tokens.color.line }}
             tickLine={false}
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fill: tokens.color.inkSoft, fontSize: 11 }}
+            tick={{ fill: tokens.color.graphite, fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             cursor={{ fill: tokens.color.line }}
             contentStyle={{
-              background: tokens.color.white,
+              background: tokens.color.vellum,
               border: `1px solid ${tokens.color.line}`,
               fontSize: 12,
             }}
           />
-          <Bar dataKey="total" fill={tokens.color.tide} radius={[2, 2, 0, 0]} />
+          <Bar dataKey="total" fill={tokens.color.patina} radius={[2, 2, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

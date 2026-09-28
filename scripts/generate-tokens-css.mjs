@@ -25,6 +25,10 @@ for (const [key, value] of Object.entries(tokens.size)) {
   lines.push(`  --text-${key}: ${value};`);
 }
 
+for (const [key, value] of Object.entries(tokens.tracking)) {
+  lines.push(`  --tracking-${key}: ${value};`);
+}
+
 tokens.space.forEach((value, index) => {
   lines.push(`  --spacing-${index}: ${value}px;`);
 });

@@ -66,24 +66,24 @@ export default async function AboutPage({ params }: AboutPageProps) {
           </div>
         ) : (
           <>
-            <p className="mb-8 max-w-[52ch] text-sm leading-relaxed text-ink-soft">{t('sub')}</p>
+            <p className="mb-8 max-w-[52ch] text-sm leading-relaxed text-graphite">{t('sub')}</p>
 
             <section className="mb-8">
               <h2 className="mb-3 font-display text-lg text-ink">{t('ruleTitle')}</h2>
-              <p className="text-sm leading-relaxed text-ink-soft">{t('ruleBody')}</p>
+              <p className="text-sm leading-relaxed text-graphite">{t('ruleBody')}</p>
             </section>
 
             <section className="mb-8">
               <h2 className="mb-3 font-display text-lg text-ink">{t('dataTitle')}</h2>
-              <p className="text-sm leading-relaxed text-ink-soft">{t('dataBody')}</p>
+              <p className="text-sm leading-relaxed text-graphite">{t('dataBody')}</p>
             </section>
 
             <section className="mb-10">
               <h2 className="mb-3 font-display text-lg text-ink">{t('agenciesTitle')}</h2>
-              <p className="mb-5 text-sm leading-relaxed text-ink-soft">{t('agenciesBody')}</p>
+              <p className="mb-5 text-sm leading-relaxed text-graphite">{t('agenciesBody')}</p>
               <Link
                 href="/list-with-us"
-                className="inline-block bg-abyss px-6 py-3 text-xs uppercase tracking-[0.14em] text-white"
+                className="inline-block bg-obsidian px-6 py-3 text-xs uppercase tracking-[0.14em] text-vellum"
               >
                 {nav('listWithUs')}
               </Link>

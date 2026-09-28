@@ -23,14 +23,14 @@ import { tokens } from '@/tokens/tokens';
 
 const styles = {
   body: {
-    backgroundColor: tokens.color.shell,
+    backgroundColor: tokens.color.bone,
     fontFamily: tokens.font.body,
     color: tokens.color.ink,
     margin: 0,
     padding: '24px 0',
   },
   container: {
-    backgroundColor: tokens.color.white,
+    backgroundColor: tokens.color.vellum,
     border: `1px solid ${tokens.color.line}`,
     maxWidth: '520px',
     padding: '32px',
@@ -40,7 +40,7 @@ const styles = {
     letterSpacing: '0.22em',
     textTransform: 'uppercase' as const,
     fontSize: tokens.size.base,
-    color: tokens.color.abyss,
+    color: tokens.color.obsidian,
     margin: '0 0 24px',
   },
   heading: {
@@ -53,14 +53,14 @@ const styles = {
   text: {
     fontSize: tokens.size.sm,
     lineHeight: '1.55',
-    color: tokens.color.inkSoft,
+    color: tokens.color.graphite,
     margin: '0 0 12px',
   },
   label: {
     fontSize: tokens.size.xs,
     letterSpacing: '0.16em',
     textTransform: 'uppercase' as const,
-    color: tokens.color.inkSoft,
+    color: tokens.color.graphite,
     margin: '16px 0 2px',
   },
   value: {
@@ -69,8 +69,8 @@ const styles = {
     margin: 0,
   },
   cta: {
-    backgroundColor: tokens.color.abyss,
-    color: tokens.color.white,
+    backgroundColor: tokens.color.obsidian,
+    color: tokens.color.vellum,
     fontSize: tokens.size.xs,
     letterSpacing: '0.14em',
     textTransform: 'uppercase' as const,
@@ -78,7 +78,7 @@ const styles = {
     textDecoration: 'none',
   },
   hr: { borderColor: tokens.color.line, margin: '24px 0' },
-  footer: { fontSize: tokens.size.xs, color: tokens.color.inkSoft },
+  footer: { fontSize: tokens.size.xs, color: tokens.color.graphite },
 } as const;
 
 function Shell({ preview, children }: { preview: string; children: React.ReactNode }) {

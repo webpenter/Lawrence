@@ -108,7 +108,7 @@ export async function FilterPills({ params }: { params: SearchParams }) {
   if (pills.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-line bg-white px-5 py-3">
+    <div className="flex flex-wrap items-center gap-2 border-b border-line bg-vellum px-5 py-3">
       {pills.map((pill) => (
         <Link
           key={pill.label}
@@ -116,8 +116,8 @@ export async function FilterPills({ params }: { params: SearchParams }) {
           aria-label={t('removeFilterLabel', { filter: pill.label })}
           className={
             pill.key
-              ? 'border border-tide px-3 py-1.5 text-xs text-tide hover:bg-shell'
-              : 'border border-line px-3 py-1.5 text-xs text-ink-soft hover:bg-shell'
+              ? 'border border-patina px-3 py-1.5 text-xs text-patina hover:bg-bone'
+              : 'border border-line px-3 py-1.5 text-xs text-graphite hover:bg-bone'
           }
         >
           {pill.label} <span aria-hidden="true">×</span>
@@ -125,7 +125,7 @@ export async function FilterPills({ params }: { params: SearchParams }) {
       ))}
       <Link
         href="/search"
-        className="ml-auto py-1.5 text-xs text-tide underline-offset-2 hover:underline"
+        className="ml-auto py-1.5 text-xs text-patina underline-offset-2 hover:underline"
       >
         {t('clearFilters')}
       </Link>

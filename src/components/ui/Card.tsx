@@ -9,7 +9,7 @@ export function Card({ interactive = false, className, children, ...props }: Car
   return (
     <div
       className={clsx(
-        'rounded-lg border border-line bg-white p-6 shadow-card',
+        'rounded-lg border border-line bg-vellum p-6 shadow-card',
         interactive &&
           'transition-shadow duration-[var(--motion-base)] hover:shadow-pop focus-within:shadow-pop',
         className,

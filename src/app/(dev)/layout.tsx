@@ -6,7 +6,7 @@ import { bodyFont, displayFont } from '@/tokens/fonts';
 import '../(frontend)/styles.css';
 
 export const metadata: Metadata = {
-  title: 'WATERLINE dev',
+  title: 'Lawrence dev',
   robots: { index: false, follow: false },
 };
 

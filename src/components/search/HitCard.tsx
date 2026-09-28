@@ -42,7 +42,7 @@ export async function HitCard({ hit }: { hit: SearchHit }) {
         </div>
         <div aria-hidden="true" className="absolute inset-0" style={{ background: PHOTO_SCRIM }} />
       </AspectBox>
-      <h3 className="mb-1 mt-3 font-display text-[length:var(--text-base)] text-ink group-hover:text-tide">
+      <h3 className="mb-1 mt-3 font-display text-[length:var(--text-base)] text-ink group-hover:text-patina">
         {hit.title}
       </h3>
       <div className="mb-2 flex flex-wrap gap-1.5">
@@ -51,8 +51,8 @@ export async function HitCard({ hit }: { hit: SearchHit }) {
             key={chip.label}
             className={
               chip.key
-                ? 'border border-tide px-1.5 py-0.5 text-[length:var(--text-xs)] uppercase tracking-[0.1em] text-tide'
-                : 'border border-line-strong px-1.5 py-0.5 text-[length:var(--text-xs)] uppercase tracking-[0.1em] text-ink-soft'
+                ? 'border border-patina px-1.5 py-0.5 text-[length:var(--text-xs)] uppercase tracking-[0.1em] text-patina'
+                : 'border border-line-strong px-1.5 py-0.5 text-[length:var(--text-xs)] uppercase tracking-[0.1em] text-graphite'
             }
           >
             {chip.label}

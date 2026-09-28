@@ -128,7 +128,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     <>
       <a
         href="#results-list"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-toast focus:bg-white focus:p-3"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-toast focus:bg-vellum focus:p-3"
       >
         {t('skipMap')}
       </a>
@@ -147,7 +147,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
         className="grid lg:grid-cols-[1.25fr_1fr]"
         style={{ minHeight: layout.searchSplitMinH }}
       >
-        <section id="results-list" className="bg-shell px-5 py-4">
+        <section id="results-list" className="bg-bone px-5 py-4">
           <h1 className="sr-only">{t('pageTitle')}</h1>
           <div className="mb-3 flex items-baseline justify-between gap-4">
             {/* h2 so card titles (h3) keep a valid heading order under the sr-only h1 */}
@@ -155,7 +155,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               {t('resultsCount', { count: result.total })}
             </h2>
             {/* Preview .rescount right label — bbox search follows map moves. */}
-            <span className="ml-auto mr-3 hidden text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-ink-soft lg:inline">
+            <span className="ml-auto mr-3 hidden text-[length:var(--text-xs)] uppercase tracking-[0.18em] text-graphite lg:inline">
               {t('searchAsIMove')} <span aria-hidden="true">✓</span>
             </span>
             <SortSelect
@@ -172,8 +172,8 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-start gap-3 border border-line bg-white p-6">
-              <p className="text-sm text-ink-soft">
+            <div className="flex flex-col items-start gap-3 border border-line bg-vellum p-6">
+              <p className="text-sm text-graphite">
                 {narrowest
                   ? t('emptyState', {
                       filter: narrowest.params[0] ?? '',
@@ -184,12 +184,12 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               {narrowest ? (
                 <Link
                   href={`/search${queryWithout(sp, narrowest.params)}`}
-                  className="bg-abyss px-4 py-2 text-xs uppercase tracking-[0.14em] text-white"
+                  className="bg-obsidian px-4 py-2 text-xs uppercase tracking-[0.14em] text-vellum"
                 >
                   {t('emptyStateRelax', { filter: narrowest.params[0] ?? '' })}
                 </Link>
               ) : (
-                <Link href="/search" className="text-xs text-tide underline-offset-2 hover:underline">
+                <Link href="/search" className="text-xs text-patina underline-offset-2 hover:underline">
                   {t('clearFilters')}
                 </Link>
               )}
@@ -204,18 +204,18 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               {page > 1 ? (
                 <Link
                   href={`/search${queryWithout({ ...sp, page: String(page - 1) }, [])}`}
-                  className="border border-line px-3 py-1.5 text-ink-soft hover:bg-white"
+                  className="border border-line px-3 py-1.5 text-graphite hover:bg-vellum"
                 >
                   {t('paginationPrev')}
                 </Link>
               ) : (
                 <span />
               )}
-              <span className="text-ink-soft">{t('paginationLabel', { page, total: totalPages })}</span>
+              <span className="text-graphite">{t('paginationLabel', { page, total: totalPages })}</span>
               {page < totalPages ? (
                 <Link
                   href={`/search${queryWithout({ ...sp, page: String(page + 1) }, [])}`}
-                  className="border border-line px-3 py-1.5 text-ink-soft hover:bg-white"
+                  className="border border-line px-3 py-1.5 text-graphite hover:bg-vellum"
                 >
                   {t('paginationNext')}
                 </Link>

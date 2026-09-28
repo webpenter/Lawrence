@@ -49,7 +49,7 @@ export function LocaleSwitcher({ label, currentLocale, dark = false }: LocaleSwi
   return (
     <label
       className={`inline-flex items-center gap-2 text-xs uppercase tracking-wider ${
-        dark ? 'text-white' : 'text-ink-soft'
+        dark ? 'text-vellum' : 'text-graphite'
       }`}
     >
       {/* Footer (dark) shows only the value, preview-style; the label stays for AT. */}
@@ -59,12 +59,12 @@ export function LocaleSwitcher({ label, currentLocale, dark = false }: LocaleSwi
         onChange={(event) => onChange(event.target.value)}
         className={`cursor-pointer text-xs font-medium transition-colors ${
           dark
-            ? 'appearance-none border-0 bg-transparent p-0 uppercase tracking-[0.16em] text-white hover:text-white/80'
-            : 'py-1.5 rounded border border-line bg-white px-2 text-ink'
+            ? 'appearance-none border-0 bg-transparent p-0 uppercase tracking-[0.16em] text-vellum hover:text-vellum/80'
+            : 'py-1.5 rounded border border-line bg-vellum px-2 text-ink'
         }`}
       >
         {LOCALES.map((code) => (
-          <option key={code} value={code} className="bg-abyss text-white">
+          <option key={code} value={code} className="bg-obsidian text-vellum">
             {LOCALE_LABELS[code]}
           </option>
         ))}

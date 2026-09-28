@@ -52,24 +52,24 @@ export async function SiteFooter() {
   ] as const;
 
   const heading =
-    'mb-2 text-[length:var(--text-xs)] font-medium uppercase tracking-[0.16em] text-white';
+    'mb-2 text-[length:var(--text-xs)] font-medium uppercase tracking-[0.16em] text-vellum';
 
   return (
-    <footer className="bg-abyss px-7 py-7 text-xs text-white/70">
+    <footer className="bg-obsidian px-7 py-7 text-xs text-vellum/70">
       <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
         <div>
           <h2 className={heading}>{t('destinationsTitle')}</h2>
           {destinations.length > 0 ? (
             destinations.map((destination) => (
               <p key={destination.slug} className="mb-1">
-                <Link href={`/destinations/${destination.slug}`} className="hover:text-white">
+                <Link href={`/destinations/${destination.slug}`} className="hover:text-vellum">
                   {destination.name}
                 </Link>
               </p>
             ))
           ) : (
             <p className="mb-1">
-              <Link href="/destinations" className="hover:text-white">
+              <Link href="/destinations" className="hover:text-vellum">
                 {nav('destinations')}
               </Link>
             </p>
@@ -80,7 +80,7 @@ export async function SiteFooter() {
           <h2 className={heading}>{t('waterTitle')}</h2>
           {waterLinks.map((link) => (
             <p key={link.href} className="mb-1">
-              <Link href={link.href} className="hover:text-white">
+              <Link href={link.href} className="hover:text-vellum">
                 {link.label}
               </Link>
             </p>
@@ -91,7 +91,7 @@ export async function SiteFooter() {
           <h2 className={heading}>{t('companyTitle')}</h2>
           {companyLinks.map((link) => (
             <p key={link.href} className="mb-1">
-              <Link href={link.href} className="hover:text-white">
+              <Link href={link.href} className="hover:text-vellum">
                 {link.label}
               </Link>
             </p>
@@ -104,19 +104,19 @@ export async function SiteFooter() {
             <PreferenceBar dark />
           </div>
           <p className="mb-1">
-            <Link href="/legal/privacy" className="hover:text-white">
+            <Link href="/legal/privacy" className="hover:text-vellum">
               {t('legalPrivacy')}
             </Link>
             {' · '}
-            <Link href="/legal/cookies" className="hover:text-white">
+            <Link href="/legal/cookies" className="hover:text-vellum">
               {t('legalCookies')}
             </Link>
             {' · '}
-            <Link href="/legal/terms" className="hover:text-white">
+            <Link href="/legal/terms" className="hover:text-vellum">
               {t('legalTerms')}
             </Link>
           </p>
-          <p className="mt-3 text-white/70">
+          <p className="mt-3 text-vellum/70">
             © {brand.copyrightYear} {brand.legalName}
           </p>
         </div>
