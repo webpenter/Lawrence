@@ -8,7 +8,7 @@ module.exports = {
       url: [
         'http://localhost:3000/en',
         'http://localhost:3000/en/collection',
-        'http://localhost:3000/en/property/sample-wl-sample-001',
+        'http://localhost:3000/en/property/sample-lpc-sample-001',
       ],
       numberOfRuns: 1,
     },

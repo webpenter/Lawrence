@@ -7,9 +7,9 @@ export const tokens = {
     bone: '#F3F0EA', // page surface
     vellum: '#FAF8F4', // raised surface
     line: 'rgba(10,11,13,0.10)',
-    patina: '#7E6B4F', // the single warm accent, max 2% of surface
+    patina: '#7A674C', // the single warm accent, max 2% of surface (AA ≥4.5:1 on bone at 12px)
     patinaSoft: '#B9A888',
-    focus: '#7E6B4F',
+    focus: '#7A674C',
     success: '#3C6B52',
     warning: '#8A6A24',
     danger: '#8C3A2E',

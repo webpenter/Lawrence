@@ -79,9 +79,11 @@ export function ResultsMap({ markers, panelLabel, unavailableNote }: ResultsMapP
       map = instance;
 
       for (const marker of markers) {
-        const el = document.createElement('button');
-        el.type = 'button';
-        el.setAttribute('aria-label', marker.label);
+        // Decorative pins: hover-highlight only. The card list is the
+        // accessible surface — buttons here would be sub-24px overlapping
+        // targets with redundant labels (WCAG 2.2 target-size).
+        const el = document.createElement('div');
+        el.setAttribute('aria-hidden', 'true');
         el.className = marker.approximate
           ? 'h-6 w-6 rounded-sm border border-patina bg-patina/20'
           : 'rounded-sm bg-vellum px-2 py-1 text-xs font-medium tabular-nums text-obsidian shadow-card';
@@ -143,10 +145,9 @@ export function ResultsMap({ markers, panelLabel, unavailableNote }: ResultsMapP
             const left = ((marker.lng - b.minLng) / (b.maxLng - b.minLng)) * 100;
             const top = (1 - (marker.lat - b.minLat) / (b.maxLat - b.minLat)) * 100;
             return (
-              <button
+              <span
                 key={marker.id}
-                type="button"
-                aria-label={marker.label}
+                aria-hidden="true"
                 onMouseEnter={() => highlightCard(marker.id, true)}
                 onMouseLeave={() => highlightCard(marker.id, false)}
                 style={{ left: `${left}%`, top: `${top}%` }}
@@ -157,7 +158,7 @@ export function ResultsMap({ markers, panelLabel, unavailableNote }: ResultsMapP
                 }
               >
                 {marker.approximate ? null : marker.label}
-              </button>
+              </span>
             );
           })
         : null}

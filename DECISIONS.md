@@ -493,3 +493,35 @@ reindex shows the split working (30 public / 15 member listings); no sample cont
 phase10/11 e2e); unit 294 + int 42 green; e2e phase5 5/5, member 7/7 (1 timing flake passed
 on retry), phase7 7/7, phase9 9/9, phase10 6/6, phase11 9/9; audit:exposure green over the
 15-listing off-market layer; typecheck/lint clean.
+
+## 2026-09-29 — Phase 13: the accessibility and performance passes (§14, §16)
+
+**Decision**: The axe sweep now covers TWELVE public routes (home, filtered collection,
+listing, markets hub, market page, segment page, intelligence index, report, journal,
+article, contact, sell) plus the styleguide — zero violations is the gate and it holds.
+Two real fixes fell out of it:
+- **The patina token missed AA by a hair**: #7E6B4F on bone (#F3F0EA) measures 4.49:1 at
+  12px — under the 4.5:1 minimum. `patina` (and the matching `focus` token) moved to
+  #7A674C (≈4.77:1), a four-units-per-channel darken that is imperceptible but compliant
+  everywhere the accent appears, PDF included (the token pipeline restyles both).
+- **Map pins demoted to decorative**: the collection map's price pins were sub-24px,
+  overlapping `<button>`s with redundant (sometimes "—") labels — a WCAG 2.2 target-size
+  failure and screen-reader noise. They are hover-highlight visuals only; the card list is
+  the accessible surface. Both map variants now render them as aria-hidden spans/divs.
+
+Lighthouse (production build, this dev box): accessibility **100 / 100 / 100** on home,
+collection and listing; performance 98 / 94 / 95; best-practices 96. The two SEO flags are
+explained artifacts as documented in Phase 8: the sample listing is noindex BY RULE 8, and
+the canonical points at NEXT_PUBLIC_SITE_URL rather than localhost. The signed revalidation
+webhook (verifyWebhookSignature + REVALIDATE_SECRET) and the §16 cache-header matrix were
+verified already in place and tested (phase12/14 specs); bundle budgets re-verified after
+the token change: home 109.2/110 · collection 110.9/160 · listing 127.8/130 kB gz.
+
+Working note: two axe "failures" that appeared first were phantoms — Postgres had been
+OOM-killed mid-run and axe was auditing the ISR-cached 404 shell (html-has-lang/no-main on
+an error page). Worth remembering on this box: verify the DB is up before trusting a
+browser-audit failure, and pre-warm every audited route serially.
+
+**Gate evidence**: axe 14/14 with zero violations across all twelve routes + styleguide;
+Lighthouse accessibility 100 on all three audited routes; unit+int 336/336; typecheck/lint
+clean; budgets green.

@@ -13,7 +13,12 @@ const ROUTES: Array<{ name: string; path: string }> = [
   { name: 'collection', path: '/en/collection?tier=trophy&beds=4' },
   { name: 'listing', path: '/en/property/sample-lpc-sample-001' },
   { name: 'markets hub', path: '/en/markets' },
+  { name: 'market page', path: '/en/markets/lake-como' },
+  { name: 'segment page', path: '/en/markets/gstaad/ski-chalets' },
+  { name: 'intelligence', path: '/en/intelligence' },
+  { name: 'report', path: '/en/intelligence/prime-entry-price-comparison-2026' },
   { name: 'journal', path: '/en/journal' },
+  { name: 'article', path: '/en/journal/sample-buying-through-a-structure' },
   { name: 'contact', path: '/en/contact' },
   { name: 'sell', path: '/en/list-with-us' },
 ];
