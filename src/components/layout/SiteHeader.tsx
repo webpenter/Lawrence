@@ -30,9 +30,10 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
   return (
     <nav
       className={clsx(
-        'relative z-10 w-full',
+        'relative w-full',
         onHero ? 'text-white' : 'border-b border-line bg-white text-ink',
       )}
+      style={{ zIndex: 'var(--z-index-header)' }}
     >
       <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-5 py-5 md:px-8 lg:px-12">
         <Link
