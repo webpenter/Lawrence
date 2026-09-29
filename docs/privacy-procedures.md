@@ -1,12 +1,12 @@
-# WATERLINE — Privacy & GDPR Procedures (Spec §16.4 & §16.5)
+# LAWRENCE — Privacy & GDPR Procedures (Spec §16.4 & §16.5)
 
-This document outlines WATERLINE's data protection, subject access procedures, data retention schedules, and Data Processing Agreements (DPAs).
+This document outlines LAWRENCE's data protection, subject access procedures, data retention schedules, and Data Processing Agreements (DPAs).
 
 ---
 
 ## 1. Data Protection & Processing Register
 
-WATERLINE collects and processes personal data strictly necessary to facilitate real estate enquiries for waterfront properties:
+LAWRENCE collects and processes personal data strictly necessary to facilitate real estate enquiries for trophy properties:
 
 - **Enquirer Data**: Full name, email address, phone number, personal message, IP address, consent timestamp.
 - **Agency / Agent Data**: Business email address, phone number, name, assigned listings.
@@ -16,7 +16,7 @@ WATERLINE collects and processes personal data strictly necessary to facilitate 
 
 ## 2. Subject Access Request (SAR) Procedure
 
-Under GDPR Article 15, data subjects have the right to request access to their personal data stored by WATERLINE.
+Under GDPR Article 15, data subjects have the right to request access to their personal data stored by LAWRENCE.
 
 ### Procedure for Data Protection Officers (DPO):
 1. **Verification**: Verify the identity of the requesting individual via email confirmation from the registered address.
@@ -33,7 +33,7 @@ Under GDPR Article 17, individuals can request erasure of their personal data.
 ### One-Click Admin Action:
 In the Payload backoffice (or via the administrative API endpoint `/api/admin/anonymize-lead`), administrators can anonymize any lead in one click:
 - `name` is replaced with `[ANONYMIZED]`.
-- `email` is replaced with `anonymized-{id}@privacy.waterline.internal`.
+- `email` is replaced with `anonymized-{id}@privacy.lawrence.internal`.
 - `phone` is deleted (`undefined`).
 - `message` is replaced with `[ANONYMIZED_PER_GDPR_REQUEST]`.
 - `consentIp` is replaced with `[ANONYMIZED]`.
@@ -44,7 +44,7 @@ In the Payload backoffice (or via the administrative API endpoint `/api/admin/an
 
 ## 4. Data Retention Schedule (§16.5)
 
-WATERLINE automatically enforces data retention limits via scheduled retention sweeps (`/api/cron/retention`):
+LAWRENCE automatically enforces data retention limits via scheduled retention sweeps (`/api/cron/retention`):
 
 | Data Category | Retention Period | Action Upon Expiry |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ WATERLINE automatically enforces data retention limits via scheduled retention s
 
 ## 5. Vendor Data Processing Agreements (DPAs)
 
-WATERLINE maintains DPAs with the following sub-processors:
+LAWRENCE maintains DPAs with the following sub-processors:
 
 - **Vercel Inc.**: Application Hosting & Edge Runtime (US/EU Data Privacy Framework).
 - **Neon Inc.**: Managed PostgreSQL Database (EU region Frankfurt/Dublin).

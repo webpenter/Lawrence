@@ -525,3 +525,37 @@ browser-audit failure, and pre-warm every audited route serially.
 **Gate evidence**: axe 14/14 with zero violations across all twelve routes + styleguide;
 Lighthouse accessibility 100 on all three audited routes; unit+int 336/336; typecheck/lint
 clean; budgets green.
+
+## 2026-09-29 — Phase 14: security, tests, launch readiness, handover (§16–§20)
+
+**Decision**: The hardening layer the repo inherited was verified piece by piece and
+Lawrence-ified where it still spoke Waterline. The CSP gained Turnstile's hosts
+(script-src + frame-src for challenges.cloudflare.com — the widget would have been blocked
+in production the moment a site key was set); the header set otherwise stands as §16.1
+(HSTS, frame-ancestors 'none', nosniff, referrer-policy, permissions-policy — the
+grade-A set, asserted by phase13.spec on pages AND the API surface, with a live
+no-CSP-violations browse test). Sentry PII scrubbing (emails, IPs, phones, tokens,
+sensitive keys — beforeSend on every payload), the signed revalidation webhook, in-memory
+rate limits, self-service account deletion (§8.5, built in Phase 9) and the privacy
+endpoints (anonymisation, retention cron, CRON_SECRET gates) were all confirmed present
+and tested. The GDPR anonymisation domain moved to @privacy.lawrence.internal.
+
+LAUNCH-CHECKLIST.md and the seven /docs guides were rebranded and retargeted: the
+checklist now opens with the two Lawrence hard gates (off-market never leaks — rule 1
+verified by audit:exposure; §2.2 admission holds incl. the prime cap), Section 2 checks
+the §5.5 market grammar instead of nautical filters, the SEO section checks market/segment
+publication + the off-market 404 sweep, the a11y section counts all twelve routes, and the
+enquiry item names /api/enquiry with Turnstile. docs/admin-guide, anti-scraping,
+privacy-procedures, architecture, seo-playbook and the handover script now describe the
+€20M portal.
+
+**Gate evidence ("CI fully green")**: typecheck 0 errors · lint clean · unit+int 336/336 ·
+full E2E battery 100/100 across ten spec files (health, i18n, phase4/5/7/9/10/11/12/13/14,
+member, console-errors; one keyboard-enquiry timing flake passed on retry) · axe 14/14 ·
+Lighthouse a11y 100 ×3 / perf 94–98 · audit:exposure and audit:seo 0/0 · budgets green.
+Deploy-time items remain checklist boxes by design: Sentry DSN wiring, visual-regression
+baselines (VISUAL=1), MapTiler key, Upstash rate limiting, TOTP enrolment for staff,
+production backups. Track A (Phases 1–14) is complete; Track B (15 agency accounts,
+16 moderation + bulk import) is optional-later per the plan — note that tenancy access
+functions, the moderation states and feed ingestion already exist from the inherited
+codebase as a head start.

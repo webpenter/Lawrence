@@ -44,7 +44,7 @@ export async function anonymizeLead(
     overrideAccess: true,
     data: {
       name: '[ANONYMIZED]',
-      email: `anonymized-${idNum}@privacy.waterline.internal`,
+      email: `anonymized-${idNum}@privacy.lawrence.internal`,
       phone: undefined,
       message: '[ANONYMIZED_PER_GDPR_REQUEST]',
       consent: {
@@ -106,7 +106,7 @@ export async function runRetentionSweep(): Promise<RetentionSweepResult> {
     });
 
     for (const lead of oldLeads.docs) {
-      if (typeof lead.email === 'string' && lead.email.includes('@privacy.waterline.internal')) {
+      if (typeof lead.email === 'string' && lead.email.includes('@privacy.lawrence.internal')) {
         continue;
       }
       await anonymizeLead(lead.id);

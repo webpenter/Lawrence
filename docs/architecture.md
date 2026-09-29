@@ -1,4 +1,4 @@
-# WATERLINE — Architecture
+# LAWRENCE — Architecture
 
 One Next.js 15 App Router application with Payload 3 embedded. Public pages
 are SSG/ISR; the backoffice and APIs are server-rendered. Everything that

@@ -19,13 +19,15 @@ export function getSecurityHeaders(): Record<string, string> {
 
   const csp = [
     `default-src 'self'`,
-    `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ''} https://plausible.io https://browser.sentry-cdn.com`,
+    `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ''} https://plausible.io https://browser.sentry-cdn.com https://challenges.cloudflare.com`,
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' blob: data: https://images.unsplash.com https://api.maptiler.com https://*.r2.dev https://imagedelivery.net`,
     `font-src 'self' data:`,
     `connect-src 'self' https://plausible.io https://*.sentry.io https://api.maptiler.com${dev ? ' ws:' : ''}`,
     `worker-src 'self' blob:`,
     `child-src blob:`,
+    // §16.1: the Turnstile widget renders in an iframe from Cloudflare.
+    `frame-src https://challenges.cloudflare.com`,
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,

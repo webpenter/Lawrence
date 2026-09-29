@@ -1,6 +1,6 @@
-# WATERLINE — Anti-Scraping & Asset Protection Policy (Spec §16.3)
+# LAWRENCE — Anti-Scraping & Asset Protection Policy (Spec §16.3)
 
-Listing data and water access credentials are WATERLINE's core assets. This document specifies technical controls and operational policies designed to make automated scraping prohibitively costly without hindering legitimate search engine indexing or public web access.
+Listing data and provenance and confidential listing data are LAWRENCE's core assets. This document specifies technical controls and operational policies designed to make automated scraping prohibitively costly without hindering legitimate search engine indexing or public web access.
 
 ---
 
@@ -30,9 +30,9 @@ Listing data and water access credentials are WATERLINE's core assets. This docu
 
 ## 2. Terms of Service Prohibition Clause
 
-WATERLINE's Terms of Service explicitly prohibit unauthorized data extraction:
+LAWRENCE's Terms of Service explicitly prohibit unauthorized data extraction:
 
-> "The extraction, scraping, harvesting, mining, or automated collection of listing data, property descriptions, water access specifications, media, or price information from WATERLINE by any automated script, spider, crawler, or bot (other than explicitly allowed search engine crawlers adhering to `robots.txt`) is strictly prohibited."
+> "The extraction, scraping, harvesting, mining, or automated collection of listing data, property descriptions, provenance and confidential specifications, media, or price information from LAWRENCE by any automated script, spider, crawler, or bot (other than explicitly allowed search engine crawlers adhering to `robots.txt`) is strictly prohibited."
 
 ---
 

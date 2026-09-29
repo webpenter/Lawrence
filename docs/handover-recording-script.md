@@ -4,7 +4,7 @@ Record against **staging** with demo inventory seeded (`pnpm seed`). One
 take per chapter is fine; keep the cursor slow. Total target: 10 minutes.
 
 ## 0:00 — Intro (30 s)
-"This is the WATERLINE backoffice. Five things in ten minutes: publish a
+"This is the LAWRENCE backoffice. Five things in ten minutes: publish a
 listing, import a CSV, approve a listing, read the dashboard, add a landing
 page." Show the `/admin` login (mention 2FA prompt).
 

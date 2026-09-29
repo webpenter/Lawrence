@@ -1,12 +1,12 @@
-# WATERLINE — Backoffice & Editorial Guide
+# LAWRENCE — Backoffice & Editorial Guide
 
-A comprehensive guide for non-technical editors, agency administrators, and property agents managing listings on the WATERLINE portal.
+A comprehensive guide for non-technical editors, agency administrators, and property agents managing listings on the LAWRENCE portal.
 
 ---
 
 ## 1. Accessing the Backoffice
 
-- **URL**: `https://waterline.com/admin` (or `http://localhost:3000/admin` in development)
+- **URL**: `https://lawrenceprivatecollection.com/admin` (or `http://localhost:3000/admin` in development)
 - **Sign In**: Use your registered agency or editorial credentials.
 - **Roles & Permissions**:
   - **Portal Administrator (`admin`)**: Full platform control, moderation approvals, user/agency management, and platform analytics.
@@ -17,7 +17,7 @@ A comprehensive guide for non-technical editors, agency administrators, and prop
 
 ## 2. Listing Management & The Water Rule
 
-WATERLINE is the worldwide marketplace exclusively for properties with **direct water access**. The publishing gate is enforced by automated server-side validation.
+LAWRENCE is the private portal for trophy property from **€20M** (with the €10–20M prime-exception track). The publishing gate is enforced by automated server-side validation.
 
 ### Publishing Requirements (Non-Negotiable)
 To move a listing to `status = in_market` and publish it live, the following criteria must be satisfied:

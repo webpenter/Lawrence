@@ -1,4 +1,4 @@
-# WATERLINE — SEO Playbook
+# LAWRENCE — SEO Playbook
 
 How the programmatic SEO layer works and how to grow it without breaking the
 rules that make it rank. Read §13.9 and §14 of the spec first — they are

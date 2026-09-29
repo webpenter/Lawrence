@@ -1,10 +1,13 @@
-# WATERLINE — Launch Checklist & Definition of Done
+# LAWRENCE — Launch Checklist & Definition of Done
 
 This document implements **Spec §19 (Content Freeze & Launch Protocol)** and **Spec §20 (Definition of Done)**. Every item must be verified and checked off prior to production DNS cutover.
 
 ---
 
 ## 🚫 Critical Hard Gates (Zero Exceptions)
+
+- [ ] **Off-market never leaks (CLAUDE.md rule 1)**: anonymous `/off-market/*` requests 404; no off-market id, slug, address, internal value or hidden price in any public response (`pnpm audit:exposure`).
+- [ ] **§2.2 admission holds**: nothing below €10M published; €10–20M only as explicit prime exceptions within the 10% cap.
 
 - [ ] **No Sample Listings in Production Index**:
   - `pnpm sample:purge` executed against production database.
@@ -20,9 +23,9 @@ This document implements **Spec §19 (Content Freeze & Launch Protocol)** and **
 
 ### 1. Performance & Budgets (§12.1)
 - [ ] **First-load JS budgets met**:
-  - Home: < 110 kB gz (current: ~108.9 kB gz)
-  - Search: < 160 kB gz (current: ~109.6 kB gz)
-  - Listing: < 130 kB gz (current: ~122.8 kB gz)
+  - Home: < 110 kB gz (current: ~109.2 kB gz)
+  - Collection: < 160 kB gz (current: ~110.9 kB gz)
+  - Listing: < 130 kB gz (current: ~127.8 kB gz)
 - [ ] **Core Web Vitals**:
   - LCP < 1.2s mobile (throttled 4G)
   - CLS < 0.02
@@ -34,8 +37,8 @@ This document implements **Spec §19 (Content Freeze & Launch Protocol)** and **
   - Best Practices ≥ 95
 
 ### 2. Search & Discovery Experience
-- [ ] All filter facets (water body, access, price, bedrooms, amenities) return correct listings and counts.
-- [ ] Nautical filter ("Will my yacht fit?": LOA, draft, beam) correctly filters matching berths/moorings.
+- [ ] All filter facets (market, value tier, property type, price, bedrooms, features) return correct listings and counts.
+- [ ] The §5.5 market grammar resolves: canonical `/markets/[market]/[segment]` pages render, aliases 301, ungated combinations 404.
 - [ ] MapLibre GL dynamic split map loads on demand (`ssr: false`) with responsive markers and synchronized hover state.
 
 ### 3. Multi-Agency Backoffice & Workflows
@@ -55,20 +58,21 @@ This document implements **Spec §19 (Content Freeze & Launch Protocol)** and **
 - [ ] Metric / Imperial unit toggle (`m` vs `ft`, `sqm` vs `sqft`) stored in cookies.
 
 ### 5. Programmatic SEO & AI Discovery
-- [ ] Programmatic waterfront combo pages (`/waterfront/[combo]`) published with valid copy.
+- [ ] Market and segment pages published with sourced editorial (§5.5 gate: copy + three sourced data points).
+- [ ] Off-market layer verified: anonymous requests to `/off-market/*` return 404; `pnpm audit:exposure` green against production.
 - [ ] Sitemaps (`/sitemap.xml` + child sitemaps) returning valid XML with 0 broken links.
 - [ ] `pnpm audit:seo` passes with 0 errors.
 - [ ] Structured JSON-LD schemas (`RealEstateListing`, `BreadcrumbList`, `Organization`, `WebSite`, `FAQPage`) valid.
 - [ ] AI discovery endpoints (`/llms.txt`, `/llms-full.txt`, `robots.txt`) served and crawler policies enforced.
 
 ### 6. Accessibility (WCAG 2.2 AA)
-- [ ] Zero axe-core violations on all 8 core routes.
+- [ ] Zero axe-core violations on all 12 core routes (incl. market, segment, intelligence, report, article).
 - [ ] Keyboard-only user can perform a search and complete an enquiry form.
 - [ ] Visible focus rings on all interactive elements.
 - [ ] Target sizes ≥ 24px and contrast ratios ≥ 4.5:1.
 
 ### 7. Lead Generation & Privacy Compliance
-- [ ] Lead intake endpoint `/api/leads` honeypotted and rate-limited.
+- [ ] Enquiry intake endpoint `/api/enquiry` Turnstile-verified, honeypotted and rate-limited (5/IP/h).
 - [ ] Transactional enquiry notification via Resend operational.
 - [ ] Cookie consent banner non-blocking with granular analytics/marketing preferences.
 - [ ] One-click GDPR lead anonymization action operational in admin.
@@ -79,7 +83,7 @@ This document implements **Spec §19 (Content Freeze & Launch Protocol)** and **
 - [ ] Edge cache headers (`s-maxage`, `stale-while-revalidate`) verified.
 - [ ] Sentry error logging and Plausible analytics live (zero PII in events).
 - [ ] Operational runbooks published in `/docs/runbooks/`.
-- [ ] 7-day PITR and automated Neon backups verified.
+- [ ] 7-day PITR and automated Postgres backups verified.
 - [ ] TOTP 2FA enrolled for every `admin` and `agency_admin` account (deploy-time plugin — see DECISIONS.md Prompt 18 entry).
 - [ ] Visual-regression baselines generated in CI (`VISUAL=1`, `tests/visual.spec.ts`) and diffs green on the release candidate.
 - [ ] MapTiler key live and the map visually verified after the MapLibre 6 upgrade.
