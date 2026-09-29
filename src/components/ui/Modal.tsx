@@ -26,7 +26,8 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       ref={dialogRef}
       onClose={onClose}
       onCancel={onClose}
-      className="z-modal w-full max-w-lg rounded-lg border border-line bg-vellum p-6 shadow-pop backdrop:bg-ink/60"
+      className="w-full max-w-lg rounded-lg border border-line bg-vellum p-6 shadow-pop backdrop:bg-ink/60"
+      style={{ zIndex: 'var(--z-index-modal)' }}
       aria-labelledby="modal-title"
     >
       <div className="flex items-start justify-between gap-4">

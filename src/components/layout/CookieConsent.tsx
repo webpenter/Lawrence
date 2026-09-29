@@ -63,7 +63,8 @@ export function CookieConsent({ labels, locale }: CookieConsentProps) {
     <aside
       role="region"
       aria-label={labels.title}
-      className="fixed inset-x-3 bottom-3 z-toast mx-auto max-w-xl border border-line bg-vellum p-5 shadow-pop"
+      className="fixed inset-x-3 bottom-3 mx-auto max-w-xl border border-line bg-vellum p-5 shadow-pop"
+      style={{ zIndex: 'var(--z-index-toast)' }}
     >
       <h2 className="mb-1 font-display text-base text-ink">{labels.title}</h2>
       <p className="mb-4 text-xs leading-relaxed text-graphite">{labels.description}</p>

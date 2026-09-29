@@ -81,7 +81,8 @@ export function Lightbox({ images, currentIndex, labels, onClose, onNavigate }: 
       role="dialog"
       aria-modal="true"
       aria-label={labels.dialog}
-      className="fixed inset-0 z-modal flex items-center justify-center bg-obsidian/95 p-4"
+      className="fixed inset-0 flex items-center justify-center bg-obsidian/95 p-4"
+      style={{ zIndex: 'var(--z-index-modal)' }}
     >
       <button
         ref={closeRef}

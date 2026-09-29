@@ -129,7 +129,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     <>
       <a
         href="#results-list"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-toast focus:bg-vellum focus:p-3"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[var(--z-index-toast)] focus:bg-vellum focus:p-3"
       >
         {t('skipMap')}
       </a>

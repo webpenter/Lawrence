@@ -101,16 +101,16 @@ export default async function HomePage({
               <p className="mb-8 max-w-[56ch] text-base md:text-lg text-white/90 m-0 leading-relaxed">
                 {t('heroSub')}
               </p>
-              <div className="flex flex-col gap-4 sm:flex-row">
+              <div className="flex flex-row gap-3 sm:gap-4">
                 <Link
                   href="/collection"
-                  className="bg-white text-obsidian border border-white px-8 py-3.5 text-center text-[length:var(--text-xs)] uppercase tracking-[0.14em] transition-colors duration-[var(--motion-base)] hover:bg-white/90"
+                  className="flex-1 bg-white text-obsidian border border-white px-4 py-3 text-center text-[length:var(--text-xs)] uppercase tracking-[0.14em] transition-colors duration-[var(--motion-base)] hover:bg-white/90 sm:flex-none sm:px-8 sm:py-3.5"
                 >
                   {t('heroActionCollection')}
                 </Link>
                 <Link
                   href="/join"
-                  className="border border-white/55 px-8 py-3.5 text-center text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-white transition-colors duration-[var(--motion-base)] hover:bg-white/10"
+                  className="flex-1 border border-white/55 px-4 py-3 text-center text-[length:var(--text-xs)] uppercase tracking-[0.14em] text-white transition-colors duration-[var(--motion-base)] hover:bg-white/10 sm:flex-none sm:px-8 sm:py-3.5"
                 >
                   {t('heroActionOffMarket')}
                 </Link>

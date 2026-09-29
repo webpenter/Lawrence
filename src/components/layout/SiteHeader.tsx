@@ -75,7 +75,11 @@ export async function SiteHeader({ onHero = false }: SiteHeaderProps) {
             <span className="block h-0.5 w-5 bg-current" />
           </span>
         </summary>
-        <div className="absolute right-0 top-full z-header mt-2 flex w-48 flex-col gap-1 border border-line bg-vellum p-2 text-obsidian shadow-pop">
+        <div
+          className="absolute right-0 top-full mt-2 flex w-48 flex-col gap-1 border border-line bg-vellum p-2 text-obsidian shadow-pop"
+          style={{ zIndex: 'var(--z-index-header)' }}
+        >
+
           {links.map((link) => (
             <Link
               key={link.href}
