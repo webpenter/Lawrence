@@ -1,6 +1,7 @@
-import { buildConfig } from 'payload';
+import { buildConfig, type Plugin } from 'payload';
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import { s3Storage } from '@payloadcms/storage-s3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
@@ -32,7 +33,47 @@ import { ImportJob } from './collections/ImportJob';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+// Cloudflare R2 (S3-compatible): Vercel's serverless functions have no
+// persistent filesystem, so local-disk uploads (Payload's default) do not
+// survive between invocations in production. Media and Documents both route
+// through R2 there. Left disabled in dev/CI (no R2 vars set) so local uploads
+// keep using disk exactly as before — nothing here changes local behaviour.
+const r2Configured = Boolean(
+  process.env['R2_ACCOUNT_ID'] &&
+    process.env['R2_ACCESS_KEY_ID'] &&
+    process.env['R2_SECRET_ACCESS_KEY'] &&
+    process.env['R2_BUCKET'],
+);
+
+const plugins: Plugin[] = r2Configured
+  ? [
+      s3Storage({
+        collections: {
+          // Payload's default per-document access control still runs on every
+          // read (Media.access.read / Documents.access.read), so this alone
+          // never exposes a members-only asset — see docs/media-storage.md.
+          // Explicit prefixes: both collections share one bucket, so without
+          // this two docs with the same generated filename in different
+          // collections would collide on the same object key.
+          media: { prefix: 'media' },
+          documents: { prefix: 'documents' },
+        },
+        bucket: process.env['R2_BUCKET'] as string,
+        config: {
+          endpoint: `https://${process.env['R2_ACCOUNT_ID']}.r2.cloudflarestorage.com`,
+          region: 'auto',
+          credentials: {
+            accessKeyId: process.env['R2_ACCESS_KEY_ID'] as string,
+            secretAccessKey: process.env['R2_SECRET_ACCESS_KEY'] as string,
+          },
+          forcePathStyle: true,
+        },
+      }),
+    ]
+  : [];
+
 export default buildConfig({
+  plugins,
   admin: {
     user: Users.slug,
     meta: {
