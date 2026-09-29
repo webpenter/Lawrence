@@ -24,6 +24,8 @@ const eslintConfig = [
       'next-env.d.ts',
       'src/payload-types.ts',
       'src/migrations/**',
+      // Repo-root scratch codemods (one-shot design-pass helpers).
+      '*.js',
     ],
   },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),

@@ -288,77 +288,17 @@ async function searchListingsPostgres(
   };
 }
 
-export interface ScopeAggregates {
-  count: number;
-  medianPriceEur: number | null;
-  medianFrontageM: number | null;
-  topPropertyType: string | null;
-}
+import type { Market, SegmentPage } from '@/payload-types';
+import { marketPassesGate, type Segment } from '@/lib/seo/segments';
 
-function median(values: number[]): number | null {
-  if (values.length === 0) return null;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  const value =
-    sorted.length % 2 === 1 ? sorted[mid] : ((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2;
-  return value ?? null;
-}
-
-export async function getAggregatesForScope(scope: {
-  country?: string;
-  waterBodyType?: string;
-  propertyType?: string;
-  marketId?: number;
-}): Promise<ScopeAggregates> {
-  const payload = await getPayloadClient();
-  const clauses: Where[] = [publicPredicate()];
-  if (scope.country) clauses.push({ 'location.country': { equals: scope.country } });
-  if (scope.waterBodyType)
-    clauses.push({ 'waterfront.waterBodyType': { equals: scope.waterBodyType } });
-  if (scope.propertyType) clauses.push({ propertyType: { equals: scope.propertyType } });
-  if (scope.marketId != null)
-    clauses.push({ 'location.market': { equals: scope.marketId } });
-
-  const res = await payload.find({
-    collection: 'properties',
-    where: { and: clauses },
-    limit: 1000,
-    depth: 0,
-    select: { priceEur: true, waterfront: true, propertyType: true },
-  });
-
-  const typeCounts = new Map<string, number>();
-  for (const doc of res.docs) {
-    if (doc.propertyType) {
-      typeCounts.set(doc.propertyType, (typeCounts.get(doc.propertyType) ?? 0) + 1);
-    }
-  }
-  const topPropertyType =
-    [...typeCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-
-  return {
-    count: res.totalDocs,
-    medianPriceEur: median(
-      res.docs.map((d) => d.priceEur).filter((v): v is number => v != null),
-    ),
-    medianFrontageM: median(
-      res.docs.map((d) => d.waterfront?.waterFrontageM).filter((v): v is number => v != null),
-    ),
-    topPropertyType,
-  };
-}
-
-import type { LandingPage, Market } from '@/payload-types';
-import { publishedLandingPagesWhere } from '@/lib/seo/combos';
-
-export async function getLandingPageBySlug(
+export async function getMarketBySlug(
   slug: string,
   locale: Locale = 'en',
-): Promise<LandingPage | null> {
+): Promise<Market | null> {
   const payload = await getPayloadClient();
   const res = await payload.find({
-    collection: 'landing-pages',
-    where: { and: [publishedLandingPagesWhere(), { slug: { equals: slug } }] },
+    collection: 'markets',
+    where: { slug: { equals: slug } },
     locale,
     depth: 1,
     limit: 1,
@@ -367,14 +307,36 @@ export async function getLandingPageBySlug(
   return res.docs[0] ?? null;
 }
 
-export async function getPublishedLandingPages(
+/**
+ * §5.5-gated markets: published editorial copy plus at least three sourced
+ * data points. The only market set that enters sitemaps, llms.txt and the
+ * research hub's stat rows.
+ */
+export async function getGatedMarkets(
   locale: Locale = 'en',
   limit = 100,
-): Promise<LandingPage[]> {
+  includeSamples = false,
+): Promise<Market[]> {
   const payload = await getPayloadClient();
   const res = await payload.find({
-    collection: 'landing-pages',
-    where: publishedLandingPagesWhere(),
+    collection: 'markets',
+    ...(includeSamples ? {} : { where: { isSample: { not_equals: true } } }),
+    locale,
+    depth: 0,
+    limit,
+    overrideAccess: true,
+  });
+  return res.docs.filter(marketPassesGate);
+}
+
+export async function getPublishedSegmentPages(
+  locale: Locale = 'en',
+  limit = 200,
+): Promise<SegmentPage[]> {
+  const payload = await getPayloadClient();
+  const res = await payload.find({
+    collection: 'segment-pages',
+    where: { _status: { equals: 'published' } },
     locale,
     depth: 1,
     limit,
@@ -383,14 +345,52 @@ export async function getPublishedLandingPages(
   return res.docs;
 }
 
-export async function getDestinationBySlug(
-  slug: string,
+export async function getSegmentPage(
+  marketId: number,
+  segment: Segment,
   locale: Locale = 'en',
-): Promise<Market | null> {
+): Promise<SegmentPage | null> {
   const payload = await getPayloadClient();
   const res = await payload.find({
-    collection: 'markets',
-    where: { slug: { equals: slug } },
+    collection: 'segment-pages',
+    where: {
+      and: [
+        { _status: { equals: 'published' } },
+        { market: { equals: marketId } },
+        { segment: { equals: segment } },
+      ],
+    },
+    locale,
+    depth: 1,
+    limit: 1,
+    overrideAccess: true,
+  });
+  return res.docs[0] ?? null;
+}
+
+/** §11.6 — published reports, newest first, ungated summaries included. */
+export async function getReports(locale: Locale = 'en', limit = 20): Promise<Report[]> {
+  const payload = await getPayloadClient();
+  const res = await payload.find({
+    collection: 'reports',
+    where: { _status: { equals: 'published' } },
+    sort: '-publicationDate',
+    locale,
+    depth: 1,
+    limit,
+    overrideAccess: true,
+  });
+  return res.docs;
+}
+
+export async function getReportBySlug(
+  slug: string,
+  locale: Locale = 'en',
+): Promise<Report | null> {
+  const payload = await getPayloadClient();
+  const res = await payload.find({
+    collection: 'reports',
+    where: { and: [{ _status: { equals: 'published' } }, { slug: { equals: slug } }] },
     locale,
     depth: 1,
     limit: 1,

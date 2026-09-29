@@ -48,6 +48,13 @@ export const Article: CollectionConfig = {
     { name: 'body', type: 'richText', localized: true },
     { name: 'author', type: 'relationship', relationTo: 'users' },
     { name: 'publishedAt', type: 'date', index: true },
+    {
+      name: 'isSample',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      admin: { position: 'sidebar', description: 'Demo data: SAMPLE notice, noindex, out of sitemaps.' },
+    },
     { name: 'metaTitle', type: 'text', localized: true },
     { name: 'metaDescription', type: 'textarea', localized: true },
   ],

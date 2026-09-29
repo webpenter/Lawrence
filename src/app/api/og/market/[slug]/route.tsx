@@ -1,35 +1,35 @@
 import { ImageResponse } from 'next/og';
 
 import { brand } from '@/config/brand';
-import { getAggregatesForScope, getLandingPageBySlug } from '@/lib/db';
-import { comboToFilters } from '@/lib/seo/combos';
+import { getMarketBySlug, searchPropertiesPostgres } from '@/lib/db';
+import { formatPriceCompact } from '@/lib/intl/format';
+import { marketPassesGate } from '@/lib/seo/segments';
 import { tokens } from '@/tokens/tokens';
 import { HORIZON_GRADIENTS } from '@/tokens/placeholders';
 
 export const revalidate = 3600;
 
-// §14 dynamic OG image for landing pages: the combination title plus the live
-// count — the same answer-first shape the page itself opens with.
+// §15 dynamic OG image for market pages: the market name plus one sourced
+// figure — the same answer-first shape the page itself opens with.
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ combo: string }> },
+  { params }: { params: Promise<{ slug: string }> },
 ): Promise<ImageResponse> {
-  const { combo } = await params;
+  const { slug } = await params;
 
   let title = brand.tagline;
-  let count: number | null = null;
+  let statLine: string | null = null;
   try {
-    const page = await getLandingPageBySlug(combo);
-    if (page) {
-      title = page.title;
-      const filters = comboToFilters(page);
-      const aggregates = await getAggregatesForScope({
-        country: filters.country,
-        waterBodyType: filters.waterBodyTypes?.[0],
-        propertyType: filters.propertyTypes?.[0],
-        marketId: filters.marketId,
-      });
-      count = aggregates.count;
+    const market = await getMarketBySlug(slug);
+    if (market && marketPassesGate(market)) {
+      title = market.name;
+      const prime = market.stats?.primeEntryEur;
+      if (prime?.value != null && prime.source && prime.asOfDate) {
+        statLine = `Prime entry ${formatPriceCompact(prime.value, 'EUR', 'en')}`;
+      } else {
+        const { total } = await searchPropertiesPostgres({ marketId: market.id, limit: 1 });
+        if (total > 0) statLine = `${total} properties in the collection`;
+      }
     }
   } catch {
     // brand fallback card
@@ -63,9 +63,9 @@ export async function GET(
           <div style={{ fontSize: 60, lineHeight: 1.1, marginTop: 18, maxWidth: 1050 }}>
             {title}
           </div>
-          {count != null ? (
+          {statLine ? (
             <div style={{ fontSize: 32, marginTop: 22, color: tokens.color.patinaSoft }}>
-              {count} verified waterfront listings
+              {statLine}
             </div>
           ) : null}
         </div>

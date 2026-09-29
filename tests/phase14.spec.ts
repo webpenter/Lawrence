@@ -53,9 +53,10 @@ test.describe('sitemap index & child sitemaps verification (§14)', () => {
     expect(xml).toContain('<sitemapindex');
     expect(xml).toContain('/sitemaps/static.xml');
     expect(xml).toContain('/sitemaps/properties.xml');
-    expect(xml).toContain('/sitemaps/landing.xml');
-    expect(xml).toContain('/sitemaps/destinations.xml');
-    expect(xml).toContain('/sitemaps/articles.xml');
+    expect(xml).toContain('/sitemaps/markets.xml');
+    expect(xml).toContain('/sitemaps/segments.xml');
+    expect(xml).toContain('/sitemaps/reports.xml');
+    expect(xml).toContain('/sitemaps/journal.xml');
   });
 
   test('serves static child sitemap with all core routes', async ({ request }) => {
@@ -68,7 +69,6 @@ test.describe('sitemap index & child sitemaps verification (§14)', () => {
     expect(xml).toContain('/collection');
     expect(xml).toContain('/contact');
     expect(xml).toContain('/list-with-us');
-    expect(xml).toContain('/journal');
   });
 
   test('sitemaps return public edge cache-control headers', async ({ request }) => {

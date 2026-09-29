@@ -207,3 +207,43 @@ export function breadcrumbJsonLd(
     })),
   };
 }
+
+/**
+ * §15.5 Dataset — on reports and on the market stats endpoint. The
+ * distribution points at the public JSON so assistants can cite the figures
+ * with their source and asOfDate rather than scraping the page.
+ */
+export function datasetJsonLd(input: {
+  name: string;
+  description: string;
+  /** Canonical page the dataset describes. */
+  url: string;
+  /** Machine-readable JSON distribution (e.g. /api/public/markets/x/stats). */
+  dataUrl?: string;
+  dateModified?: string;
+}): Json {
+  const jsonLd: Json = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: input.name,
+    description: input.description,
+    url: input.url.startsWith('http') ? input.url : `${siteUrl()}${input.url}`,
+    creator: {
+      '@type': 'Organization',
+      name: brand.name,
+      url: siteUrl(),
+    },
+    isAccessibleForFree: true,
+  };
+  if (input.dataUrl) {
+    jsonLd.distribution = [
+      {
+        '@type': 'DataDownload',
+        encodingFormat: 'application/json',
+        contentUrl: input.dataUrl.startsWith('http') ? input.dataUrl : `${siteUrl()}${input.dataUrl}`,
+      },
+    ];
+  }
+  if (input.dateModified) jsonLd.dateModified = input.dateModified;
+  return jsonLd;
+}

@@ -71,7 +71,7 @@ export function buildPageMetadata(input: PageMetadataInput): Metadata {
     title,
     description,
     robots: input.robots,
-    alternates: hreflangAlternates(input.path),
+    alternates: hreflangAlternates(input.path, locale),
     openGraph: {
       title,
       description,

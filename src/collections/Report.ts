@@ -69,6 +69,13 @@ export const Report: CollectionConfig = {
       hasMany: true,
       admin: { description: 'Cross-links to the relevant market pages (§11.5).' },
     },
+    {
+      name: 'isSample',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      admin: { position: 'sidebar', description: 'Demo data: SAMPLE notice, noindex, out of sitemaps.' },
+    },
     { name: 'metaTitle', type: 'text', localized: true },
     { name: 'metaDescription', type: 'textarea', localized: true },
   ],

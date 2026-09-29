@@ -5,7 +5,7 @@ import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { getMarketCounts, type MarketCount, type Locale } from '@/lib/db';
-import { hreflangAlternates } from '@/lib/seo/hreflang';
+import { buildPageMetadata } from '@/lib/seo/metadata';
 import { HERO_SCRIM, horizonGradientFor } from '@/tokens/placeholders';
 
 // Destination hub (§5.2, §10.5): SSG + ISR.
@@ -16,13 +16,14 @@ interface HubProps {
 }
 
 export async function generateMetadata({ params }: HubProps): Promise<Metadata> {
-  await params;
+  const { locale } = await params;
   const t = await getTranslations('destinations');
-  return {
+  return buildPageMetadata({
     title: t('hubTitle'),
-    description: t('hubSub'),
-    alternates: hreflangAlternates('/markets'),
-  };
+    description: t('hubMetaDescription'),
+    path: '/markets',
+    locale,
+  });
 }
 
 async function safeCounts(locale: Locale): Promise<MarketCount[]> {

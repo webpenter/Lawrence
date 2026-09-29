@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: LegalPageProps): Promise<Meta
   return {
     title: cms?.metaTitle ?? cms?.title ?? builtIn.title,
     description: cms?.metaDescription ?? builtIn.description,
-    alternates: hreflangAlternates(`/legal/${doc}`),
+    alternates: hreflangAlternates(`/legal/${doc}`, locale),
   };
 }
 

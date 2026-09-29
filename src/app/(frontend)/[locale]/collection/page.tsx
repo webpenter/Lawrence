@@ -59,7 +59,7 @@ async function countWithFilters(filters: PropertyFilters): Promise<number> {
 }
 
 export async function generateMetadata({ params, searchParams }: SearchPageProps): Promise<Metadata> {
-  await params;
+  const { locale } = await params;
   const sp = await searchParams;
   const t = await getTranslations('search');
   const filtered = activeFilterParams(sp).length > 0;
@@ -72,7 +72,7 @@ export async function generateMetadata({ params, searchParams }: SearchPageProps
     // filtered inventory; filtered/paginated browse is noindex,follow with
     // the canonical pointing at page 1 of the same filter set.
     robots: filtered || page > 1 ? { index: false, follow: true } : undefined,
-    alternates: hreflangAlternates('/collection'),
+    alternates: hreflangAlternates('/collection', locale),
   };
 }
 

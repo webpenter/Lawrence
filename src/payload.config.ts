@@ -19,7 +19,7 @@ import { MemberActivity } from './collections/MemberActivity';
 import { Report } from './collections/Report';
 import { Documents } from './collections/Documents';
 import { FxSnapshot } from './collections/FxSnapshot';
-import { LandingPage } from './collections/LandingPage';
+import { SegmentPage } from './collections/SegmentPage';
 import { Taxonomy } from './collections/Taxonomy';
 import { Article } from './collections/Article';
 import { Page } from './collections/Page';
@@ -61,7 +61,7 @@ export default buildConfig({
     MemberActivity,
     Report,
     FxSnapshot,
-    LandingPage,
+    SegmentPage,
     Taxonomy,
     Article,
     Page,

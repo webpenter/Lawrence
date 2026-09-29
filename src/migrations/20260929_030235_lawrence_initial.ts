@@ -71,13 +71,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum_reports_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__reports_v_version_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__reports_v_published_locale" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
-  CREATE TYPE "public"."enum_landing_pages_combo_property_type" AS ENUM('villa', 'estate', 'penthouse', 'townhouse', 'chalet', 'castle', 'palazzo', 'private_island', 'vineyard_estate', 'equestrian_estate', 'hotel_resort', 'development_site', 'apartment', 'lodge', 'ranch');
-  CREATE TYPE "public"."enum_landing_pages_combo_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary');
-  CREATE TYPE "public"."enum_landing_pages_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum__landing_pages_v_version_combo_property_type" AS ENUM('villa', 'estate', 'penthouse', 'townhouse', 'chalet', 'castle', 'palazzo', 'private_island', 'vineyard_estate', 'equestrian_estate', 'hotel_resort', 'development_site', 'apartment', 'lodge', 'ranch');
-  CREATE TYPE "public"."enum__landing_pages_v_version_combo_water_body_type" AS ENUM('sea', 'ocean', 'lake', 'river', 'lagoon', 'canal', 'fjord', 'bay', 'estuary');
-  CREATE TYPE "public"."enum__landing_pages_v_version_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum__landing_pages_v_published_locale" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
+  CREATE TYPE "public"."enum_segment_pages_segment" AS ENUM('waterfront-estates', 'vineyard-estates', 'ski-chalets', 'penthouses', 'private-islands', 'historic-estates', 'equestrian-estates', 'new-developments', 'golf-estates');
+  CREATE TYPE "public"."enum_segment_pages_status" AS ENUM('draft', 'published');
+  CREATE TYPE "public"."enum__segment_pages_v_version_segment" AS ENUM('waterfront-estates', 'vineyard-estates', 'ski-chalets', 'penthouses', 'private-islands', 'historic-estates', 'equestrian-estates', 'new-developments', 'golf-estates');
+  CREATE TYPE "public"."enum__segment_pages_v_version_status" AS ENUM('draft', 'published');
+  CREATE TYPE "public"."enum__segment_pages_v_published_locale" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
   CREATE TYPE "public"."enum_taxonomies_group" AS ENUM('lifestyle', 'style', 'collection');
   CREATE TYPE "public"."enum_articles_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__articles_v_version_status" AS ENUM('draft', 'published');
@@ -544,6 +542,15 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
+  CREATE TABLE "markets_faq" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"_locale" "_locales" NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"question" varchar NOT NULL,
+  	"answer" varchar NOT NULL
+  );
+  
   CREATE TABLE "markets" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"country" varchar,
@@ -566,6 +573,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"stats_transaction_volume_band_value" "enum_markets_stats_transaction_volume_band_value",
   	"stats_transaction_volume_band_source" varchar,
   	"stats_transaction_volume_band_as_of_date" timestamp(3) with time zone,
+  	"is_sample" boolean DEFAULT false,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
@@ -573,12 +581,22 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "markets_locales" (
   	"name" varchar NOT NULL,
   	"slug" varchar NOT NULL,
+  	"answer" varchar,
   	"intro" jsonb,
+  	"buying_notes" jsonb,
   	"meta_title" varchar,
   	"meta_description" varchar,
   	"id" serial PRIMARY KEY NOT NULL,
   	"_locale" "_locales" NOT NULL,
   	"_parent_id" integer NOT NULL
+  );
+  
+  CREATE TABLE "markets_rels" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"order" integer,
+  	"parent_id" integer NOT NULL,
+  	"path" varchar NOT NULL,
+  	"markets_id" integer
   );
   
   CREATE TABLE "enquiries" (
@@ -675,6 +693,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"pdf_id" integer,
   	"charts" jsonb,
   	"publication_date" timestamp(3) with time zone,
+  	"is_sample" boolean DEFAULT false,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"_status" "enum_reports_status" DEFAULT 'draft'
@@ -713,6 +732,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_pdf_id" integer,
   	"version_charts" jsonb,
   	"version_publication_date" timestamp(3) with time zone,
+  	"version_is_sample" boolean DEFAULT false,
   	"version_updated_at" timestamp(3) with time zone,
   	"version_created_at" timestamp(3) with time zone,
   	"version__status" "enum__reports_v_version_status" DEFAULT 'draft',
@@ -750,7 +770,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
-  CREATE TABLE "landing_pages_faq" (
+  CREATE TABLE "segment_pages_faq" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
   	"_locale" "_locales" NOT NULL,
@@ -759,19 +779,17 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"answer" varchar
   );
   
-  CREATE TABLE "landing_pages" (
+  CREATE TABLE "segment_pages" (
   	"id" serial PRIMARY KEY NOT NULL,
-  	"slug" varchar,
-  	"combo_property_type" "enum_landing_pages_combo_property_type",
-  	"combo_water_body_type" "enum_landing_pages_combo_water_body_type",
-  	"combo_destination_id" integer,
-  	"combo_country" varchar,
+  	"market_id" integer,
+  	"segment" "enum_segment_pages_segment",
+  	"is_sample" boolean DEFAULT false,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"_status" "enum_landing_pages_status" DEFAULT 'draft'
+  	"_status" "enum_segment_pages_status" DEFAULT 'draft'
   );
   
-  CREATE TABLE "landing_pages_locales" (
+  CREATE TABLE "segment_pages_locales" (
   	"title" varchar,
   	"intro" jsonb,
   	"body" jsonb,
@@ -782,7 +800,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_parent_id" integer NOT NULL
   );
   
-  CREATE TABLE "_landing_pages_v_version_faq" (
+  CREATE TABLE "_segment_pages_v_version_faq" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
   	"_locale" "_locales" NOT NULL,
@@ -792,25 +810,23 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_uuid" varchar
   );
   
-  CREATE TABLE "_landing_pages_v" (
+  CREATE TABLE "_segment_pages_v" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"parent_id" integer,
-  	"version_slug" varchar,
-  	"version_combo_property_type" "enum__landing_pages_v_version_combo_property_type",
-  	"version_combo_water_body_type" "enum__landing_pages_v_version_combo_water_body_type",
-  	"version_combo_destination_id" integer,
-  	"version_combo_country" varchar,
+  	"version_market_id" integer,
+  	"version_segment" "enum__segment_pages_v_version_segment",
+  	"version_is_sample" boolean DEFAULT false,
   	"version_updated_at" timestamp(3) with time zone,
   	"version_created_at" timestamp(3) with time zone,
-  	"version__status" "enum__landing_pages_v_version_status" DEFAULT 'draft',
+  	"version__status" "enum__segment_pages_v_version_status" DEFAULT 'draft',
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"snapshot" boolean,
-  	"published_locale" "enum__landing_pages_v_published_locale",
+  	"published_locale" "enum__segment_pages_v_published_locale",
   	"latest" boolean
   );
   
-  CREATE TABLE "_landing_pages_v_locales" (
+  CREATE TABLE "_segment_pages_v_locales" (
   	"version_title" varchar,
   	"version_intro" jsonb,
   	"version_body" jsonb,
@@ -843,6 +859,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"hero_image_id" integer,
   	"author_id" integer,
   	"published_at" timestamp(3) with time zone,
+  	"is_sample" boolean DEFAULT false,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"_status" "enum_articles_status" DEFAULT 'draft'
@@ -866,6 +883,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_hero_image_id" integer,
   	"version_author_id" integer,
   	"version_published_at" timestamp(3) with time zone,
+  	"version_is_sample" boolean DEFAULT false,
   	"version_updated_at" timestamp(3) with time zone,
   	"version_created_at" timestamp(3) with time zone,
   	"version__status" "enum__articles_v_version_status" DEFAULT 'draft',
@@ -1009,7 +1027,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"member_activity_id" integer,
   	"reports_id" integer,
   	"fx_snapshots_id" integer,
-  	"landing_pages_id" integer,
+  	"segment_pages_id" integer,
   	"taxonomies_id" integer,
   	"articles_id" integer,
   	"pages_id" integer,
@@ -1078,8 +1096,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "agents_languages" ADD CONSTRAINT "agents_languages_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."agents"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "agents" ADD CONSTRAINT "agents_agency_id_agencies_id_fk" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "agents" ADD CONSTRAINT "agents_photo_id_media_id_fk" FOREIGN KEY ("photo_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "markets_faq" ADD CONSTRAINT "markets_faq_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."markets"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "markets" ADD CONSTRAINT "markets_hero_image_id_media_id_fk" FOREIGN KEY ("hero_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "markets_locales" ADD CONSTRAINT "markets_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."markets"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "markets_rels" ADD CONSTRAINT "markets_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."markets"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "markets_rels" ADD CONSTRAINT "markets_rels_markets_fk" FOREIGN KEY ("markets_id") REFERENCES "public"."markets"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "enquiries" ADD CONSTRAINT "enquiries_property_id_properties_id_fk" FOREIGN KEY ("property_id") REFERENCES "public"."properties"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "enquiries" ADD CONSTRAINT "enquiries_agency_id_agencies_id_fk" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "enquiries" ADD CONSTRAINT "enquiries_agent_id_agents_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."agents"("id") ON DELETE set null ON UPDATE no action;
@@ -1104,13 +1125,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "_reports_v_locales" ADD CONSTRAINT "_reports_v_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_reports_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_reports_v_rels" ADD CONSTRAINT "_reports_v_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."_reports_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_reports_v_rels" ADD CONSTRAINT "_reports_v_rels_markets_fk" FOREIGN KEY ("markets_id") REFERENCES "public"."markets"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "landing_pages_faq" ADD CONSTRAINT "landing_pages_faq_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."landing_pages"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "landing_pages" ADD CONSTRAINT "landing_pages_combo_destination_id_markets_id_fk" FOREIGN KEY ("combo_destination_id") REFERENCES "public"."markets"("id") ON DELETE set null ON UPDATE no action;
-  ALTER TABLE "landing_pages_locales" ADD CONSTRAINT "landing_pages_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."landing_pages"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "_landing_pages_v_version_faq" ADD CONSTRAINT "_landing_pages_v_version_faq_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_landing_pages_v"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "_landing_pages_v" ADD CONSTRAINT "_landing_pages_v_parent_id_landing_pages_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."landing_pages"("id") ON DELETE set null ON UPDATE no action;
-  ALTER TABLE "_landing_pages_v" ADD CONSTRAINT "_landing_pages_v_version_combo_destination_id_markets_id_fk" FOREIGN KEY ("version_combo_destination_id") REFERENCES "public"."markets"("id") ON DELETE set null ON UPDATE no action;
-  ALTER TABLE "_landing_pages_v_locales" ADD CONSTRAINT "_landing_pages_v_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_landing_pages_v"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "segment_pages_faq" ADD CONSTRAINT "segment_pages_faq_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."segment_pages"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "segment_pages" ADD CONSTRAINT "segment_pages_market_id_markets_id_fk" FOREIGN KEY ("market_id") REFERENCES "public"."markets"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "segment_pages_locales" ADD CONSTRAINT "segment_pages_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."segment_pages"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "_segment_pages_v_version_faq" ADD CONSTRAINT "_segment_pages_v_version_faq_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_segment_pages_v"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "_segment_pages_v" ADD CONSTRAINT "_segment_pages_v_parent_id_segment_pages_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."segment_pages"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "_segment_pages_v" ADD CONSTRAINT "_segment_pages_v_version_market_id_markets_id_fk" FOREIGN KEY ("version_market_id") REFERENCES "public"."markets"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "_segment_pages_v_locales" ADD CONSTRAINT "_segment_pages_v_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_segment_pages_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "taxonomies_locales" ADD CONSTRAINT "taxonomies_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."taxonomies"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "articles" ADD CONSTRAINT "articles_hero_image_id_media_id_fk" FOREIGN KEY ("hero_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "articles" ADD CONSTRAINT "articles_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
@@ -1140,7 +1161,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_member_activity_fk" FOREIGN KEY ("member_activity_id") REFERENCES "public"."member_activity"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_reports_fk" FOREIGN KEY ("reports_id") REFERENCES "public"."reports"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_fx_snapshots_fk" FOREIGN KEY ("fx_snapshots_id") REFERENCES "public"."fx_snapshots"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_landing_pages_fk" FOREIGN KEY ("landing_pages_id") REFERENCES "public"."landing_pages"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_segment_pages_fk" FOREIGN KEY ("segment_pages_id") REFERENCES "public"."segment_pages"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_taxonomies_fk" FOREIGN KEY ("taxonomies_id") REFERENCES "public"."taxonomies"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_articles_fk" FOREIGN KEY ("articles_id") REFERENCES "public"."articles"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_pages_fk" FOREIGN KEY ("pages_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;
@@ -1269,12 +1290,20 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "agents_photo_idx" ON "agents" USING btree ("photo_id");
   CREATE INDEX "agents_updated_at_idx" ON "agents" USING btree ("updated_at");
   CREATE INDEX "agents_created_at_idx" ON "agents" USING btree ("created_at");
+  CREATE INDEX "markets_faq_order_idx" ON "markets_faq" USING btree ("_order");
+  CREATE INDEX "markets_faq_parent_id_idx" ON "markets_faq" USING btree ("_parent_id");
+  CREATE INDEX "markets_faq_locale_idx" ON "markets_faq" USING btree ("_locale");
   CREATE INDEX "markets_country_idx" ON "markets" USING btree ("country");
   CREATE INDEX "markets_hero_image_idx" ON "markets" USING btree ("hero_image_id");
+  CREATE INDEX "markets_is_sample_idx" ON "markets" USING btree ("is_sample");
   CREATE INDEX "markets_updated_at_idx" ON "markets" USING btree ("updated_at");
   CREATE INDEX "markets_created_at_idx" ON "markets" USING btree ("created_at");
   CREATE INDEX "markets_slug_idx" ON "markets_locales" USING btree ("slug","_locale");
   CREATE UNIQUE INDEX "markets_locales_locale_parent_id_unique" ON "markets_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX "markets_rels_order_idx" ON "markets_rels" USING btree ("order");
+  CREATE INDEX "markets_rels_parent_idx" ON "markets_rels" USING btree ("parent_id");
+  CREATE INDEX "markets_rels_path_idx" ON "markets_rels" USING btree ("path");
+  CREATE INDEX "markets_rels_markets_id_idx" ON "markets_rels" USING btree ("markets_id");
   CREATE INDEX "enquiries_property_idx" ON "enquiries" USING btree ("property_id");
   CREATE INDEX "enquiries_agency_idx" ON "enquiries" USING btree ("agency_id");
   CREATE INDEX "enquiries_agent_idx" ON "enquiries" USING btree ("agent_id");
@@ -1311,6 +1340,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE UNIQUE INDEX "reports_slug_idx" ON "reports" USING btree ("slug");
   CREATE INDEX "reports_pdf_idx" ON "reports" USING btree ("pdf_id");
   CREATE INDEX "reports_publication_date_idx" ON "reports" USING btree ("publication_date");
+  CREATE INDEX "reports_is_sample_idx" ON "reports" USING btree ("is_sample");
   CREATE INDEX "reports_updated_at_idx" ON "reports" USING btree ("updated_at");
   CREATE INDEX "reports_created_at_idx" ON "reports" USING btree ("created_at");
   CREATE INDEX "reports__status_idx" ON "reports" USING btree ("_status");
@@ -1325,6 +1355,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_reports_v_version_version_slug_idx" ON "_reports_v" USING btree ("version_slug");
   CREATE INDEX "_reports_v_version_version_pdf_idx" ON "_reports_v" USING btree ("version_pdf_id");
   CREATE INDEX "_reports_v_version_version_publication_date_idx" ON "_reports_v" USING btree ("version_publication_date");
+  CREATE INDEX "_reports_v_version_version_is_sample_idx" ON "_reports_v" USING btree ("version_is_sample");
   CREATE INDEX "_reports_v_version_version_updated_at_idx" ON "_reports_v" USING btree ("version_updated_at");
   CREATE INDEX "_reports_v_version_version_created_at_idx" ON "_reports_v" USING btree ("version_created_at");
   CREATE INDEX "_reports_v_version_version__status_idx" ON "_reports_v" USING btree ("version__status");
@@ -1341,30 +1372,32 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE UNIQUE INDEX "fx_snapshots_date_idx" ON "fx_snapshots" USING btree ("date");
   CREATE INDEX "fx_snapshots_updated_at_idx" ON "fx_snapshots" USING btree ("updated_at");
   CREATE INDEX "fx_snapshots_created_at_idx" ON "fx_snapshots" USING btree ("created_at");
-  CREATE INDEX "landing_pages_faq_order_idx" ON "landing_pages_faq" USING btree ("_order");
-  CREATE INDEX "landing_pages_faq_parent_id_idx" ON "landing_pages_faq" USING btree ("_parent_id");
-  CREATE INDEX "landing_pages_faq_locale_idx" ON "landing_pages_faq" USING btree ("_locale");
-  CREATE UNIQUE INDEX "landing_pages_slug_idx" ON "landing_pages" USING btree ("slug");
-  CREATE INDEX "landing_pages_combo_combo_destination_idx" ON "landing_pages" USING btree ("combo_destination_id");
-  CREATE INDEX "landing_pages_updated_at_idx" ON "landing_pages" USING btree ("updated_at");
-  CREATE INDEX "landing_pages_created_at_idx" ON "landing_pages" USING btree ("created_at");
-  CREATE INDEX "landing_pages__status_idx" ON "landing_pages" USING btree ("_status");
-  CREATE UNIQUE INDEX "landing_pages_locales_locale_parent_id_unique" ON "landing_pages_locales" USING btree ("_locale","_parent_id");
-  CREATE INDEX "_landing_pages_v_version_faq_order_idx" ON "_landing_pages_v_version_faq" USING btree ("_order");
-  CREATE INDEX "_landing_pages_v_version_faq_parent_id_idx" ON "_landing_pages_v_version_faq" USING btree ("_parent_id");
-  CREATE INDEX "_landing_pages_v_version_faq_locale_idx" ON "_landing_pages_v_version_faq" USING btree ("_locale");
-  CREATE INDEX "_landing_pages_v_parent_idx" ON "_landing_pages_v" USING btree ("parent_id");
-  CREATE INDEX "_landing_pages_v_version_version_slug_idx" ON "_landing_pages_v" USING btree ("version_slug");
-  CREATE INDEX "_landing_pages_v_version_combo_version_combo_destination_idx" ON "_landing_pages_v" USING btree ("version_combo_destination_id");
-  CREATE INDEX "_landing_pages_v_version_version_updated_at_idx" ON "_landing_pages_v" USING btree ("version_updated_at");
-  CREATE INDEX "_landing_pages_v_version_version_created_at_idx" ON "_landing_pages_v" USING btree ("version_created_at");
-  CREATE INDEX "_landing_pages_v_version_version__status_idx" ON "_landing_pages_v" USING btree ("version__status");
-  CREATE INDEX "_landing_pages_v_created_at_idx" ON "_landing_pages_v" USING btree ("created_at");
-  CREATE INDEX "_landing_pages_v_updated_at_idx" ON "_landing_pages_v" USING btree ("updated_at");
-  CREATE INDEX "_landing_pages_v_snapshot_idx" ON "_landing_pages_v" USING btree ("snapshot");
-  CREATE INDEX "_landing_pages_v_published_locale_idx" ON "_landing_pages_v" USING btree ("published_locale");
-  CREATE INDEX "_landing_pages_v_latest_idx" ON "_landing_pages_v" USING btree ("latest");
-  CREATE UNIQUE INDEX "_landing_pages_v_locales_locale_parent_id_unique" ON "_landing_pages_v_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX "segment_pages_faq_order_idx" ON "segment_pages_faq" USING btree ("_order");
+  CREATE INDEX "segment_pages_faq_parent_id_idx" ON "segment_pages_faq" USING btree ("_parent_id");
+  CREATE INDEX "segment_pages_faq_locale_idx" ON "segment_pages_faq" USING btree ("_locale");
+  CREATE INDEX "segment_pages_market_idx" ON "segment_pages" USING btree ("market_id");
+  CREATE INDEX "segment_pages_segment_idx" ON "segment_pages" USING btree ("segment");
+  CREATE INDEX "segment_pages_is_sample_idx" ON "segment_pages" USING btree ("is_sample");
+  CREATE INDEX "segment_pages_updated_at_idx" ON "segment_pages" USING btree ("updated_at");
+  CREATE INDEX "segment_pages_created_at_idx" ON "segment_pages" USING btree ("created_at");
+  CREATE INDEX "segment_pages__status_idx" ON "segment_pages" USING btree ("_status");
+  CREATE UNIQUE INDEX "segment_pages_locales_locale_parent_id_unique" ON "segment_pages_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX "_segment_pages_v_version_faq_order_idx" ON "_segment_pages_v_version_faq" USING btree ("_order");
+  CREATE INDEX "_segment_pages_v_version_faq_parent_id_idx" ON "_segment_pages_v_version_faq" USING btree ("_parent_id");
+  CREATE INDEX "_segment_pages_v_version_faq_locale_idx" ON "_segment_pages_v_version_faq" USING btree ("_locale");
+  CREATE INDEX "_segment_pages_v_parent_idx" ON "_segment_pages_v" USING btree ("parent_id");
+  CREATE INDEX "_segment_pages_v_version_version_market_idx" ON "_segment_pages_v" USING btree ("version_market_id");
+  CREATE INDEX "_segment_pages_v_version_version_segment_idx" ON "_segment_pages_v" USING btree ("version_segment");
+  CREATE INDEX "_segment_pages_v_version_version_is_sample_idx" ON "_segment_pages_v" USING btree ("version_is_sample");
+  CREATE INDEX "_segment_pages_v_version_version_updated_at_idx" ON "_segment_pages_v" USING btree ("version_updated_at");
+  CREATE INDEX "_segment_pages_v_version_version_created_at_idx" ON "_segment_pages_v" USING btree ("version_created_at");
+  CREATE INDEX "_segment_pages_v_version_version__status_idx" ON "_segment_pages_v" USING btree ("version__status");
+  CREATE INDEX "_segment_pages_v_created_at_idx" ON "_segment_pages_v" USING btree ("created_at");
+  CREATE INDEX "_segment_pages_v_updated_at_idx" ON "_segment_pages_v" USING btree ("updated_at");
+  CREATE INDEX "_segment_pages_v_snapshot_idx" ON "_segment_pages_v" USING btree ("snapshot");
+  CREATE INDEX "_segment_pages_v_published_locale_idx" ON "_segment_pages_v" USING btree ("published_locale");
+  CREATE INDEX "_segment_pages_v_latest_idx" ON "_segment_pages_v" USING btree ("latest");
+  CREATE UNIQUE INDEX "_segment_pages_v_locales_locale_parent_id_unique" ON "_segment_pages_v_locales" USING btree ("_locale","_parent_id");
   CREATE UNIQUE INDEX "taxonomies_slug_idx" ON "taxonomies" USING btree ("slug");
   CREATE INDEX "taxonomies_updated_at_idx" ON "taxonomies" USING btree ("updated_at");
   CREATE INDEX "taxonomies_created_at_idx" ON "taxonomies" USING btree ("created_at");
@@ -1373,6 +1406,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "articles_hero_image_idx" ON "articles" USING btree ("hero_image_id");
   CREATE INDEX "articles_author_idx" ON "articles" USING btree ("author_id");
   CREATE INDEX "articles_published_at_idx" ON "articles" USING btree ("published_at");
+  CREATE INDEX "articles_is_sample_idx" ON "articles" USING btree ("is_sample");
   CREATE INDEX "articles_updated_at_idx" ON "articles" USING btree ("updated_at");
   CREATE INDEX "articles_created_at_idx" ON "articles" USING btree ("created_at");
   CREATE INDEX "articles__status_idx" ON "articles" USING btree ("_status");
@@ -1382,6 +1416,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_articles_v_version_version_hero_image_idx" ON "_articles_v" USING btree ("version_hero_image_id");
   CREATE INDEX "_articles_v_version_version_author_idx" ON "_articles_v" USING btree ("version_author_id");
   CREATE INDEX "_articles_v_version_version_published_at_idx" ON "_articles_v" USING btree ("version_published_at");
+  CREATE INDEX "_articles_v_version_version_is_sample_idx" ON "_articles_v" USING btree ("version_is_sample");
   CREATE INDEX "_articles_v_version_version_updated_at_idx" ON "_articles_v" USING btree ("version_updated_at");
   CREATE INDEX "_articles_v_version_version_created_at_idx" ON "_articles_v" USING btree ("version_created_at");
   CREATE INDEX "_articles_v_version_version__status_idx" ON "_articles_v" USING btree ("version__status");
@@ -1446,7 +1481,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_locked_documents_rels_member_activity_id_idx" ON "payload_locked_documents_rels" USING btree ("member_activity_id");
   CREATE INDEX "payload_locked_documents_rels_reports_id_idx" ON "payload_locked_documents_rels" USING btree ("reports_id");
   CREATE INDEX "payload_locked_documents_rels_fx_snapshots_id_idx" ON "payload_locked_documents_rels" USING btree ("fx_snapshots_id");
-  CREATE INDEX "payload_locked_documents_rels_landing_pages_id_idx" ON "payload_locked_documents_rels" USING btree ("landing_pages_id");
+  CREATE INDEX "payload_locked_documents_rels_segment_pages_id_idx" ON "payload_locked_documents_rels" USING btree ("segment_pages_id");
   CREATE INDEX "payload_locked_documents_rels_taxonomies_id_idx" ON "payload_locked_documents_rels" USING btree ("taxonomies_id");
   CREATE INDEX "payload_locked_documents_rels_articles_id_idx" ON "payload_locked_documents_rels" USING btree ("articles_id");
   CREATE INDEX "payload_locked_documents_rels_pages_id_idx" ON "payload_locked_documents_rels" USING btree ("pages_id");
@@ -1489,8 +1524,10 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "agencies_locales" CASCADE;
   DROP TABLE "agents_languages" CASCADE;
   DROP TABLE "agents" CASCADE;
+  DROP TABLE "markets_faq" CASCADE;
   DROP TABLE "markets" CASCADE;
   DROP TABLE "markets_locales" CASCADE;
+  DROP TABLE "markets_rels" CASCADE;
   DROP TABLE "enquiries" CASCADE;
   DROP TABLE "saved_listings" CASCADE;
   DROP TABLE "requirements_property_types" CASCADE;
@@ -1507,12 +1544,12 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "_reports_v_locales" CASCADE;
   DROP TABLE "_reports_v_rels" CASCADE;
   DROP TABLE "fx_snapshots" CASCADE;
-  DROP TABLE "landing_pages_faq" CASCADE;
-  DROP TABLE "landing_pages" CASCADE;
-  DROP TABLE "landing_pages_locales" CASCADE;
-  DROP TABLE "_landing_pages_v_version_faq" CASCADE;
-  DROP TABLE "_landing_pages_v" CASCADE;
-  DROP TABLE "_landing_pages_v_locales" CASCADE;
+  DROP TABLE "segment_pages_faq" CASCADE;
+  DROP TABLE "segment_pages" CASCADE;
+  DROP TABLE "segment_pages_locales" CASCADE;
+  DROP TABLE "_segment_pages_v_version_faq" CASCADE;
+  DROP TABLE "_segment_pages_v" CASCADE;
+  DROP TABLE "_segment_pages_v_locales" CASCADE;
   DROP TABLE "taxonomies" CASCADE;
   DROP TABLE "taxonomies_locales" CASCADE;
   DROP TABLE "articles" CASCADE;
@@ -1602,13 +1639,11 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_reports_status";
   DROP TYPE "public"."enum__reports_v_version_status";
   DROP TYPE "public"."enum__reports_v_published_locale";
-  DROP TYPE "public"."enum_landing_pages_combo_property_type";
-  DROP TYPE "public"."enum_landing_pages_combo_water_body_type";
-  DROP TYPE "public"."enum_landing_pages_status";
-  DROP TYPE "public"."enum__landing_pages_v_version_combo_property_type";
-  DROP TYPE "public"."enum__landing_pages_v_version_combo_water_body_type";
-  DROP TYPE "public"."enum__landing_pages_v_version_status";
-  DROP TYPE "public"."enum__landing_pages_v_published_locale";
+  DROP TYPE "public"."enum_segment_pages_segment";
+  DROP TYPE "public"."enum_segment_pages_status";
+  DROP TYPE "public"."enum__segment_pages_v_version_segment";
+  DROP TYPE "public"."enum__segment_pages_v_version_status";
+  DROP TYPE "public"."enum__segment_pages_v_published_locale";
   DROP TYPE "public"."enum_taxonomies_group";
   DROP TYPE "public"."enum_articles_status";
   DROP TYPE "public"."enum__articles_v_version_status";

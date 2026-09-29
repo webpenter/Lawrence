@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-// Phase 9 live acceptance (Prompt 14): machine endpoints, sitemaps, OG images.
+// Machine-endpoint live acceptance (Prompt 10/§15.6): sitemaps, llms, OG images.
 
-test('robots.txt serves the §14.6 AI-crawler policy as text/plain', async ({ request }) => {
+test('robots.txt serves the §15.6 AI-crawler policy as text/plain', async ({ request }) => {
   const response = await request.get('/robots.txt');
   expect(response.status()).toBe(200);
   expect(response.headers()['content-type']).toContain('text/plain');
@@ -11,6 +11,9 @@ test('robots.txt serves the §14.6 AI-crawler policy as text/plain', async ({ re
     expect(body).toContain(`User-agent: ${bot}`);
   }
   expect(body).toContain('Disallow: /admin');
+  // §15.3: /off-market and /account are robots-excluded on every locale prefix.
+  expect(body).toContain('Disallow: /*/off-market');
+  expect(body).toContain('Disallow: /*/account');
   expect(body).toContain('Sitemap:');
 });
 
@@ -18,8 +21,8 @@ test('llms.txt and llms-full.txt are served as text/plain with the admission rul
   request,
 }) => {
   const expectations: Array<[string, string]> = [
-    ['/llms.txt', '50 metres or less'],
-    ['/llms-full.txt', 'distance to water <= 50 m'],
+    ['/llms.txt', 'admitted from \u20ac20,000,000'],
+    ['/llms-full.txt', 'source and asOfDate'],
   ];
   for (const [path, admissionRule] of expectations) {
     const response = await request.get(path);
@@ -34,7 +37,7 @@ test('sitemap index and every typed child return valid XML', async ({ request })
   expect(index.status()).toBe(200);
   expect(index.headers()['content-type']).toContain('xml');
   const body = await index.text();
-  for (const child of ['static', 'properties', 'landing', 'destinations', 'articles']) {
+  for (const child of ['static', 'properties', 'markets', 'segments', 'reports', 'journal']) {
     expect(body).toContain(`/sitemaps/${child}.xml`);
     const childResponse = await request.get(`/sitemaps/${child}.xml`);
     expect(childResponse.status(), child).toBe(200);
@@ -48,16 +51,24 @@ test('unknown sitemap children 404', async ({ request }) => {
 });
 
 test('dynamic OG routes return share-card images even without data', async ({ request }) => {
-  for (const path of ['/api/og/property/does-not-exist', '/api/og/landing/does-not-exist']) {
+  for (const path of ['/api/og/property/does-not-exist', '/api/og/market/does-not-exist']) {
     const response = await request.get(path);
     expect(response.status(), path).toBe(200);
     expect(response.headers()['content-type'], path).toContain('image/');
   }
 });
 
-test('the public stats endpoint 404s unknown combos', async ({ request }) => {
-  const response = await request.get('/api/public/stats/not-a-combo');
+test('the public market stats endpoint 404s unknown markets', async ({ request }) => {
+  const response = await request.get('/api/public/markets/not-a-market/stats');
   expect([404, 503]).toContain(response.status());
+});
+
+test('sitemaps never contain a gated URL (§15.3)', async ({ request }) => {
+  for (const child of ['static', 'properties', 'markets', 'segments', 'reports', 'journal']) {
+    const xml = await (await request.get(`/sitemaps/${child}.xml`)).text();
+    expect(xml, child).not.toContain('/off-market');
+    expect(xml, child).not.toContain('/account');
+  }
 });
 
 test('pages carry OG/Twitter cards from the metadata helper', async ({ page }) => {

@@ -119,16 +119,23 @@ async function main(): Promise<void> {
     }
   }
 
-  // Internal-link heuristic (§14.1): every sitemap property URL should be
-  // reachable from a landing page; with no landing sitemap entries, listings
+  // Prompt 10 acceptance: no gated URL appears in any sitemap — /off-market
+  // and /account must never be listed, on any locale prefix.
+  const gated = sitemapUrls.filter((u) => /\/(off-market|account)(\/|$)/.test(u));
+  for (const url of gated) {
+    report('error', url, 'gated URL present in a sitemap (§15.3)');
+  }
+
+  // Internal-link heuristic (§15.2): every sitemap property URL should be
+  // reachable from a market page; with no market sitemap entries, listings
   // rely on search alone — flag it.
-  const landingCount = sitemapUrls.filter((u) => u.includes('/waterfront/')).length;
+  const marketCount = sitemapUrls.filter((u) => u.includes('/markets/')).length;
   const propertyCount = sitemapUrls.filter((u) => u.includes('/property/')).length;
-  if (propertyCount > 0 && landingCount === 0) {
+  if (propertyCount > 0 && marketCount === 0) {
     report(
       'warning',
-      `${BASE}/sitemaps/landing.xml`,
-      `${propertyCount} listings have no published landing pages linking to them (orphan risk)`,
+      `${BASE}/sitemaps/markets.xml`,
+      `${propertyCount} listings have no gated market pages linking to them (orphan risk)`,
     );
   }
 

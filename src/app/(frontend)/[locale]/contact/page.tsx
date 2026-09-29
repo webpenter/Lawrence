@@ -14,12 +14,12 @@ interface ContactPageProps {
 }
 
 export async function generateMetadata({ params }: ContactPageProps): Promise<Metadata> {
-  await params;
+  const { locale } = await params;
   const t = await getTranslations('contact');
   return {
     title: t('title'),
     description: t('sub'),
-    alternates: hreflangAlternates('/contact'),
+    alternates: hreflangAlternates('/contact', locale),
   };
 }
 

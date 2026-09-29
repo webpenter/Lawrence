@@ -14,9 +14,14 @@ import { SAMPLE_AGENCIES, SAMPLE_AGENTS } from '@/lib/sample/agencies';
 import { SAMPLE_DESTINATIONS, SAMPLE_DESTINATION_BY_SLUG } from '@/lib/sample/markets';
 import { buildAllBlueprints, type ListingBlueprint } from '@/lib/sample/economics';
 import { sourceGallery, type SourcedPhoto } from '@/lib/sample/unsplash';
+import { ARTICLE_PARAGRAPHS, DEMO_ARTICLE } from '@/lib/sample/fallback-content';
 import { purgeSamples } from '@/scripts/purge-samples';
 import type { DestinationQueryKey } from '@/scripts/image-queries';
-import { LANDING_PAGE_SEEDS } from '@/scripts/seed-data/landing-pages';
+import {
+  marketEditorialFor,
+  REPORT_SEEDS,
+  SEGMENT_PAGE_SEEDS,
+} from '@/scripts/seed-data/market-editorial';
 
 /**
  * §13.10 sample inventory generator. Deterministic and idempotent: every
@@ -31,11 +36,11 @@ import { LANDING_PAGE_SEEDS } from '@/scripts/seed-data/landing-pages';
 const LOCALES = ['en', 'it', 'fr', 'de', 'es', 'ru'] as const;
 
 const ARTICLE_STUBS = [
-  'Mooring and anchoring rules by country',
-  'Buying a demanio marittimo concession in Italy, explained',
-  'What “no fixed bridges” means and why Florida buyers pay for it',
-  'Dredging, draft and why depth at the dock matters',
-  'What a metre of private frontage is actually worth',
+  'Buying through a structure: SCI, LLC or personal title',
+  'Heritage protection and pre-emption rights in Italy, explained',
+  'What provenance is actually worth at the top of the market',
+  'Total acquisition costs: the schedule to demand in writing',
+  'Why trophy sales complete slowly — and why that is fine',
   'Buying a private island: the eight questions to ask first',
 ] as const;
 
@@ -51,7 +56,7 @@ function parseFlags(argv: string[]): { count: number; destination?: string; wipe
 
 async function upsertBySlug(
   payload: Payload,
-  collection: 'markets' | 'agencies' | 'landing-pages' | 'articles',
+  collection: 'markets' | 'agencies' | 'articles' | 'reports',
   slug: string,
   data: Record<string, unknown>,
   draft = false,
@@ -89,14 +94,42 @@ async function seedReferenceData(payload: Payload): Promise<{
   const marketIds = new Map<string, number>();
 
   for (const destination of SAMPLE_DESTINATIONS) {
+    // §13.10: sample markets carry full derived editorial + sourced stats so
+    // the §5.5 gate, the stats API and the SEO surfaces exercise for real —
+    // isSample keeps all of it noindexed and out of sitemaps (rule 8).
+    const editorial = marketEditorialFor(destination);
     marketIds.set(
       destination.slug,
       await upsertBySlug(payload, 'markets', destination.slug, {
         name: destination.name,
         country: destination.country,
         region: destination.region,
+        isSample: true,
+        answer: editorial.answer,
+        intro: textToLexical(...editorial.introParagraphs),
+        buyingNotes: textToLexical(...editorial.buyingNotesParagraphs),
+        faq: editorial.faq,
+        stats: editorial.stats,
+        metaDescription: editorial.metaDescription,
       }),
     );
+  }
+
+  // Second pass: related markets (same country first, then neighbours by list order).
+  for (const destination of SAMPLE_DESTINATIONS) {
+    const related = SAMPLE_DESTINATIONS.filter((other) => other.slug !== destination.slug)
+      .sort((a, b) =>
+        Number(b.country === destination.country) - Number(a.country === destination.country),
+      )
+      .slice(0, 4)
+      .map((other) => marketIds.get(other.slug))
+      .filter((id): id is number => id != null);
+    await payload.update({
+      collection: 'markets',
+      id: marketIds.get(destination.slug) as number,
+      data: { relatedMarkets: related },
+      overrideAccess: true,
+    });
   }
   return { marketIds };
 }
@@ -152,28 +185,65 @@ async function seedEditorialStubs(
   payload: Payload,
   marketIds: Map<string, number>,
 ): Promise<void> {
-  // 10 landing pages (drafts behind the §5.4 gate until sourced copy lands).
-  for (const seed of LANDING_PAGE_SEEDS.slice(0, 10)) {
-    const destinationSlug = [...SAMPLE_DESTINATION_BY_SLUG.values()].find(
-      (d) => d.name === seed.destinationName,
-    )?.slug;
-    await upsertBySlug(
-      payload,
-      'landing-pages',
-      seed.slug,
-      {
-        title: seed.title,
-        _status: 'draft',
-        combo: {
-          propertyType: seed.propertyType,
-          waterBodyType: seed.waterBodyType,
-          country: seed.country,
-          destination: destinationSlug ? marketIds.get(destinationSlug) : undefined,
-        },
-      },
-      true,
-    );
+  // §5.5 market × segment pages: published sample editorial per combination.
+  for (const seed of SEGMENT_PAGE_SEEDS) {
+    const marketId = marketIds.get(seed.marketSlug);
+    if (marketId == null) continue;
+    const data = {
+      title: seed.title,
+      market: marketId,
+      segment: seed.segment,
+      isSample: true,
+      intro: textToLexical(...seed.introParagraphs),
+      faq: seed.faq,
+      _status: 'published',
+    };
+    const existing = await payload.find({
+      collection: 'segment-pages',
+      where: { and: [{ market: { equals: marketId } }, { segment: { equals: seed.segment } }] },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    if (existing.docs[0]) {
+      await payload.update({
+        collection: 'segment-pages',
+        id: existing.docs[0].id,
+        data: data as never,
+        overrideAccess: true,
+      });
+    } else {
+      await payload.create({ collection: 'segment-pages', data: data as never, overrideAccess: true });
+    }
   }
+
+  // §15.4 launch reports: published sample summaries; the gated PDF arrives
+  // with the real editorial pass.
+  for (const seed of REPORT_SEEDS) {
+    await upsertBySlug(payload, 'reports', seed.slug, {
+      title: seed.title,
+      summary: textToLexical(...seed.summaryParagraphs),
+      publicationDate: seed.publicationDate,
+      isSample: true,
+      metaDescription: seed.metaDescription,
+      markets: seed.marketSlugs
+        .map((slug) => marketIds.get(slug))
+        .filter((id): id is number => id != null),
+      authors: [{ name: 'Lawrence Research Desk' }],
+      _status: 'published',
+    });
+  }
+
+  // The §13.12 demo article, published as sample content (noindex, out of
+  // sitemaps) — the same copy the DB-error fallback serves.
+  await upsertBySlug(payload, 'articles', DEMO_ARTICLE.slug, {
+    title: DEMO_ARTICLE.title,
+    excerpt: DEMO_ARTICLE.excerpt,
+    body: textToLexical(...ARTICLE_PARAGRAPHS),
+    publishedAt: '2026-01-05T09:00:00.000Z',
+    isSample: true,
+    _status: 'published',
+  });
 
   // 6 journal-article stubs from the §13.7 backlog: titles reserved as drafts,
   // bodies pending the sourced editorial pass (§13.7 rule 1).
@@ -548,7 +618,7 @@ async function main(): Promise<void> {
   console.log(
     `\nSeed complete: ${created} created, ${updated} updated across ${blueprints.length} listings; ` +
       `${membersSeeded} members, ${offMarketSeeded} off-market samples; ` +
-      `${SAMPLE_AGENCIES.length} agencies, ${SAMPLE_AGENTS.length} agents, 10 landing drafts, ${ARTICLE_STUBS.length} article stubs.`,
+      `${SAMPLE_AGENCIES.length} agencies, ${SAMPLE_AGENTS.length} agents, ${SEGMENT_PAGE_SEEDS.length} segment pages, ${REPORT_SEEDS.length} reports, ${ARTICLE_STUBS.length} article stubs.`,
   );
   process.exit(0);
 }

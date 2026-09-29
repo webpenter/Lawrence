@@ -73,7 +73,44 @@ export const Market: CollectionConfig = {
     },
     { name: 'centroid', type: 'point' },
     { name: 'heroImage', type: 'relationship', relationTo: 'media' },
+    {
+      name: 'answer',
+      type: 'textarea',
+      localized: true,
+      admin: {
+        description:
+          '§15.6 answer-first: a 40–60-word direct answer with the key figures, units and dates. Opens the page and the meta description.',
+      },
+    },
     { name: 'intro', type: 'richText', localized: true },
+    {
+      name: 'buyingNotes',
+      type: 'richText',
+      localized: true,
+      admin: {
+        description:
+          '§11.5 buying notes — structures, typical costs, timelines. Factual and sourced, never advice.',
+      },
+    },
+    {
+      name: 'faq',
+      type: 'array',
+      localized: true,
+      admin: {
+        description: '§11.5 FAQ rendered with FAQPage JSON-LD. Question-form H2s per §15.6.',
+      },
+      fields: [
+        { name: 'question', type: 'text', required: true },
+        { name: 'answer', type: 'textarea', required: true },
+      ],
+    },
+    {
+      name: 'relatedMarkets',
+      type: 'relationship',
+      relationTo: 'markets',
+      hasMany: true,
+      admin: { description: '§11.5 related markets for the 6–10 internal links block.' },
+    },
     {
       type: 'group',
       name: 'stats',
@@ -101,6 +138,13 @@ export const Market: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'isSample',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      admin: { position: 'sidebar', description: 'Demo data: SAMPLE notice, noindex, out of sitemaps.' },
     },
     { name: 'metaTitle', type: 'text', localized: true },
     { name: 'metaDescription', type: 'textarea', localized: true },

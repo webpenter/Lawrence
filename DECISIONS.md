@@ -336,3 +336,60 @@ verify→login cookie, no-enumeration, magic-link redeem/reject, saved toggle + 
 TOTP enrol + challenge-gated two-step login); 331/331 unit+int; typecheck/lint clean;
 audit:exposure green over the seeded off-market content; budgets home 109.2/110 ·
 collection 110.8/160 · listing 127.5/130 kB gz.
+
+## 2026-09-29 — Phase 10: market intelligence and the SEO engine (§11.5–11.6, §15)
+
+**Decision**: The Waterline landing grammar is gone; the §5.5 Lawrence grammar replaced it.
+`/waterfront/[combo]`, the LandingPage collection, combos.ts and `/api/public/stats/[combo]`
+were deleted and replaced by `/markets/[market]/[segment]` over the controlled nine-segment
+taxonomy (waterfront-estates … golf-estates) with an alias→301 resolver
+(`normalizeSegmentSlug`), a SegmentPage collection (one page per market × segment, enforced
+in a beforeValidate hook), and the §5.5 render gate everywhere: published editorial copy
+PLUS at least three sourced data points (`marketPassesGate`/`segmentPagePassesGate`) —
+ungated combinations 404 and never enter a sitemap.
+
+The market page now renders the full §11.5 order: answer-first paragraph, editorial intro,
+the sourced statistics table (every figure with source URL + asOfDate; unsourced numbers
+never render), current listings, the off-market count with the join action, buying notes,
+6–10 related-market/segment links, FAQ with FAQPage JSON-LD, and the report cross-link —
+with Dataset JSON-LD referencing the new `/api/public/markets/[market]/stats`, which serves
+the editor-maintained Market.stats as JSON (per-figure source and asOfDate), never on-the-fly
+aggregates. `/intelligence` + `/intelligence/[slug]` are live: ungated summaries with
+Dataset + breadcrumbs; the gated PDF goes through `/api/member/report/[slug]/pdf`, which
+mints a fresh single-use signed URL per member request so nothing signed bakes into the
+static page (anonymous → /join). Market fields grew answer/buyingNotes/faq/relatedMarkets.
+
+SEO layer: per-locale self-canonical (the old helper canonicalised every locale to /en — a
+§15.2 bug, fixed with tests); sitemap children renamed to the §15.2 set (properties, markets,
+segments, reports, journal, static) with §5.5 gating and hard sample/off-market exclusion;
+robots.txt now disallows /off-market and /account on every locale prefix (one of the §15.3
+three layers) for all crawlers including the five allowed AI bots; llms.txt/llms-full.txt
+rewritten to the Lawrence admission threshold, market + report index and the stats endpoint;
+journal posts emit Article + BreadcrumbList; audit:seo gained a gated-URL-in-sitemap error
+and the market-based orphan heuristic.
+
+Working notes:
+- **Sample regime extended (rule 8)**: Market, SegmentPage, Report and Article all carry
+  isSample now. The seeder derives market stats from the §13.10 `baseEurPerSqm` baselines
+  (never invented figures — §13.9), cites the §13.6 public source per country, and publishes
+  14 market editorials, 10 segment pages, 3 §15.4 reports and the §13.12 demo article — all
+  isSample: SAMPLE notice, noindex, excluded from sitemaps and llms-full. The demo journal
+  article is now a real seeded row (same copy the DB-error fallback serves, single-sourced
+  from fallback-content), so the journal is demonstrable with a healthy database.
+- Localised per-locale segment slugs (§5.5 "from the Taxonomy collection") are deferred: the
+  taxonomy is a code-level controlled enum with localised display names in messages,
+  consistent with the unlocalised /markets and /collection path segments.
+- The intelligence/markets/segments message namespaces landed in all six locales (the unused
+  Waterline `landing` namespace was removed); the sold-listing retirement 301 now targets the
+  parent market page.
+- DB squashed twice to the single lawrence_initial baseline (segment_pages table, market
+  editorial columns, isSample ×4); dropdb/psql need the .env credentials (PGPASSWORD).
+
+**Gate evidence**: audit:seo 0 errors / 0 warnings over 11 pages + sitemaps (typed children
+all 200, no gated URL in any sitemap, llms as text/plain); e2e — phase5 5/5 (hub, alias 308
+→ canonical, out-of-taxonomy and unseeded-combination 404s), phase9 9/9 (robots incl.
+off-market/account disallows, llms admission rule, six sitemap children, market OG, stats-API
+404, gated-URL sweep), phase11 9/9 (sample segment page renders noindexed; demo article
+listed + noindexed), phase14 7/7; unit+int 331+1/332 with new segments-gate and Dataset
+shape tests; typecheck/lint clean; audit:exposure green; budgets home 109.2/110 ·
+collection 110.8/160 · listing 127.5/130 kB gz.

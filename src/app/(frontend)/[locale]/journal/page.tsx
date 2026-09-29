@@ -7,7 +7,7 @@ import { SiteHeader } from '@/components/layout/SiteHeader';
 import { getPublishedArticles } from '@/lib/db/articles';
 import type { Locale } from '@/lib/db';
 import { isFallbackContent } from '@/lib/sample/fallback-content';
-import { hreflangAlternates } from '@/lib/seo/hreflang';
+import { buildPageMetadata } from '@/lib/seo/metadata';
 import { formatDate } from '@/lib/intl/format';
 
 export const revalidate = 3600;
@@ -17,13 +17,14 @@ interface JournalPageProps {
 }
 
 export async function generateMetadata({ params }: JournalPageProps): Promise<Metadata> {
-  await params;
+  const { locale } = await params;
   const t = await getTranslations('journal');
-  return {
+  return buildPageMetadata({
     title: t('title'),
     description: t('sub'),
-    alternates: hreflangAlternates('/journal'),
-  };
+    path: '/journal',
+    locale,
+  });
 }
 
 export default async function JournalPage({ params }: JournalPageProps) {
@@ -45,7 +46,7 @@ export default async function JournalPage({ params }: JournalPageProps) {
           <ul className="flex flex-col gap-6">
             {articles.map((article) => (
               <li key={article.slug} className="border border-line bg-vellum p-6">
-                {isFallbackContent(article) ? (
+                {isFallbackContent(article) || article.isSample ? (
                   <p className="mb-2 inline-block bg-patina-soft px-2 py-0.5 text-[length:var(--text-xs)] font-medium uppercase tracking-[0.14em] text-ink">
                     {t('sampleNotice')}
                   </p>

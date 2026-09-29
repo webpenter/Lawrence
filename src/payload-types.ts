@@ -82,7 +82,7 @@ export interface Config {
     'member-activity': MemberActivity;
     reports: Report;
     'fx-snapshots': FxSnapshot;
-    'landing-pages': LandingPage;
+    'segment-pages': SegmentPage;
     taxonomies: Taxonomy;
     articles: Article;
     pages: Page;
@@ -111,7 +111,7 @@ export interface Config {
     'member-activity': MemberActivitySelect<false> | MemberActivitySelect<true>;
     reports: ReportsSelect<false> | ReportsSelect<true>;
     'fx-snapshots': FxSnapshotsSelect<false> | FxSnapshotsSelect<true>;
-    'landing-pages': LandingPagesSelect<false> | LandingPagesSelect<true>;
+    'segment-pages': SegmentPagesSelect<false> | SegmentPagesSelect<true>;
     taxonomies: TaxonomiesSelect<false> | TaxonomiesSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -808,6 +808,10 @@ export interface Market {
    */
   centroid?: [number, number] | null;
   heroImage?: (number | null) | Media;
+  /**
+   * §15.6 answer-first: a 40–60-word direct answer with the key figures, units and dates. Opens the page and the meta description.
+   */
+  answer?: string | null;
   intro?: {
     root: {
       type: string;
@@ -823,6 +827,38 @@ export interface Market {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * §11.5 buying notes — structures, typical costs, timelines. Factual and sourced, never advice.
+   */
+  buyingNotes?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * §11.5 FAQ rendered with FAQPage JSON-LD. Question-form H2s per §15.6.
+   */
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * §11.5 related markets for the 6–10 internal links block.
+   */
+  relatedMarkets?: (number | Market)[] | null;
   /**
    * Editor-maintained market data (§6.7). Every value needs its source URL and as-of date to count toward the §5.5 three-sourced-data-points rule.
    */
@@ -871,6 +907,10 @@ export interface Market {
       asOfDate?: string | null;
     };
   };
+  /**
+   * Demo data: SAMPLE notice, noindex, out of sitemaps.
+   */
+  isSample?: boolean | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
   updatedAt: string;
@@ -1081,6 +1121,10 @@ export interface Report {
    * Cross-links to the relevant market pages (§11.5).
    */
   markets?: (number | Market)[] | null;
+  /**
+   * Demo data: SAMPLE notice, noindex, out of sitemaps.
+   */
+  isSample?: boolean | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
   updatedAt: string;
@@ -1112,41 +1156,27 @@ export interface FxSnapshot {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "landing-pages".
+ * via the `definition` "segment-pages".
  */
-export interface LandingPage {
+export interface SegmentPage {
   id: number;
   title: string;
-  slug: string;
+  market: number | Market;
   /**
-   * The filter combination this page targets.
+   * The §5.5 controlled taxonomy — never free text.
    */
-  combo?: {
-    propertyType?:
-      | (
-          | 'villa'
-          | 'estate'
-          | 'penthouse'
-          | 'townhouse'
-          | 'chalet'
-          | 'castle'
-          | 'palazzo'
-          | 'private_island'
-          | 'vineyard_estate'
-          | 'equestrian_estate'
-          | 'hotel_resort'
-          | 'development_site'
-          | 'apartment'
-          | 'lodge'
-          | 'ranch'
-        )
-      | null;
-    waterBodyType?: ('sea' | 'ocean' | 'lake' | 'river' | 'lagoon' | 'canal' | 'fjord' | 'bay' | 'estuary') | null;
-    destination?: (number | null) | Market;
-    country?: string | null;
-  };
+  segment:
+    | 'waterfront-estates'
+    | 'vineyard-estates'
+    | 'ski-chalets'
+    | 'penthouses'
+    | 'private-islands'
+    | 'historic-estates'
+    | 'equestrian-estates'
+    | 'new-developments'
+    | 'golf-estates';
   /**
-   * Opens with a 40–60-word direct answer paragraph (§14.6). Required before the combo goes live.
+   * Opens with a 40–60-word direct answer (§15.6). Required before the combination goes live.
    */
   intro?: {
     root: {
@@ -1179,7 +1209,7 @@ export interface LandingPage {
     [k: string]: unknown;
   } | null;
   /**
-   * Question-form entries rendered as an accordion with FAQPage JSON-LD (§10.4/§14.3). Answer real buyer questions — mooring rules, tenure, access.
+   * Question-form entries rendered with FAQPage JSON-LD (§15.5). Answer real buyer questions — tenure, structures, access.
    */
   faq?:
     | {
@@ -1188,6 +1218,10 @@ export interface LandingPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Demo data: SAMPLE notice, noindex, out of sitemaps.
+   */
+  isSample?: boolean | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
   updatedAt: string;
@@ -1234,6 +1268,10 @@ export interface Article {
   } | null;
   author?: (number | null) | User;
   publishedAt?: string | null;
+  /**
+   * Demo data: SAMPLE notice, noindex, out of sitemaps.
+   */
+  isSample?: boolean | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
   updatedAt: string;
@@ -1429,8 +1467,8 @@ export interface PayloadLockedDocument {
         value: number | FxSnapshot;
       } | null)
     | ({
-        relationTo: 'landing-pages';
-        value: number | LandingPage;
+        relationTo: 'segment-pages';
+        value: number | SegmentPage;
       } | null)
     | ({
         relationTo: 'taxonomies';
@@ -1865,7 +1903,17 @@ export interface MarketsSelect<T extends boolean = true> {
   polygon?: T;
   centroid?: T;
   heroImage?: T;
+  answer?: T;
   intro?: T;
+  buyingNotes?: T;
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  relatedMarkets?: T;
   stats?:
     | T
     | {
@@ -1905,6 +1953,7 @@ export interface MarketsSelect<T extends boolean = true> {
               asOfDate?: T;
             };
       };
+  isSample?: T;
   metaTitle?: T;
   metaDescription?: T;
   updatedAt?: T;
@@ -2002,6 +2051,7 @@ export interface ReportsSelect<T extends boolean = true> {
         id?: T;
       };
   markets?: T;
+  isSample?: T;
   metaTitle?: T;
   metaDescription?: T;
   updatedAt?: T;
@@ -2021,19 +2071,12 @@ export interface FxSnapshotsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "landing-pages_select".
+ * via the `definition` "segment-pages_select".
  */
-export interface LandingPagesSelect<T extends boolean = true> {
+export interface SegmentPagesSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
-  combo?:
-    | T
-    | {
-        propertyType?: T;
-        waterBodyType?: T;
-        destination?: T;
-        country?: T;
-      };
+  market?: T;
+  segment?: T;
   intro?: T;
   body?: T;
   faq?:
@@ -2043,6 +2086,7 @@ export interface LandingPagesSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  isSample?: T;
   metaTitle?: T;
   metaDescription?: T;
   updatedAt?: T;
@@ -2073,6 +2117,7 @@ export interface ArticlesSelect<T extends boolean = true> {
   body?: T;
   author?: T;
   publishedAt?: T;
+  isSample?: T;
   metaTitle?: T;
   metaDescription?: T;
   updatedAt?: T;

@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { RichText } from '@payloadcms/richtext-lexical/react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { Link } from '@/i18n/navigation';
 import { getArticleBySlug, getPublishedArticles } from '@/lib/db/articles';
 import type { Locale } from '@/lib/db';
 import { isFallbackContent } from '@/lib/sample/fallback-content';
 import { hreflangAlternates } from '@/lib/seo/hreflang';
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonld';
 import { formatDate } from '@/lib/intl/format';
 
 export const revalidate = 3600;
@@ -30,9 +31,11 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   return {
     title: article.metaTitle ?? article.title,
     description: article.metaDescription ?? article.excerpt ?? undefined,
-    alternates: hreflangAlternates(`/journal/${slug}`),
-    // Demo fallback content never enters the index (§13.12).
-    ...(isFallbackContent(article) ? { robots: { index: false, follow: false } } : {}),
+    alternates: hreflangAlternates(`/journal/${slug}`, locale),
+    // Demo/sample content never enters the index (§13.12, rule 8).
+    ...(isFallbackContent(article) || article.isSample
+      ? { robots: { index: false, follow: false } }
+      : {}),
   };
 }
 
@@ -43,18 +46,49 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   if (!article) notFound();
 
   const t = await getTranslations('journal');
+  const tl = await getTranslations('listing');
+
+  // §15.5: Article + BreadcrumbList on journal posts.
+  const jsonLd = [
+    articleJsonLd(
+      {
+        slug: article.slug,
+        title: article.title,
+        excerpt: article.excerpt,
+        publishedAt: article.publishedAt,
+        updatedAt: article.updatedAt,
+        authorName:
+          typeof article.author === 'object' && article.author !== null
+            ? ((article.author as { name?: string | null }).name ?? null)
+            : null,
+      },
+      locale,
+    ),
+    breadcrumbJsonLd(locale, [
+      { name: tl('breadcrumbHome'), path: '' },
+      { name: t('title'), path: '/journal' },
+      { name: article.title, path: `/journal/${article.slug}` },
+    ]),
+  ];
 
   return (
     <>
       <SiteHeader />
+      {jsonLd.map((entry, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(entry) }}
+        />
+      ))}
       <main className="mx-auto max-w-2xl px-7 py-10">
         <nav aria-label={t('breadcrumbLabel')} className="mb-6 text-xs text-graphite">
-          <Link href={`/${locale}/journal`} className="hover:text-patina">
+          <Link href="/journal" className="hover:text-patina">
             {t('backToJournal')}
           </Link>
         </nav>
 
-        {isFallbackContent(article) ? (
+        {isFallbackContent(article) || article.isSample ? (
           <p className="mb-4 inline-block bg-patina-soft px-2 py-0.5 text-[length:var(--text-xs)] font-medium uppercase tracking-[0.14em] text-ink">
             {t('sampleNotice')}
           </p>

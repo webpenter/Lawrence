@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { getPayloadClient, getPublishedLandingPages } from '@/lib/db';
+import { getGatedMarkets, getPayloadClient } from '@/lib/db';
 import { sendEmail } from '@/lib/email/send';
 import {
   decideExpiryAction,
@@ -8,7 +8,6 @@ import {
   SOLD_RETIRE_AFTER_DAYS,
   soldPageShouldRetire,
 } from '@/lib/expiry';
-import { passesEditorialGate } from '@/lib/seo/combos';
 import { deleteListingEverywhere } from '@/lib/search/sync';
 
 export const maxDuration = 300;
@@ -95,8 +94,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
   }
 
-  // §14.5: sold listings past the 90-day courtesy window retire — archived,
-  // out of search, 301 to the parent landing page (or /search).
+  // §15: sold listings past the 90-day courtesy window retire — archived,
+  // out of search, 301 to the parent market page (or /collection).
   let retired = 0;
   const soldSince = new Date(
     now.getTime() - SOLD_RETIRE_AFTER_DAYS * 24 * 60 * 60 * 1000,
@@ -110,8 +109,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     depth: 0,
     overrideAccess: true,
   });
-  const landingPages = soldCandidates.docs.length
-    ? (await getPublishedLandingPages('en', 200).catch(() => [])).filter(passesEditorialGate)
+  const gatedMarkets = soldCandidates.docs.length
+    ? await getGatedMarkets('en', 200).catch(() => [])
     : [];
 
   for (const listing of soldCandidates.docs) {
@@ -120,11 +119,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       typeof listing.location?.market === 'object'
         ? listing.location.market?.id
         : listing.location?.market;
-    const parent = landingPages.find((page) => {
-      const combo = page.combo?.destination;
-      return (typeof combo === 'object' ? combo?.id : combo) === marketId;
-    });
-    const to = parent ? `/waterfront/${parent.slug}` : '/collection';
+    const parent = gatedMarkets.find((market) => market.id === marketId);
+    const to = parent ? `/markets/${parent.slug}` : '/collection';
 
     await payload.update({
       collection: 'properties',

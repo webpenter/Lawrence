@@ -19,7 +19,16 @@ describe('hreflangAlternates (Prompt 6 acceptance)', () => {
     expect(languages.it?.endsWith('/it')).toBe(true);
   });
 
-  it('canonical points at the default locale', () => {
+  it('canonical defaults to the default locale when no locale is given', () => {
     expect(String(hreflangAlternates('/about').canonical)).toMatch(/\/en\/about$/);
+  });
+
+  it('canonical self-references the requesting locale (§15.2)', () => {
+    expect(String(hreflangAlternates('/about', 'fr').canonical)).toMatch(/\/fr\/about$/);
+    expect(String(hreflangAlternates('/', 'ru').canonical)).toMatch(/\/ru$/);
+  });
+
+  it('falls back to the default locale for an unknown locale value', () => {
+    expect(String(hreflangAlternates('/about', 'xx').canonical)).toMatch(/\/en\/about$/);
   });
 });

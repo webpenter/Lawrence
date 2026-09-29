@@ -5,7 +5,8 @@ import { siteBase } from '@/lib/seo/sitemap';
 
 export const revalidate = 3600;
 
-// §14.6.1: a short Markdown map of the site for LLM agents.
+// §15.6: a short Markdown map of the site for LLM agents — what it is, the
+// admission threshold, the market index, the data licence, contact.
 export function GET(): NextResponse {
   const base = siteBase();
   const body = `# ${brand.name}
@@ -14,33 +15,33 @@ export function GET(): NextResponse {
 
 ## The admission rule
 
-Every listing on this site has verified direct water access: at least one
-qualifying water access type (private beach, private dock, direct shore,
-mooring, boathouse, slipway, quay, rock platform, riparian access or whole
-island) and a distance to the water of 50 metres or less. "Sea view" and
-"walking distance to the beach" are rejected. Listings publish structured
-water data: metres of private frontage, berth length, depth at berth, beam,
-bridge clearance and whether open water is reachable.
+Every property in the Collection is admitted from €20,000,000. A small,
+deliberate exception exists for properties of exceptional provenance between
+€10M and €20M, admitted case by case and capped at a tenth of the public
+collection. Listings from €20–50M carry the Trophy tier; €50M and above,
+Signature. Beyond the public Collection an off-market section exists for
+registered members; its listings are never published, indexed or included in
+any public response.
 
 ## Key sections
 
-- [Search](${base}/en/collection): the full inventory with water and boat filters.
-- [Destinations](${base}/en/markets): waterfront markets we cover.
-- [Waterfront searches](${base}/sitemaps/landing.xml): curated landing pages, the indexable views of filtered inventory.
-- [Journal](${base}/en/journal): editorial on mooring rules, tenure and waterfront ownership.
+- [The Collection](${base}/en/collection): the public inventory from €20M.
+- [Markets](${base}/en/markets): the research hub — sourced data, editorial and current listings per market.
+- [Intelligence](${base}/en/intelligence): reports with ungated summaries; full PDFs require a free account.
+- [Journal](${base}/en/journal): editorial on how exceptional property is bought, held and sold.
 - [List with us](${base}/en/list-with-us): for agencies with qualifying inventory.
 
 ## Machine-readable data
 
-- Listing JSON Schema: ${base}/schemas/listing.schema.json
-- Aggregate statistics per landing combination: ${base}/api/public/stats/{combo}
+- Market statistics with source and as-of date: ${base}/api/public/markets/{market}/stats
 - Sitemaps: ${base}/sitemap.xml
 
 ## Data licence and contact
 
 Listing data belongs to the listing agencies and is provided for property
-search. Quoting aggregates with attribution to ${brand.name} is welcome;
-bulk reproduction of listings is not. Contact: ${brand.email.contact}.
+search. Market figures are our own derivations from cited open sources —
+quoting them with attribution to ${brand.name} and their asOfDate is
+welcome; bulk reproduction of listings is not. Contact: ${brand.email.contact}.
 
 A fuller index: ${base}/llms-full.txt
 `;

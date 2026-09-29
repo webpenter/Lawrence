@@ -1,29 +1,55 @@
 import { NextResponse } from 'next/server';
 
 import { brand } from '@/config/brand';
-import { getMarketCounts, getPublishedLandingPages } from '@/lib/db';
-import { passesEditorialGate } from '@/lib/seo/combos';
+import { getGatedMarkets, getPublishedSegmentPages, getReports } from '@/lib/db';
+import { segmentPagePassesGate } from '@/lib/seo/segments';
 import { siteBase } from '@/lib/seo/sitemap';
+import type { Market } from '@/payload-types';
 
 export const revalidate = 3600;
 
-// §14.6.1: the fuller /llms-full.txt with the destination and landing index.
+// §15.6: the fuller /llms-full.txt — every market and report, plus the
+// published segment pages.
 export async function GET(): Promise<NextResponse> {
   const base = siteBase();
 
-  let destinationLines = '- (destination index unavailable)';
-  let landingLines = '- (landing index unavailable)';
+  let marketLines = '- (market index unavailable)';
+  let segmentLines = '- (segment index unavailable)';
+  let reportLines = '- (report index unavailable)';
   try {
-    const destinations = await getMarketCounts();
-    if (destinations.length > 0) {
-      destinationLines = destinations
-        .map((d) => `- [${d.name}](${base}/en/markets/${d.slug}): ${d.count} listings`)
+    const markets = await getGatedMarkets('en', 500);
+    if (markets.length > 0) {
+      marketLines = markets
+        .map(
+          (market) =>
+            `- [${market.name}](${base}/en/markets/${market.slug}) — stats: ${base}/api/public/markets/${market.slug}/stats`,
+        )
         .join('\n');
     }
-    const landing = (await getPublishedLandingPages('en', 200)).filter(passesEditorialGate);
-    if (landing.length > 0) {
-      landingLines = landing
-        .map((page) => `- [${page.title}](${base}/en/waterfront/${page.slug})`)
+
+    const segments = await getPublishedSegmentPages('en', 500);
+    const gated = segments.filter((page) => {
+      const market = typeof page.market === 'object' ? (page.market as Market) : null;
+      return (
+        market != null &&
+        !page.isSample &&
+        !market.isSample &&
+        segmentPagePassesGate(page, market)
+      );
+    });
+    if (gated.length > 0) {
+      segmentLines = gated
+        .map((page) => {
+          const market = page.market as Market;
+          return `- [${page.title}](${base}/en/markets/${market.slug}/${page.segment})`;
+        })
+        .join('\n');
+    }
+
+    const reports = (await getReports('en', 100)).filter((report) => !report.isSample);
+    if (reports.length > 0) {
+      reportLines = reports
+        .map((report) => `- [${report.title}](${base}/en/intelligence/${report.slug})`)
         .join('\n');
     }
   } catch {
@@ -34,23 +60,25 @@ export async function GET(): Promise<NextResponse> {
 
 > ${brand.description}
 
-Every listing carries verified direct water access (>=1 water access type,
-distance to water <= 50 m) plus structured nautical data: frontage in metres,
-maximum boat length, depth at berth, beam, bridge clearance, and open-water
-navigability.
+Admission from €20,000,000 (a capped provenance exception runs €10–20M).
+Market figures are published only with a source URL and an as-of date; the
+same figures are served as JSON per market below.
 
-## Destinations
+## Markets
 
-${destinationLines}
+${marketLines}
 
-## Waterfront landing pages
+## Segments
 
-${landingLines}
+${segmentLines}
+
+## Intelligence reports
+
+${reportLines}
 
 ## Data endpoints
 
-- Listing JSON Schema: ${base}/schemas/listing.schema.json
-- Aggregates per combination: ${base}/api/public/stats/{combo} (counts and medians, with updatedAt)
+- Market statistics: ${base}/api/public/markets/{market}/stats (each figure with source and asOfDate)
 - Sitemap index: ${base}/sitemap.xml
 
 Contact: ${brand.email.contact}

@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { EnquiryForm } from '@/components/property/EnquiryForm';
-import { hreflangAlternates } from '@/lib/seo/hreflang';
+import { buildPageMetadata } from '@/lib/seo/metadata';
 import { HERO_SCRIM, horizonGradientFor } from '@/tokens/placeholders';
 
 export const revalidate = 3600;
@@ -14,14 +14,15 @@ interface ListWithUsPageProps {
 }
 
 export async function generateMetadata({ params }: ListWithUsPageProps): Promise<Metadata> {
-  await params;
+  const { locale } = await params;
   const t = await getTranslations('listWithUs');
   const home = await getTranslations('home');
-  return {
+  return buildPageMetadata({
     title: t('title'),
     description: home('supplyCtaSub'),
-    alternates: hreflangAlternates('/list-with-us'),
-  };
+    path: '/list-with-us',
+    locale,
+  });
 }
 
 // The supply-side landing (§5.2, copy §11.1). The full §8.2 application form

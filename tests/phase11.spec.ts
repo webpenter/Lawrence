@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
  * Phase 11 (Prompt 16) — WCAG 2.2 AA behaviours beyond what axe can see:
  * the two §15 acceptance journeys (search and enquiry) completed with the
  * keyboard alone, error-summary focus management, and the routes added for
- * the 8-route axe sweep (journal, landing fallback).
+ * the 8-route axe sweep (journal, segment pages).
  */
 
 
@@ -94,12 +94,12 @@ test.describe('journal', () => {
   test('the journal index lists the demo article with a SAMPLE notice', async ({ page }) => {
     await page.goto('/en/journal');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    const link = page.getByRole('link', { name: /mooring rights/i });
+    const link = page.getByRole('link', { name: /buying through a structure/i });
     await expect(link).toBeVisible();
   });
 
   test('the demo article renders noindexed with a valid heading order', async ({ page }) => {
-    await page.goto('/en/journal/sample-mooring-rights-private-berth');
+    await page.goto('/en/journal/sample-buying-through-a-structure');
     await expect(page.getByRole('article')).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
@@ -110,15 +110,15 @@ test.describe('journal', () => {
   });
 });
 
-test.describe('landing fallback', () => {
-  test('a seeded combo renders the demo landing, noindexed, with listings', async ({ page }) => {
-    await page.goto('/en/waterfront/villas-sea-liguria');
+test.describe('sample segment pages (§5.5 + rule 8)', () => {
+  test('a seeded market × segment renders, noindexed as sample content', async ({ page }) => {
+    await page.goto('/en/markets/lake-como/waterfront-estates');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 
-  test('unknown combos still 404', async ({ page }) => {
-    const response = await page.goto('/en/waterfront/villas-sea-atlantis');
+  test('unknown combinations still 404', async ({ page }) => {
+    const response = await page.goto('/en/markets/lake-como/vineyard-estates');
     expect(response?.status()).toBe(404);
   });
 });

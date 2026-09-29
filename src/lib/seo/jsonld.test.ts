@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Property } from '@/payload-types';
 
-import { breadcrumbJsonLd, realEstateListingJsonLd } from './jsonld';
+import { breadcrumbJsonLd, datasetJsonLd, realEstateListingJsonLd } from './jsonld';
 
 const property = {
   id: 1,
@@ -155,5 +155,22 @@ describe('organization + website JSON-LD (§14.3)', async () => {
     expect(jsonLd['@type']).toBe('RealEstateAgent');
     expect(String(jsonLd.url)).toContain('/en/agencies/riviera-blu');
     expect(jsonLd.sameAs).toEqual(['https://example.com']);
+  });
+
+  it('Dataset (§15.5) links the page and its JSON distribution', () => {
+    const jsonLd = datasetJsonLd({
+      name: 'Lake Como — Market data',
+      description: 'Sourced figures for Lake Como.',
+      url: '/en/markets/lake-como',
+      dataUrl: '/api/public/markets/lake-como/stats',
+      dateModified: '2026-06-30T00:00:00.000Z',
+    });
+    expect(jsonLd['@type']).toBe('Dataset');
+    expect(String(jsonLd.url)).toContain('/en/markets/lake-como');
+    const distribution = jsonLd.distribution as Array<{ contentUrl: string; encodingFormat: string }>;
+    expect(distribution[0]?.encodingFormat).toBe('application/json');
+    expect(distribution[0]?.contentUrl).toContain('/api/public/markets/lake-como/stats');
+    expect(jsonLd.isAccessibleForFree).toBe(true);
+    expect(jsonLd.dateModified).toBe('2026-06-30T00:00:00.000Z');
   });
 });

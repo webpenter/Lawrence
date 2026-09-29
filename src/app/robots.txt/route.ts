@@ -4,28 +4,31 @@ import { siteBase } from '@/lib/seo/sitemap';
 
 export const revalidate = 3600;
 
-// §14.6 crawler policy, decided once (DECISIONS.md): AI crawlers are ALLOWED
+// §15.6 crawler policy, decided once (DECISIONS.md): AI crawlers are ALLOWED
 // on public content — discovery is worth more than the content — and
-// disallowed exactly where humans are too: admin, APIs, and search-filter
-// URLs (only landing pages are indexable representations of filtered
-// inventory, §5.5).
+// disallowed exactly where humans are too: admin, APIs, filter URLs, and the
+// member area. robots.txt is one of the §15.3 three independent layers
+// keeping /off-market and /account out of crawlers (with X-Robots-Tag and
+// authentication behind it).
 const AI_CRAWLERS = ['GPTBot', 'OAI-SearchBot', 'PerplexityBot', 'ClaudeBot', 'Google-Extended'];
+
+const DISALLOW = [
+  'Disallow: /admin',
+  'Disallow: /api/',
+  'Disallow: /*/collection?*',
+  'Disallow: /*/off-market',
+  'Disallow: /*/account',
+  'Disallow: /off-market',
+  'Disallow: /account',
+];
 
 export function GET(): NextResponse {
   const lines: string[] = [
     'User-agent: *',
-    'Disallow: /admin',
-    'Disallow: /api/',
-    'Disallow: /*/collection?*',
+    ...DISALLOW,
     'Disallow: /dev/',
     '',
-    ...AI_CRAWLERS.flatMap((bot) => [
-      `User-agent: ${bot}`,
-      'Disallow: /admin',
-      'Disallow: /api/',
-      'Disallow: /*/collection?*',
-      '',
-    ]),
+    ...AI_CRAWLERS.flatMap((bot) => [`User-agent: ${bot}`, ...DISALLOW, '']),
     `Sitemap: ${siteBase()}/sitemap.xml`,
     '',
   ];

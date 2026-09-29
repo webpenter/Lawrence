@@ -65,7 +65,8 @@ describe('buildPageMetadata', () => {
     expect(Object.keys(languages)).toEqual(
       expect.arrayContaining(['en', 'it', 'fr', 'de', 'es', 'ru', 'x-default']),
     );
-    expect(String(metadata.alternates?.canonical)).toContain('/en/property/villa-portofino');
+    // §15.2: the canonical self-references the page's own locale.
+    expect(String(metadata.alternates?.canonical)).toContain('/it/property/villa-portofino');
   });
 
   it('builds OG and Twitter cards with the absolute image URL', () => {

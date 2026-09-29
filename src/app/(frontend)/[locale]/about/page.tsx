@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
   return {
     title: cms?.metaTitle ?? cms?.title ?? t('title'),
     description: cms?.metaDescription ?? t('sub'),
-    alternates: hreflangAlternates('/about'),
+    alternates: hreflangAlternates('/about', locale),
   };
 }
 
