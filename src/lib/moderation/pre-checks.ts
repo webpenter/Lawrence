@@ -16,6 +16,8 @@ export interface PreCheckInput {
   imageCount: number;
   descriptionText: string;
   title: string;
+  /** Set when the import fingerprint matched another agency's listing. */
+  duplicateOf?: number | string | null;
 }
 
 export interface PreCheckContext {
@@ -62,14 +64,24 @@ export function runPreChecks(input: PreCheckInput, context: PreCheckContext = {}
     }
   }
 
-  if (input.imageCount < 6) {
-    flags.push({ code: 'too_few_images', message: `${input.imageCount} images; minimum is 6.` });
+  // §9.4: ≥8 images at ≥2000px. The 2000px long edge and EXIF stripping are
+  // enforced structurally at upload (Media.ts refuses smaller/unstripped
+  // files), so the queue only needs the count here.
+  if (input.imageCount < 8) {
+    flags.push({ code: 'too_few_images', message: `${input.imageCount} images; minimum is 8.` });
   }
 
-  if (input.descriptionText.trim().length < 300) {
+  if (input.descriptionText.trim().length < 600) {
     flags.push({
       code: 'description_too_short',
-      message: `Description is ${input.descriptionText.trim().length} characters; minimum is 300.`,
+      message: `Description is ${input.descriptionText.trim().length} characters; minimum is 600.`,
+    });
+  }
+
+  if (input.duplicateOf != null) {
+    flags.push({
+      code: 'duplicate_fingerprint',
+      message: `Fingerprint matches listing #${input.duplicateOf} from another agency.`,
     });
   }
 

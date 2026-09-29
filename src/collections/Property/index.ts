@@ -29,6 +29,7 @@ import {
   cleanupAfterDelete,
   computeDerivedFields,
   enforceAdmission,
+  requireCompleteAgencyProfile,
   sanitizeAgencySubmission,
   syncAfterChange,
 } from './hooks';
@@ -72,7 +73,7 @@ export const Property: CollectionConfig = {
     maxPerDoc: 25,
   },
   hooks: {
-    beforeValidate: [applyPublicationControl, enforceAdmission],
+    beforeValidate: [requireCompleteAgencyProfile, applyPublicationControl, enforceAdmission],
     beforeChange: [sanitizeAgencySubmission, computeDerivedFields],
     afterChange: [syncAfterChange],
     afterDelete: [cleanupAfterDelete],

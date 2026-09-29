@@ -27,6 +27,7 @@ async function collectDocuments(
       limit: 200,
       page,
       depth: 1,
+      locale: 'en',
     });
     documents.push(...res.docs.map((doc) => toSearchDocument(doc)));
     if (!res.hasNextPage) break;

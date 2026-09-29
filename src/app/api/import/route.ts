@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 import { getPayloadClient } from '@/lib/db';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
@@ -38,25 +39,55 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ok: false, error: 'agency required' }, { status: 400 });
   }
 
-  const csv = await request.text();
-  if (!csv.trim()) return NextResponse.json({ ok: false }, { status: 400 });
+  // CSV as text, or XLSX as the raw binary body (?format=xlsx or an .xlsx
+  // filename). The first sheet is the import sheet; header row = column names.
+  const filename = request.headers.get('x-filename') ?? undefined;
+  const isXlsx =
+    url.searchParams.get('format') === 'xlsx' || /\.xlsx?$/i.test(filename ?? '');
 
-  const parsed = Papa.parse<RawRow>(csv, { header: true, skipEmptyLines: true });
-  if (parsed.errors.length > 0 && parsed.data.length === 0) {
-    return NextResponse.json(
-      { ok: false, error: parsed.errors[0]?.message ?? 'CSV parse error' },
-      { status: 400 },
-    );
+  let rows: RawRow[];
+  if (isXlsx) {
+    const buffer = Buffer.from(await request.arrayBuffer());
+    if (buffer.length === 0) return NextResponse.json({ ok: false }, { status: 400 });
+    try {
+      const workbook = XLSX.read(buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = sheetName ? workbook.Sheets[sheetName] : undefined;
+      if (!sheet) throw new Error('empty workbook');
+      rows = XLSX.utils
+        .sheet_to_json<Record<string, unknown>>(sheet, { defval: '' })
+        .map((row) =>
+          Object.fromEntries(
+            Object.entries(row).map(([key, cell]) => [key.trim(), String(cell ?? '')]),
+          ),
+        );
+    } catch (err) {
+      return NextResponse.json(
+        { ok: false, error: `XLSX parse error: ${String(err)}` },
+        { status: 400 },
+      );
+    }
+  } else {
+    const csv = await request.text();
+    if (!csv.trim()) return NextResponse.json({ ok: false }, { status: 400 });
+    const parsed = Papa.parse<RawRow>(csv, { header: true, skipEmptyLines: true });
+    if (parsed.errors.length > 0 && parsed.data.length === 0) {
+      return NextResponse.json(
+        { ok: false, error: parsed.errors[0]?.message ?? 'CSV parse error' },
+        { status: 400 },
+      );
+    }
+    rows = parsed.data;
   }
 
   const summary = await runImport({
     payload,
     agencyId,
-    rows: parsed.data,
+    rows,
     dryRun,
-    kind: 'csv',
+    kind: isXlsx ? 'xlsx' : 'csv',
     sourceType: 'csv_import',
-    sourceFilename: request.headers.get('x-filename') ?? undefined,
+    sourceFilename: filename,
   });
 
   return NextResponse.json({ ok: true, ...summary }, { status: dryRun ? 200 : 201 });

@@ -559,3 +559,101 @@ production backups. Track A (Phases 1–14) is complete; Track B (15 agency acco
 16 moderation + bulk import) is optional-later per the plan — note that tenancy access
 functions, the moderation states and feed ingestion already exist from the inherited
 codebase as a head start.
+
+## 2026-09-29 — Phase 15: agency accounts and roles (§9.4 onboarding)
+
+**Decision**: Track B was scoped from a survey of what the inherited codebase already had as
+"seams" (`tenant()`, the four roles, the moderation state machine, `sanitizeAgencySubmission`,
+`ImportJob`) versus what §9.4 still required: the `/sell` application intake, the
+approve → agency + agency_admin account provisioning pipeline, and closing a real access-control
+leak found during the survey. `anyLoggedIn` in `src/payload/access/tenant.ts` checked only
+`Boolean(req.user)` — since Payload's auth union puts members and staff behind the same
+`req.user`, any confirmed member (not staff) could satisfy it. That gate backs `Property.create`
+and eight content collections (Page, Article, Market, Report, …), so a member account could
+create Property drafts and read backoffice content it was never meant to reach. Fixed to
+`Boolean(req.user && 'role' in req.user)` — members carry no `role` field, staff and agency
+accounts do.
+
+`AgencyApplication` (new collection, admin-only CRUD) is the `/sell` intake: Turnstile +
+honeypot + timing check, same pattern as `/api/enquiry`. Its `afterChange` hook is the
+onboarding pipeline — on transition to `status: 'approved'` it idempotently creates the Agency
+record, idempotently creates an `agency_admin` User, calls `payload.forgotPassword({...,
+disableEmail: true})` for a reset token rather than ever handling a plaintext password, and
+emails `AgencySetPasswordEmail` (new React Email template, styled from tokens.ts like every
+other Lawrence email). A new `requireCompleteAgencyProfile` hook blocks an agency's FIRST
+Property submission until its Agency record has a description (≥40 chars) and a phone number —
+runs first in `beforeValidate`, before admission/publication logic, so an incomplete profile
+never reaches the admission check at all.
+
+**Working notes**: `sample:purge`/`seed-sample-data.ts` gained three staff users
+(`editor@sample.lawrence`, `agency-a@sample.lawrence`, `agency-b@sample.lawrence`, password
+`sample-staff-password`) so tenancy can be exercised end-to-end without a real onboarding flow.
+Tenancy isolation was proven at the REST layer, not just local-API (`tests/phase15.spec.ts`,
+Playwright): agency B gets `totalDocs: 0` querying agency A's properties/media/enquiries and a
+403/404 on a direct document read; an agency user's publish attempt (`_status: 'published'`)
+silently lands as `draft`/`unreviewed` via the existing `sanitizeAgencySubmission` hook; an
+editor's identical PATCH succeeds.
+
+**Gate evidence**: `tests/int/trackb.int.spec.ts` 2/8 cover this phase (onboarding creates the
+agency + agency_admin; the profile-completeness gate blocks the first submission) — full 8/8
+reported under Phase 16 below since both phases share one int suite; `tests/phase15.spec.ts`
+3/3 Playwright REST-level; typecheck/lint clean; full unit+int suite 344/344 after the
+`anyLoggedIn` fix (no regressions in the eight collections it also gates).
+
+## 2026-09-29 — Phase 16: moderation queue and bulk import (§9.4 review + import pipeline)
+
+**Decision**: The review queue (`/admin/review`, a custom Payload admin view) and the import
+pipeline's remaining gaps were built against what already existed (`runPreChecks`, the
+validate→map→run CSV pipeline, `ImportJob`). Pre-check thresholds were raised to the spec's
+real numbers — images `< 6` → `< 8`, description `< 300` → `< 600` chars — and a
+`duplicateOf` flag was added so a fingerprint match against another agency's inventory
+(§8.8) surfaces in the queue instead of silently auto-approving. `ReviewQueue.tsx` (server
+component, admin/editor-gated) lists every `unreviewed`/`changes_requested` listing with its
+live pre-check flags and a publication preview computed from the real §8.3 allowlist diff
+(`ALLOWLIST.anonymous` vs `member_public`) rather than a hand-written approximation, so the
+preview can't drift from what visitors actually see. `ReviewDecision.tsx` (client island)
+posts to `/api/admin/review`, which routes approve through the same `payload.update` path as
+any other publish — §2.2 admission and the prime cap still apply, and an inadmissible listing
+throws and returns a 400 rather than silently publishing.
+
+Bulk import gained: XLSX support (`xlsx` package, parsed the same as CSV rows into the
+existing pipeline), a hard rule rejecting `channel=off_market` rows in `validate-row.ts`
+(import may only create public listings — off-market entry stays manual, by design), and
+`attachRowImages` — fetches each row's image URLs (capped at 12, 20s timeout, ≤25MB,
+content-type checked), dedupes by a `sourceId` hash of the URL so re-imports don't
+re-download, and degrades a failed image to a row *warning* rather than failing the row.
+The attached-image count (not the raw URL count) now feeds `runPreChecks`, so a row with
+five broken image URLs correctly fails the ≥8-images check instead of auto-approving on
+optimistic data. `ImportSummaryEmail` and a private `/api/import/[jobId]/errors.csv` route
+(staff, or the job's own agency; everyone else gets a uniform 404, not a 403 that would
+confirm the job's existence) close the loop for an agency running a self-service import.
+
+**Working notes**: raising the pre-check thresholds broke `pre-checks.test.ts`'s own "clean"
+fixture (it was sitting just under the new 600-char description minimum) — fixed by bumping
+the fixture text, not the thresholds. `logAudit`'s real signature is positional
+(`req, action, collection, id, summary`); both new call sites were written wrong first
+(object-style, and passing a raw `NextRequest` instead of a Payload-request shape) and
+corrected. `ALLOWLIST`'s real audience keys are `anonymous | member_public | member_off_market
+| staff` — the queue's first draft referenced a non-existent `member` key.
+
+A genuine pre-existing bug surfaced during this phase's close-out, unrelated to the Track B
+code itself: `searchListingsPostgres` (the Postgres search fallback) and `collectDocuments`
+(the `search:reindex` script) both called `payload.find()` without pinning `locale`, unlike
+every other function in `src/lib/db/index.ts`. One sample listing had stray title data in a
+second locale; the unlocalized query returned it twice — once per locale — corrupting the
+Typesense index with two documents sharing one id and surfacing as a duplicate React key /
+duplicate card on `/en/collection`. Fixed both call sites to `locale: 'en'`, matching the
+file's established convention, and re-ran `search:reindex` (confirmed 0 duplicate ids across
+both audiences afterward).
+
+**Gate evidence**: `tests/int/trackb.int.spec.ts` 8/8 (onboarding, the profile gate, import
+idempotency — first run 3 created/2 rejected, re-run 0 created/3 updated — the €4M admission
+rejection, the channel=public-only rejection, the too-few-images moderation block, the
+review-decision approve-and-publish path, and the error-CSV download for both the job's own
+agency and staff); full unit+int suite 344/344; full Playwright battery 106/106 on BOTH
+chromium and mobile-chrome projects (0 failures, 30 skipped e2e/int specs by design);
+typecheck/lint clean (seven hardcoded-hex-colour lint errors in the two new admin components
+fixed by switching to Payload's own `--theme-*` CSS variables instead, so the review UI
+follows Payload's admin theme rather than baking in fixed colours); `audit:exposure` and
+`audit:seo` both 0 leaks/0 errors; production build budgets green — home 109/110 · listing
+128/130 kB gz first-load JS. Track A + Track B (Phases 1–16) are both complete.

@@ -37,6 +37,19 @@ export function validateRow(raw: RawRow, rowNumber: number): RowReport {
   const issues: RowIssue[] = [];
   const value = (name: string) => raw[name]?.trim() ?? '';
 
+  // §9.4: import may set channel = public ONLY. Off-market inventory is
+  // entered deliberately, by a person — a channel column asking for anything
+  // else is rejected, not silently ignored.
+  const channel = value('channel');
+  if (channel && channel !== 'public') {
+    issues.push({
+      column: 'channel',
+      reason:
+        'Import may only create public listings (channel=public). Off-market listings must be entered manually.',
+      severity: 'error',
+    });
+  }
+
   for (const column of IMPORT_COLUMNS) {
     const v = value(column.name);
     if (!v) {

@@ -397,5 +397,21 @@
     "reportMetaTitle": "{title} — Lawrence Intelligence",
     "byAuthors": "Por {names}",
     "breadcrumbLabel": "Ruta de navegación"
+  },
+  "sell": {
+    "title": "Vender con Lawrence",
+    "sub": "Para agencias y family offices con inventario elegible desde 20 M€. Preséntense — el desk revisa cada solicitud personalmente.",
+    "fieldAgencyName": "Nombre de la agencia o despacho",
+    "fieldContactName": "Persona de contacto",
+    "fieldEmail": "Correo electrónico",
+    "fieldPhone": "Teléfono",
+    "fieldCountry": "País (código ISO)",
+    "fieldWebsite": "Sitio web",
+    "fieldInventoryNote": "¿Qué publicarían? Mercados, número, rango de valor",
+    "consent": "Acepto que mis datos se utilicen para revisar esta solicitud.",
+    "submit": "Solicitar",
+    "sending": "Enviando…",
+    "success": "Solicitud recibida. El desk la revisa personalmente y responde en dos días laborables.",
+    "error": "Algo salió mal — revise el formulario e inténtelo de nuevo."
   }
 }

@@ -83,6 +83,7 @@ export interface Config {
     reports: Report;
     'fx-snapshots': FxSnapshot;
     'segment-pages': SegmentPage;
+    'agency-applications': AgencyApplication;
     taxonomies: Taxonomy;
     articles: Article;
     pages: Page;
@@ -112,6 +113,7 @@ export interface Config {
     reports: ReportsSelect<false> | ReportsSelect<true>;
     'fx-snapshots': FxSnapshotsSelect<false> | FxSnapshotsSelect<true>;
     'segment-pages': SegmentPagesSelect<false> | SegmentPagesSelect<true>;
+    'agency-applications': AgencyApplicationsSelect<false> | AgencyApplicationsSelect<true>;
     taxonomies: TaxonomiesSelect<false> | TaxonomiesSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -1230,6 +1232,31 @@ export interface SegmentPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agency-applications".
+ */
+export interface AgencyApplication {
+  id: number;
+  agencyName: string;
+  contactName: string;
+  email: string;
+  phone?: string | null;
+  country?: string | null;
+  website?: string | null;
+  /**
+   * What they would list — markets, count, value range (§8.2).
+   */
+  inventoryNote?: string | null;
+  status: 'new' | 'approved' | 'rejected';
+  /**
+   * Internal decision note.
+   */
+  reviewNote?: string | null;
+  consentIp?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "taxonomies".
  */
 export interface Taxonomy {
@@ -1469,6 +1496,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'segment-pages';
         value: number | SegmentPage;
+      } | null)
+    | ({
+        relationTo: 'agency-applications';
+        value: number | AgencyApplication;
       } | null)
     | ({
         relationTo: 'taxonomies';
@@ -2092,6 +2123,24 @@ export interface SegmentPagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agency-applications_select".
+ */
+export interface AgencyApplicationsSelect<T extends boolean = true> {
+  agencyName?: T;
+  contactName?: T;
+  email?: T;
+  phone?: T;
+  country?: T;
+  website?: T;
+  inventoryNote?: T;
+  status?: T;
+  reviewNote?: T;
+  consentIp?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

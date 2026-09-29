@@ -390,6 +390,45 @@ async function seedMembers(payload: Payload): Promise<Map<number, number>> {
  * populated MemberActivity trail so the dashboards are not empty. Idempotent:
  * existing rows are counted, not duplicated.
  */
+/**
+ * §13.10/Track B: sample STAFF users so the tenancy acceptance can exercise
+ * the REST API — an editor plus one agency_admin for each of the first two
+ * agencies. Same sample-domain emails, purged with everything else.
+ */
+async function seedStaffUsers(
+  payload: Payload,
+  agencyIds: Map<string, number>,
+): Promise<void> {
+  const agencies = [...agencyIds.values()];
+  const users: Array<{ email: string; role: string; agency?: number; name: string }> = [
+    { email: 'editor@sample.lawrence', role: 'editor', name: 'Sample Editor' },
+    { email: 'agency-a@sample.lawrence', role: 'agency_admin', agency: agencies[0], name: 'Sample Agency A Admin' },
+    { email: 'agency-b@sample.lawrence', role: 'agency_admin', agency: agencies[1], name: 'Sample Agency B Admin' },
+  ];
+  for (const user of users) {
+    if (user.role !== 'editor' && user.agency == null) continue;
+    const existing = await payload.find({
+      collection: 'users',
+      where: { email: { equals: user.email } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    if (existing.docs[0]) continue;
+    await payload.create({
+      collection: 'users',
+      overrideAccess: true,
+      data: {
+        email: user.email,
+        password: 'sample-staff-password',
+        name: user.name,
+        role: user.role,
+        agency: user.agency,
+      } as never,
+    });
+  }
+}
+
 async function seedMemberEngagement(
   payload: Payload,
   memberIds: Map<number, number>,
@@ -498,6 +537,7 @@ async function main(): Promise<void> {
   const { agencyIds, agentIdsByAgency } = await seedAgencies(payload);
   await seedEditorialStubs(payload, marketIds);
   const memberIds = await seedMembers(payload);
+  await seedStaffUsers(payload, agencyIds);
 
   let blueprints = buildAllBlueprints();
   if (flags.destination) {

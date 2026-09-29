@@ -76,6 +76,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum__segment_pages_v_version_segment" AS ENUM('waterfront-estates', 'vineyard-estates', 'ski-chalets', 'penthouses', 'private-islands', 'historic-estates', 'equestrian-estates', 'new-developments', 'golf-estates');
   CREATE TYPE "public"."enum__segment_pages_v_version_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__segment_pages_v_published_locale" AS ENUM('en', 'it', 'fr', 'de', 'es', 'ru');
+  CREATE TYPE "public"."enum_agency_applications_status" AS ENUM('new', 'approved', 'rejected');
   CREATE TYPE "public"."enum_taxonomies_group" AS ENUM('lifestyle', 'style', 'collection');
   CREATE TYPE "public"."enum_articles_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__articles_v_version_status" AS ENUM('draft', 'published');
@@ -837,6 +838,22 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_parent_id" integer NOT NULL
   );
   
+  CREATE TABLE "agency_applications" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"agency_name" varchar NOT NULL,
+  	"contact_name" varchar NOT NULL,
+  	"email" varchar NOT NULL,
+  	"phone" varchar,
+  	"country" varchar,
+  	"website" varchar,
+  	"inventory_note" varchar,
+  	"status" "enum_agency_applications_status" DEFAULT 'new' NOT NULL,
+  	"review_note" varchar,
+  	"consent_ip" varchar,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+  );
+  
   CREATE TABLE "taxonomies" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"slug" varchar NOT NULL,
@@ -1028,6 +1045,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"reports_id" integer,
   	"fx_snapshots_id" integer,
   	"segment_pages_id" integer,
+  	"agency_applications_id" integer,
   	"taxonomies_id" integer,
   	"articles_id" integer,
   	"pages_id" integer,
@@ -1162,6 +1180,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_reports_fk" FOREIGN KEY ("reports_id") REFERENCES "public"."reports"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_fx_snapshots_fk" FOREIGN KEY ("fx_snapshots_id") REFERENCES "public"."fx_snapshots"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_segment_pages_fk" FOREIGN KEY ("segment_pages_id") REFERENCES "public"."segment_pages"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_agency_applications_fk" FOREIGN KEY ("agency_applications_id") REFERENCES "public"."agency_applications"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_taxonomies_fk" FOREIGN KEY ("taxonomies_id") REFERENCES "public"."taxonomies"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_articles_fk" FOREIGN KEY ("articles_id") REFERENCES "public"."articles"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_pages_fk" FOREIGN KEY ("pages_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;
@@ -1398,6 +1417,10 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_segment_pages_v_published_locale_idx" ON "_segment_pages_v" USING btree ("published_locale");
   CREATE INDEX "_segment_pages_v_latest_idx" ON "_segment_pages_v" USING btree ("latest");
   CREATE UNIQUE INDEX "_segment_pages_v_locales_locale_parent_id_unique" ON "_segment_pages_v_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX "agency_applications_email_idx" ON "agency_applications" USING btree ("email");
+  CREATE INDEX "agency_applications_status_idx" ON "agency_applications" USING btree ("status");
+  CREATE INDEX "agency_applications_updated_at_idx" ON "agency_applications" USING btree ("updated_at");
+  CREATE INDEX "agency_applications_created_at_idx" ON "agency_applications" USING btree ("created_at");
   CREATE UNIQUE INDEX "taxonomies_slug_idx" ON "taxonomies" USING btree ("slug");
   CREATE INDEX "taxonomies_updated_at_idx" ON "taxonomies" USING btree ("updated_at");
   CREATE INDEX "taxonomies_created_at_idx" ON "taxonomies" USING btree ("created_at");
@@ -1482,6 +1505,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_locked_documents_rels_reports_id_idx" ON "payload_locked_documents_rels" USING btree ("reports_id");
   CREATE INDEX "payload_locked_documents_rels_fx_snapshots_id_idx" ON "payload_locked_documents_rels" USING btree ("fx_snapshots_id");
   CREATE INDEX "payload_locked_documents_rels_segment_pages_id_idx" ON "payload_locked_documents_rels" USING btree ("segment_pages_id");
+  CREATE INDEX "payload_locked_documents_rels_agency_applications_id_idx" ON "payload_locked_documents_rels" USING btree ("agency_applications_id");
   CREATE INDEX "payload_locked_documents_rels_taxonomies_id_idx" ON "payload_locked_documents_rels" USING btree ("taxonomies_id");
   CREATE INDEX "payload_locked_documents_rels_articles_id_idx" ON "payload_locked_documents_rels" USING btree ("articles_id");
   CREATE INDEX "payload_locked_documents_rels_pages_id_idx" ON "payload_locked_documents_rels" USING btree ("pages_id");
@@ -1550,6 +1574,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "_segment_pages_v_version_faq" CASCADE;
   DROP TABLE "_segment_pages_v" CASCADE;
   DROP TABLE "_segment_pages_v_locales" CASCADE;
+  DROP TABLE "agency_applications" CASCADE;
   DROP TABLE "taxonomies" CASCADE;
   DROP TABLE "taxonomies_locales" CASCADE;
   DROP TABLE "articles" CASCADE;
@@ -1644,6 +1669,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum__segment_pages_v_version_segment";
   DROP TYPE "public"."enum__segment_pages_v_version_status";
   DROP TYPE "public"."enum__segment_pages_v_published_locale";
+  DROP TYPE "public"."enum_agency_applications_status";
   DROP TYPE "public"."enum_taxonomies_group";
   DROP TYPE "public"."enum_articles_status";
   DROP TYPE "public"."enum__articles_v_version_status";

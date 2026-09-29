@@ -277,6 +277,7 @@ async function searchListingsPostgres(
     page,
     limit,
     depth: 1,
+    locale: 'en',
   });
   return {
     hits: res.docs

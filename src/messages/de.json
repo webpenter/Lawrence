@@ -397,5 +397,21 @@
     "reportMetaTitle": "{title} — Lawrence Intelligence",
     "byAuthors": "Von {names}",
     "breadcrumbLabel": "Brotkrumen-Navigation"
+  },
+  "sell": {
+    "title": "Mit Lawrence verkaufen",
+    "sub": "Für Agenturen und Family Offices mit qualifizierendem Bestand ab 20 Mio. €. Stellen Sie sich vor — der Desk prüft jede Bewerbung persönlich.",
+    "fieldAgencyName": "Name der Agentur oder des Büros",
+    "fieldContactName": "Ansprechpartner",
+    "fieldEmail": "E-Mail",
+    "fieldPhone": "Telefon",
+    "fieldCountry": "Land (ISO-Code)",
+    "fieldWebsite": "Website",
+    "fieldInventoryNote": "Was möchten Sie anbieten? Märkte, Anzahl, Wertspanne",
+    "consent": "Ich stimme zu, dass meine Angaben zur Prüfung dieser Bewerbung verwendet werden.",
+    "submit": "Bewerben",
+    "sending": "Wird gesendet…",
+    "success": "Bewerbung erhalten. Der Desk prüft persönlich und antwortet innerhalb von zwei Werktagen.",
+    "error": "Etwas ist schiefgelaufen — bitte prüfen Sie das Formular und versuchen Sie es erneut."
   }
 }

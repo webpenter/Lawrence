@@ -6,7 +6,7 @@ const CLEAN: PreCheckInput = {
   coordinates: [9.2099, 44.3034],
   priceEur: 26_000_000,
   imageCount: 8,
-  descriptionText: 'x'.repeat(350),
+  descriptionText: 'x'.repeat(650),
   title: 'Palazzo with 38 m of private sea frontage',
 };
 
@@ -53,11 +53,11 @@ describe('runPreChecks (§9.4 automated moderation)', () => {
   it('flags phone numbers and emails in the public description', () => {
     const withPhone = runPreChecks({
       ...CLEAN,
-      descriptionText: `${'x'.repeat(300)} call +39 333 123 4567`,
+      descriptionText: `${'x'.repeat(600)} call +39 333 123 4567`,
     });
     const withEmail = runPreChecks({
       ...CLEAN,
-      descriptionText: `${'x'.repeat(300)} mail me at agent@example.com`,
+      descriptionText: `${'x'.repeat(600)} mail me at agent@example.com`,
     });
     expect(withPhone.map((f) => f.code)).toContain('contact_in_description');
     expect(withEmail.map((f) => f.code)).toContain('contact_in_description');

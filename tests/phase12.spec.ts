@@ -70,7 +70,7 @@ test.describe('static rendering verification (§12.2 rule 1)', () => {
     const resIndex = await page.goto('/en/journal');
     expect(resIndex?.status()).toBe(200);
 
-    const resArticle = await page.goto('/en/journal/sample-mooring-rights-private-berth');
+    const resArticle = await page.goto('/en/journal/sample-buying-a-private-island');
     expect(resArticle?.status()).toBe(200);
   });
 });

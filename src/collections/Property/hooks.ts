@@ -104,6 +104,47 @@ export const sanitizeAgencySubmission: CollectionBeforeChangeHook = ({
 };
 
 /**
+ * §9.4 onboarding: the profile-completeness gate. An agency cannot make its
+ * FIRST submission until its own profile carries a description and a phone
+ * number — the desk needs a reachable, presentable counterparty before any
+ * inventory enters the queue. Applies to creates by agency roles only.
+ */
+export const requireCompleteAgencyProfile: CollectionBeforeValidateHook = async ({
+  data,
+  operation,
+  req,
+}) => {
+  if (operation !== 'create') return data;
+  const user = staffUser(req.user);
+  if (!user || !isAgencyRole(user.role)) return data;
+
+  const agencyId = relationId(user.agency ?? null);
+  if (agencyId == null) return data;
+  const agency = await req.payload.findByID({
+    collection: 'agencies',
+    id: agencyId,
+    depth: 0,
+    overrideAccess: true,
+  });
+  const missing: string[] = [];
+  if (!agency.description || String(agency.description).trim().length < 40)
+    missing.push('description (min. 40 characters)');
+  if (!agency.phone) missing.push('phone');
+  if (missing.length > 0) {
+    throw new ValidationError({
+      collection: 'properties',
+      errors: [
+        {
+          message: `Complete your agency profile before submitting a listing — missing: ${missing.join(', ')}.`,
+          path: 'agency',
+        },
+      ],
+    });
+  }
+  return data;
+};
+
+/**
  * The admission policy (spec §2.2). Publishing an inadmissible listing throws
  * a validation error with a human-readable reason; saving it as a draft is
  * allowed but writes the same reason into moderationNote so the submitter

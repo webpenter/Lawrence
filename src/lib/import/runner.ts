@@ -1,10 +1,92 @@
-import type { Payload } from 'payload';
+import { createHash } from 'crypto';
 
+import type { Payload } from 'payload';
+import { render } from '@react-email/components';
+
+import { brand } from '@/config/brand';
+import { sendEmail } from '@/lib/email/send';
+import { ImportSummaryEmail } from '@/lib/email/templates/agency-emails';
 import { computeFingerprint } from '@/lib/fingerprint';
 import { lexicalToText, runPreChecks } from '@/lib/moderation/pre-checks';
 
 import { imageUrlsFromRow, mapRowToListing } from './map-row';
 import { validateRow, type RawRow, type RowReport } from './validate-row';
+
+/** Cap fetched images per row — enough for the ≥8 check plus headroom. */
+const MAX_FETCHED_IMAGES = 12;
+
+/**
+ * §9.4: fetch, validate and deduplicate row images into Media docs. Upload
+ * enforcement does the heavy lifting (2000px long edge, EXIF stripping) —
+ * a rejected image degrades to a row warning, never row loss. Dedup is by
+ * source-URL hash on Media.sourceId.
+ */
+async function attachRowImages(
+  payload: Payload,
+  listingId: number,
+  agencyId: number,
+  title: string,
+  row: RawRow,
+  report: RowReport,
+): Promise<number> {
+  const urls = imageUrlsFromRow(row).slice(0, MAX_FETCHED_IMAGES);
+  const mediaIds: number[] = [];
+  for (const url of urls) {
+    const sourceId = `import-${createHash('sha1').update(url).digest('hex').slice(0, 16)}`;
+    const existing = await payload.find({
+      collection: 'media',
+      where: { sourceId: { equals: sourceId } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    if (existing.docs[0]) {
+      mediaIds.push(existing.docs[0].id);
+      continue;
+    }
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+      const type = response.headers.get('content-type') ?? '';
+      if (!response.ok || !type.startsWith('image/')) throw new Error(`HTTP ${response.status} ${type}`);
+      const buffer = Buffer.from(await response.arrayBuffer());
+      if (buffer.length > 25_000_000) throw new Error('image exceeds 25MB');
+      const created = await payload.create({
+        collection: 'media',
+        overrideAccess: true,
+        file: {
+          data: buffer,
+          name: `${sourceId}.jpg`,
+          mimetype: type.split(';')[0] ?? 'image/jpeg',
+          size: buffer.length,
+        },
+        data: {
+          visibility: 'public',
+          alt: title,
+          agency: agencyId,
+          sourceUrl: url,
+          sourceId,
+        } as never,
+      });
+      mediaIds.push(created.id);
+    } catch (err) {
+      report.issues.push({
+        column: 'image_urls',
+        reason: `Image rejected (${url.slice(0, 80)}): ${String(err).slice(0, 120)}`,
+        severity: 'warning',
+      });
+    }
+  }
+  if (mediaIds.length > 0) {
+    await payload.update({
+      collection: 'properties',
+      id: listingId,
+      data: { media: mediaIds } as never,
+      draft: true,
+      overrideAccess: true,
+    });
+  }
+  return mediaIds.length;
+}
 
 export interface ImportSummary {
   jobId: number;
@@ -142,15 +224,27 @@ export async function runImport(args: RunImportArgs): Promise<ImportSummary> {
       summary.created += 1;
     }
 
+    // §9.4: images are fetched, validated (upload enforces 2000px + EXIF
+    // stripping), optimised by the media pipeline and deduplicated by URL.
+    const attachedImages = await attachRowImages(
+      payload,
+      listingId,
+      agencyId,
+      (data.title as string) ?? '',
+      row,
+      report,
+    );
+
     // §9.4: clean listings from verified agencies auto-approve and publish.
     if (agency.tier === 'verified' && !data.duplicateOf) {
       const flags = runPreChecks({
         coordinates: coords ?? null,
         priceEur: (data.currency === 'EUR' ? (data.priceAmount as number | null) : null) ?? null,
         internalValueEur: (data.internalValueEur as number | null) ?? null,
-        imageCount: imageUrlsFromRow(row).length,
+        imageCount: attachedImages,
         descriptionText: lexicalToText(data.description),
         title: (data.title as string) ?? '',
+        duplicateOf: (data.duplicateOf as number | null) ?? null,
       });
       if (flags.length === 0) {
         await payload.update({
@@ -183,6 +277,31 @@ export async function runImport(args: RunImportArgs): Promise<ImportSummary> {
       errorReport: summary.reports.filter((r) => r.status !== 'ok'),
     },
   });
+
+  // §9.4: the summary email with the error-CSV link — best-effort.
+  if (agency.email) {
+    try {
+      const base = (process.env.NEXT_PUBLIC_SITE_URL ?? brand.siteUrl).replace(/\/$/, '');
+      const component = ImportSummaryEmail({
+        agencyName: agency.name,
+        filename: sourceFilename ?? kind,
+        processed: rows.length,
+        created: summary.created,
+        updated: summary.updated,
+        failed: summary.skipped,
+        errorCsvUrl:
+          summary.skipped > 0 ? `${base}/api/import/${job.id}/errors.csv` : null,
+      });
+      await sendEmail({
+        to: agency.email,
+        subject: `Import complete — ${summary.created} created, ${summary.updated} updated, ${summary.skipped} failed`,
+        html: await render(component),
+        text: await render(component, { plainText: true }),
+      });
+    } catch (err) {
+      payload.logger.warn(`[import] summary email failed: ${String(err)}`);
+    }
+  }
 
   return summary;
 }

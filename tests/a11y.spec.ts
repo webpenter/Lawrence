@@ -21,6 +21,7 @@ const ROUTES: Array<{ name: string; path: string }> = [
   { name: 'article', path: '/en/journal/sample-buying-through-a-structure' },
   { name: 'contact', path: '/en/contact' },
   { name: 'sell', path: '/en/list-with-us' },
+  { name: 'apply', path: '/en/sell' },
 ];
 
 test.describe('Accessibility', () => {

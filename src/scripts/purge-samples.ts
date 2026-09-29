@@ -122,6 +122,15 @@ export async function purgeSamples(payload: Payload): Promise<Record<string, num
     counts.agencies = agencies.docs.length;
   }
 
+  // Sample staff users (Track B tenancy fixtures).
+  counts.staffUsers = (
+    await payload.delete({
+      collection: 'users',
+      where: { email: { like: '%@sample.lawrence' } },
+      overrideAccess: true,
+    })
+  ).docs.length;
+
   // Sample editorial content: articles, reports, segment pages, markets.
   counts.articles = (
     await payload.delete({

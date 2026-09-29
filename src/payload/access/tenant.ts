@@ -93,8 +93,12 @@ export const staffOnlyFieldAccess: FieldAccess = ({ req }) => {
   return role === 'admin' || role === 'editor';
 };
 
-/** Any authenticated backoffice user. */
-export const anyLoggedIn: Access = ({ req }) => Boolean(req.user);
+/**
+ * Any authenticated backoffice user — members are NOT staff. The auth
+ * union puts members and users behind the same req.user, so backoffice
+ * collections must check for a staff role, not mere authentication.
+ */
+export const anyLoggedIn: Access = ({ req }) => Boolean(req.user && 'role' in req.user);
 
 export function isAgencyRole(role: string | undefined): boolean {
   return role === 'agency_admin' || role === 'agency_agent';

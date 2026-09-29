@@ -8961,6 +8961,162 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.agency_applications": {
+      "name": "agency_applications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "agency_name": {
+          "name": "agency_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_name": {
+          "name": "contact_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "country": {
+          "name": "country",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "website": {
+          "name": "website",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inventory_note": {
+          "name": "inventory_note",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum_agency_applications_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "review_note": {
+          "name": "review_note",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consent_ip": {
+          "name": "consent_ip",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "agency_applications_email_idx": {
+          "name": "agency_applications_email_idx",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "agency_applications_status_idx": {
+          "name": "agency_applications_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "agency_applications_updated_at_idx": {
+          "name": "agency_applications_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "agency_applications_created_at_idx": {
+          "name": "agency_applications_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.taxonomies": {
       "name": "taxonomies",
       "schema": "",
@@ -11302,6 +11458,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "agency_applications_id": {
+          "name": "agency_applications_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "taxonomies_id": {
           "name": "taxonomies_id",
           "type": "integer",
@@ -11606,6 +11768,21 @@
           "columns": [
             {
               "expression": "segment_pages_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "payload_locked_documents_rels_agency_applications_id_idx": {
+          "name": "payload_locked_documents_rels_agency_applications_id_idx",
+          "columns": [
+            {
+              "expression": "agency_applications_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -11924,6 +12101,19 @@
           "tableTo": "segment_pages",
           "columnsFrom": [
             "segment_pages_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_agency_applications_fk": {
+          "name": "payload_locked_documents_rels_agency_applications_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "agency_applications",
+          "columnsFrom": [
+            "agency_applications_id"
           ],
           "columnsTo": [
             "id"
@@ -13253,6 +13443,15 @@
         "ru"
       ]
     },
+    "public.enum_agency_applications_status": {
+      "name": "enum_agency_applications_status",
+      "schema": "public",
+      "values": [
+        "new",
+        "approved",
+        "rejected"
+      ]
+    },
     "public.enum_taxonomies_group": {
       "name": "enum_taxonomies_group",
       "schema": "public",
@@ -13373,6 +13572,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "8bc7eb9d-a633-4814-9f98-f944a2c4fc0b",
+  "id": "c6288a5f-ae6a-4b03-aea3-9d03d9d3aba6",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

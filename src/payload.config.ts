@@ -19,6 +19,7 @@ import { MemberActivity } from './collections/MemberActivity';
 import { Report } from './collections/Report';
 import { Documents } from './collections/Documents';
 import { FxSnapshot } from './collections/FxSnapshot';
+import { AgencyApplication } from './collections/AgencyApplication';
 import { SegmentPage } from './collections/SegmentPage';
 import { Taxonomy } from './collections/Taxonomy';
 import { Article } from './collections/Article';
@@ -39,6 +40,15 @@ export default buildConfig({
     },
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      views: {
+        // §9.4 — the moderation review queue.
+        review: {
+          Component: '@/components/admin/ReviewQueue#ReviewQueue',
+          path: '/review',
+        },
+      },
     },
   },
   localization: {
@@ -62,6 +72,7 @@ export default buildConfig({
     Report,
     FxSnapshot,
     SegmentPage,
+    AgencyApplication,
     Taxonomy,
     Article,
     Page,

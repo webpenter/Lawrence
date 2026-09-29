@@ -22,6 +22,7 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BrochureLinkField as BrochureLinkField_d07aeb316dade7e987f8a0750f5237ed } from '@/components/admin/BrochureLinkField'
+import { ReviewQueue as ReviewQueue_3392d5d6e0be1caabbeee642652b3ef1 } from '@/components/admin/ReviewQueue'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -50,5 +51,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/admin/BrochureLinkField#BrochureLinkField": BrochureLinkField_d07aeb316dade7e987f8a0750f5237ed,
+  "@/components/admin/ReviewQueue#ReviewQueue": ReviewQueue_3392d5d6e0be1caabbeee642652b3ef1,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

@@ -397,5 +397,21 @@
     "reportMetaTitle": "{title} — Lawrence Intelligence",
     "byAuthors": "Par {names}",
     "breadcrumbLabel": "Fil d'Ariane"
+  },
+  "sell": {
+    "title": "Vendre avec Lawrence",
+    "sub": "Pour les agences et family offices disposant d'un inventaire éligible dès 20 M€. Présentez-vous — le desk examine chaque candidature personnellement.",
+    "fieldAgencyName": "Nom de l'agence ou du cabinet",
+    "fieldContactName": "Nom du contact",
+    "fieldEmail": "E-mail",
+    "fieldPhone": "Téléphone",
+    "fieldCountry": "Pays (code ISO)",
+    "fieldWebsite": "Site web",
+    "fieldInventoryNote": "Que souhaitez-vous publier ? Marchés, volume, fourchette de valeur",
+    "consent": "J'accepte que mes coordonnées soient utilisées pour examiner cette candidature.",
+    "submit": "Candidater",
+    "sending": "Envoi…",
+    "success": "Candidature reçue. Le desk l'examine personnellement et répond sous deux jours ouvrés.",
+    "error": "Une erreur est survenue — vérifiez le formulaire et réessayez."
   }
 }

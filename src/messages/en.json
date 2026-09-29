@@ -393,5 +393,21 @@
     "reportMetaTitle": "{title} — Lawrence Intelligence",
     "byAuthors": "By {names}",
     "breadcrumbLabel": "Breadcrumb"
+  },
+  "sell": {
+    "title": "Sell with Lawrence",
+    "sub": "For agencies and private offices with qualifying inventory from €20M. Tell us who you are — the desk reviews every application personally.",
+    "fieldAgencyName": "Agency or office name",
+    "fieldContactName": "Contact name",
+    "fieldEmail": "Email",
+    "fieldPhone": "Phone",
+    "fieldCountry": "Country (ISO code)",
+    "fieldWebsite": "Website",
+    "fieldInventoryNote": "What would you list? Markets, count, value range",
+    "consent": "I agree that my details are used to review this application.",
+    "submit": "Apply to list",
+    "sending": "Sending…",
+    "success": "Application received. The desk reviews personally and replies within two business days.",
+    "error": "Something went wrong — please check the form and try again."
   }
 }
