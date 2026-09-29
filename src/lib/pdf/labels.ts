@@ -23,24 +23,23 @@ const CATALOGS: Record<string, Catalog> = {
 };
 
 export interface BrochureLabels {
-  waterCredentialsTitle: string;
-  nauticalTitle: string;
   keyFactsTitle: string;
+  provenanceTitle: string;
   priceOnRequest: string;
+  priceGuideBand: string;
   disclaimer: string;
-  labelWaterBody: string;
-  labelAccess: string;
-  labelFrontage: string;
-  labelDistanceToWater: string;
-  labelMooring: string;
-  labelMaxBoatLength: string;
-  labelDepthAtBerth: string;
-  labelNavigableToOpenSea: string;
   factBedrooms: string;
   factBathrooms: string;
+  factReceptions: string;
   factBuiltArea: string;
   factPlotArea: string;
+  factTerrace: string;
   factYearBuilt: string;
+  factRenovated: string;
+  factCondition: string;
+  factTenure: string;
+  factHeritage: string;
+  factArchitect: string;
   factReference: string;
   yes: string;
   no: string;
@@ -56,24 +55,23 @@ function pick(locale: string, namespace: 'listing' | 'common', key: string): str
 export function brochureLabels(locale: string): BrochureLabels {
   const l = (key: string) => pick(locale, 'listing', key);
   return {
-    waterCredentialsTitle: l('waterCredentialsTitle'),
-    nauticalTitle: l('nauticalTitle'),
     keyFactsTitle: l('keyFactsTitle'),
+    provenanceTitle: l('provenanceTitle'),
     priceOnRequest: pick(locale, 'common', 'priceOnRequest'),
+    priceGuideBand: pick(locale, 'common', 'priceGuideBand'),
     disclaimer: l('disclaimer'),
-    labelWaterBody: l('labelWaterBody'),
-    labelAccess: l('labelAccess'),
-    labelFrontage: l('labelFrontage'),
-    labelDistanceToWater: l('labelDistanceToWater'),
-    labelMooring: l('labelMooring'),
-    labelMaxBoatLength: l('labelMaxBoatLength'),
-    labelDepthAtBerth: l('labelDepthAtBerth'),
-    labelNavigableToOpenSea: l('labelNavigableToOpenSea'),
     factBedrooms: l('factBedrooms'),
     factBathrooms: l('factBathrooms'),
+    factReceptions: l('factReceptions'),
     factBuiltArea: l('factBuiltArea'),
     factPlotArea: l('factPlotArea'),
+    factTerrace: l('factTerrace'),
     factYearBuilt: l('factYearBuilt'),
+    factRenovated: l('factRenovated'),
+    factCondition: l('factCondition'),
+    factTenure: l('factTenure'),
+    factHeritage: l('factHeritage'),
+    factArchitect: l('factArchitect'),
     factReference: l('factReference'),
     yes: l('yes'),
     no: l('no'),

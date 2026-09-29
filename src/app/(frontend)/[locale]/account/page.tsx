@@ -38,7 +38,7 @@ export default async function AccountPage(props: { params: Promise<{ locale: str
   const tOff = await getTranslations('offMarket');
 
   const payload = await getPayloadClient();
-  const [member, saved, requirement] = await Promise.all([
+  const [member, saved, requirement, enquiries] = await Promise.all([
     payload.findByID({ collection: 'members', id: memberId, overrideAccess: true }) as Promise<Member>,
     payload.find({
       collection: 'saved-listings',
@@ -53,6 +53,15 @@ export default async function AccountPage(props: { params: Promise<{ locale: str
       where: { and: [{ member: { equals: memberId } }, { status: { equals: 'active' } }] },
       limit: 1,
       depth: 0,
+      overrideAccess: true,
+    }),
+    // §11.7: the member's own enquiries with their response status.
+    payload.find({
+      collection: 'enquiries',
+      where: { member: { equals: memberId } },
+      sort: '-createdAt',
+      depth: 1,
+      limit: 20,
       overrideAccess: true,
     }),
   ]);
@@ -127,6 +136,36 @@ export default async function AccountPage(props: { params: Promise<{ locale: str
                       {entry.note ? (
                         <p className="mt-2 text-sm text-graphite">{entry.note}</p>
                       ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          {/* §11.7 — the member's enquiries and their status. */}
+          <section className="mb-12">
+            <h2 className="mb-4 font-display text-xl text-ink">{t('enquiriesTitle')}</h2>
+            {enquiries.docs.length === 0 ? (
+              <div className="border border-line bg-vellum p-6">
+                <p className="text-sm text-graphite">{t('enquiriesEmpty')}</p>
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {enquiries.docs.map((enquiry) => {
+                  const enquiryProperty =
+                    typeof enquiry.property === 'object' ? (enquiry.property as Property) : null;
+                  return (
+                    <li key={enquiry.id} className="border border-line bg-vellum p-4 text-sm">
+                      <p className="font-medium text-ink">
+                        {enquiryProperty?.title ?? tOff('indexTitle')}
+                      </p>
+                      <p className="mt-1 text-xs text-graphite">
+                        {new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(
+                          new Date(enquiry.createdAt),
+                        )}{' '}
+                        · {t('enquiryStatusLabel')}: {enquiry.status}
+                      </p>
                     </li>
                   );
                 })}

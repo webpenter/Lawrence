@@ -224,7 +224,10 @@
     "timelineImmediate": "Inmediato",
     "timeline6Months": "En 6 meses",
     "timeline12Months": "En 12 meses",
-    "timelineOpportunistic": "Oportunista"
+    "timelineOpportunistic": "Oportunista",
+    "enquiriesTitle": "Sus consultas",
+    "enquiriesEmpty": "Aún no hay consultas.",
+    "enquiryStatusLabel": "Estado"
   },
   "footer": {
     "destinationsTitle": "Mercados",
@@ -269,7 +272,9 @@
     "segmentMetaTitle": "{segment} en {destination} — {count} en venta",
     "segmentMetaTitleNoCount": "{segment} en {destination}",
     "segmentKicker": "Segmento",
-    "sampleNotice": "Datos de mercado de muestra — contenido de demostración, no asesoramiento de inversión."
+    "sampleNotice": "Datos de mercado de muestra — contenido de demostración, no asesoramiento de inversión.",
+    "enquiryTitle": "Consultar sobre este mercado",
+    "enquirySub": "Díganos qué busca — el desk responde en un día laborable."
   },
   "consent": {
     "title": "Cookies en Lawrence",
@@ -283,7 +288,10 @@
   },
   "contact": {
     "title": "Contactar con el desk",
-    "sub": "Preguntas sobre una propiedad, un mercado o una venta discreta — el desk responde en un día laborable."
+    "sub": "Preguntas sobre una propiedad, un mercado o una venta discreta — el desk responde en un día laborable.",
+    "deskCallTitle": "Programar una llamada con el desk",
+    "deskCallBody": "¿Prefiere hablar? Reserve un horario a su conveniencia — el desk atiende llamadas programadas en seis idiomas.",
+    "deskCallCta": "Programar una llamada"
   },
   "listWithUs": {
     "title": "Vender una propiedad",
@@ -312,14 +320,26 @@
     "feedTitle": "Estado de los feeds",
     "feedNone": "Ningún feed configurado.",
     "leadsWeeklyTitle": "Consultas semanales por origen",
-    "waterBodyTitle": "Anuncios por categoría",
     "dataQualityTitle": "Calidad de los datos",
-    "missingFrontageCount": "{count} anuncios activos sin mercado",
-    "missingNauticalCount": "{count} anuncios activos sin valor aplicable",
     "editInAdmin": "Revisar en el backoffice",
     "leaderboardTitle": "Clasificación de agencias",
     "sampleLeakWarning": "Hay anuncios de muestra públicamente activos con el modo demo DESACTIVADO — púrguelos antes del lanzamiento.",
-    "sampleLeakOk": "Ningún anuncio de muestra está expuesto públicamente."
+    "sampleLeakOk": "Ningún anuncio de muestra está expuesto públicamente.",
+    "inventoryTitle": "Inventario — canal, nivel, estado y mercado",
+    "membersTitle": "Miembros",
+    "membersTotal": "Cuentas",
+    "membersConfirmed": "Confirmadas",
+    "membersConversion": "Tasa de confirmación",
+    "offMarketDemandTitle": "Demanda off-market por inmueble",
+    "offMarketDemandEmpty": "Sin visualizaciones ni descargas off-market registradas.",
+    "downloadsLabel": "descargas",
+    "requirementsBoardTitle": "Tablero de requisitos",
+    "requirementsEmpty": "Sin requisitos activos.",
+    "matchesLabel": "coincidencias",
+    "qualityMissingImages": "Anuncios activos sin imágenes",
+    "qualityShortDescriptions": "Anuncios activos con descripciones breves",
+    "qualityMissingMarket": "Anuncios activos sin mercado",
+    "qualityExpiringSoon": "Anuncios que caducan en 14 días"
   },
   "journal": {
     "title": "El Journal",

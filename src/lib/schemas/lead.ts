@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 /**
- * The lead intake contract, shared client/server (CLAUDE.md conventions:
+ * The enquiry intake contract, shared client/server (CLAUDE.md conventions:
  * Zod schemas colocated in /src/lib/schemas). The client validates before
- * POSTing; the /api/leads route re-validates authoritatively.
+ * POSTing; the /api/enquiry route re-validates authoritatively.
  */
 export const leadSchema = z.object({
   name: z.string().min(2).max(200),
@@ -21,6 +21,9 @@ export const leadSchema = z.object({
   website: z.string().max(0).optional(),
   /** Anti-bot timing check: epoch ms when the form was rendered. */
   startedAt: z.number().int().positive().optional(),
+  /** §22-11A: UTM parameters captured from the landing URL. */
+  utm: z.record(z.string(), z.string().max(200)).optional(),
+  turnstileToken: z.string().max(4000).optional(),
 });
 
 export type LeadInput = z.infer<typeof leadSchema>;

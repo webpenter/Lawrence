@@ -51,14 +51,14 @@ describe('Spec §17: Analytics Event Schema & Privacy', () => {
     const plausibleMock = vi.fn();
     window.plausible = plausibleMock;
 
-    trackEvent('lead_submitted', {
+    trackEvent('enquiry_submitted', {
       source: 'property_detail',
       hasPhone: false,
       propertyId: 101,
       agencyId: 5,
     });
 
-    expect(plausibleMock).toHaveBeenCalledWith('lead_submitted', {
+    expect(plausibleMock).toHaveBeenCalledWith('enquiry_submitted', {
       props: {
         source: 'property_detail',
         hasPhone: false,

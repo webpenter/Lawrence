@@ -43,7 +43,7 @@ test.describe('keyboard-only enquiry (§15 acceptance)', () => {
     await page.keyboard.press('Tab'); // → submit
     // Anti-bot timing gate: humans take >3s, so must this test.
     await page.waitForTimeout(3100);
-    const posted = page.waitForRequest((req) => req.url().includes('/api/leads'), {
+    const posted = page.waitForRequest((req) => req.url().includes('/api/enquiry'), {
       timeout: 10_000,
     });
     await page.keyboard.press('Enter');

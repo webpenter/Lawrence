@@ -37,6 +37,7 @@
     "@payloadcms/db-postgres": "3.90.1",
     "@payloadcms/next": "3.90.1",
     "@payloadcms/richtext-lexical": "3.90.1",
+    "@payloadcms/ui": "3.90.1",
     "@react-email/components": "^0.0.32",
     "@react-pdf/renderer": "^4.9.0",
     "@vercel/og": "^0.6.5",

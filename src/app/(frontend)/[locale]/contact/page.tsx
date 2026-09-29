@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { DeskCallLink } from '@/components/desk/DeskCallLink';
 import { EnquiryForm } from '@/components/property/EnquiryForm';
 import { brand } from '@/config/brand';
 import { hreflangAlternates } from '@/lib/seo/hreflang';
@@ -54,6 +55,17 @@ export default async function ContactPage({ params }: ContactPageProps) {
             errorEmail: tl('formErrorEmail'),
           }}
         />
+        {process.env.NEXT_PUBLIC_DESK_CALCOM_URL ? (
+          <section className="mt-10 border border-line bg-vellum p-6">
+            <h2 className="mb-1 font-display text-lg text-ink">{t('deskCallTitle')}</h2>
+            <p className="mb-4 text-sm text-graphite">{t('deskCallBody')}</p>
+            <DeskCallLink
+              href={process.env.NEXT_PUBLIC_DESK_CALCOM_URL}
+              locale={locale}
+              label={t('deskCallCta')}
+            />
+          </section>
+        ) : null}
         <p className="mt-8 text-xs text-graphite">
           {brand.email.contact} · {brand.phone}
         </p>

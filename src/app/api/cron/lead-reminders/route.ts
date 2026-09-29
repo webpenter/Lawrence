@@ -46,11 +46,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         listingTitle: property?.title,
         enquirerName: lead.name,
         receivedAt: new Date(lead.createdAt).toISOString().slice(0, 10),
-        dashboardUrl: `${base}/admin/collections/leads`,
+        dashboardUrl: `${base}/admin/collections/enquiries`,
       });
       await sendEmail({
         to: agency.email,
-        subject: 'WATERLINE: an enquiry is waiting for a reply',
+        subject: 'LAWRENCE: an enquiry is waiting for a reply',
         html: await render(component),
         text: await render(component, { plainText: true }),
       });

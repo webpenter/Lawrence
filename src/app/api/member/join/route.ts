@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { getPayloadClient } from '@/lib/db';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { turnstileOk } from '@/lib/security/turnstile';
 
 const joinSchema = z.object({
   email: z.string().email().max(320),
@@ -15,24 +16,6 @@ const joinSchema = z.object({
   source: z.enum(['organic', 'off_market_cta', 'report_download', 'enquiry', 'referral']).optional(),
   turnstileToken: z.string().max(4000).optional(),
 });
-
-async function turnstileOk(token: string | undefined, ip: string): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true; // not configured (dev/CI) — the rate limit still applies
-  if (!token) return false;
-  try {
-    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, response: token, remoteip: ip }),
-      signal: AbortSignal.timeout(5000),
-    });
-    const data = (await res.json()) as { success?: boolean };
-    return Boolean(data.success);
-  } catch {
-    return false;
-  }
-}
 
 /**
  * §8.5 step 1 — Join: two fields and a confirmation click. Rate-limited,

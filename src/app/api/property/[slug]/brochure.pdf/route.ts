@@ -1,19 +1,23 @@
-import { ANONYMOUS } from '@/lib/access/viewer';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { getCurrentViewer } from '@/lib/auth';
 import { getPropertyForDetail, type Locale } from '@/lib/db';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { renderBrochure } from '@/lib/pdf/render';
 import { findFallbackProperty, sampleFallbackEnabled } from '@/lib/sample/fallback';
 import type { Property } from '@/payload-types';
 
-export const revalidate = 3600;
+// Dynamic (the viewer comes from the session); anonymous responses are still
+// edge-cached via Cache-Control below.
+export const dynamic = 'force-dynamic';
 
 const LOCALES = ['en', 'it', 'fr', 'de', 'es', 'ru'];
 
-// §22 Prompt 15A: the brochure endpoint. Same data rules as the listing page —
-// database verdicts are final, the demo inventory answers only on the
-// DB-error path in demo mode, unknown slugs 404.
+// §22-11B: the brochure endpoint. Audience-aware: the viewer comes from the
+// session and the §8.3 allowlist projection decides what the PDF may contain —
+// a public brochure structurally cannot include member-only fields. Same data
+// rules as the listing page: database verdicts are final, the demo inventory
+// answers only on the DB-error path in demo mode, unknown slugs 404.
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
@@ -30,8 +34,11 @@ export async function GET(
   const locale = LOCALES.includes(requested) ? requested : 'en';
 
   let property: Property | null;
+  let isMemberViewer = false;
   try {
-    property = await getPropertyForDetail(ANONYMOUS, slug, locale as Locale);
+    const viewer = await getCurrentViewer();
+    isMemberViewer = viewer.kind === 'member';
+    property = await getPropertyForDetail(viewer, slug, locale as Locale);
   } catch (err) {
     console.warn('[brochure] load failed:', err);
     property = sampleFallbackEnabled() ? findFallbackProperty(slug) : null;
@@ -44,7 +51,8 @@ export async function GET(
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="${slug}-${locale}.pdf"`,
-        'Cache-Control': 'public, s-maxage=3600',
+        // A member's brochure is personal output — never edge-cached (§5.3).
+        'Cache-Control': isMemberViewer ? 'private, no-store' : 'public, s-maxage=3600',
       },
     });
   } catch (err) {

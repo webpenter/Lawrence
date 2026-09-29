@@ -224,7 +224,10 @@
     "timelineImmediate": "Immédiat",
     "timeline6Months": "Sous 6 mois",
     "timeline12Months": "Sous 12 mois",
-    "timelineOpportunistic": "Opportuniste"
+    "timelineOpportunistic": "Opportuniste",
+    "enquiriesTitle": "Vos demandes",
+    "enquiriesEmpty": "Aucune demande envoyée.",
+    "enquiryStatusLabel": "Statut"
   },
   "footer": {
     "destinationsTitle": "Marchés",
@@ -269,7 +272,9 @@
     "segmentMetaTitle": "{segment} à {destination} — {count} à vendre",
     "segmentMetaTitleNoCount": "{segment} à {destination}",
     "segmentKicker": "Segment",
-    "sampleNotice": "Données de marché témoins — contenu de démonstration, pas un conseil en investissement."
+    "sampleNotice": "Données de marché témoins — contenu de démonstration, pas un conseil en investissement.",
+    "enquiryTitle": "Se renseigner sur ce marché",
+    "enquirySub": "Dites-nous ce que vous recherchez — le desk répond sous un jour ouvré."
   },
   "consent": {
     "title": "Cookies chez Lawrence",
@@ -283,7 +288,10 @@
   },
   "contact": {
     "title": "Contacter le desk",
-    "sub": "Questions sur un bien, un marché ou une vente discrète — le desk répond sous un jour ouvré."
+    "sub": "Questions sur un bien, un marché ou une vente discrète — le desk répond sous un jour ouvré.",
+    "deskCallTitle": "Planifier un appel avec le desk",
+    "deskCallBody": "Vous préférez échanger de vive voix ? Réservez un créneau — le desk prend les appels planifiés en six langues.",
+    "deskCallCta": "Planifier un appel"
   },
   "listWithUs": {
     "title": "Vendre un bien",
@@ -312,14 +320,26 @@
     "feedTitle": "État des flux",
     "feedNone": "Aucun flux configuré.",
     "leadsWeeklyTitle": "Demandes hebdomadaires par origine",
-    "waterBodyTitle": "Annonces par gamme",
     "dataQualityTitle": "Qualité des données",
-    "missingFrontageCount": "{count} annonces actives sans marché",
-    "missingNauticalCount": "{count} annonces actives sans valeur applicable",
     "editInAdmin": "Vérifier dans le backoffice",
     "leaderboardTitle": "Classement des agences",
     "sampleLeakWarning": "Des annonces de démonstration sont publiquement actives alors que le mode démo est DÉSACTIVÉ — purgez-les avant le lancement.",
-    "sampleLeakOk": "Aucune annonce de démonstration n'est exposée publiquement."
+    "sampleLeakOk": "Aucune annonce de démonstration n'est exposée publiquement.",
+    "inventoryTitle": "Inventaire — canal, niveau, statut et marché",
+    "membersTitle": "Membres",
+    "membersTotal": "Comptes",
+    "membersConfirmed": "Confirmés",
+    "membersConversion": "Taux de confirmation",
+    "offMarketDemandTitle": "Demande off-market par bien",
+    "offMarketDemandEmpty": "Aucune consultation ni téléchargement off-market enregistré.",
+    "downloadsLabel": "téléchargements",
+    "requirementsBoardTitle": "Tableau des exigences",
+    "requirementsEmpty": "Aucune exigence active.",
+    "matchesLabel": "correspondances",
+    "qualityMissingImages": "Annonces actives sans images",
+    "qualityShortDescriptions": "Annonces actives aux descriptions courtes",
+    "qualityMissingMarket": "Annonces actives sans marché",
+    "qualityExpiringSoon": "Annonces expirant sous 14 jours"
   },
   "journal": {
     "title": "Le Journal",

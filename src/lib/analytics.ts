@@ -1,6 +1,6 @@
 /**
- * Spec §17: Analytics Event Schema.
- * Plausible custom events foundation for WATERLINE.
+ * Spec §18: Analytics Event Schema.
+ * Plausible custom events foundation for LAWRENCE.
  * Strict PII prevention: No personal data (email, phone, name, IP, free text)
  * is ever transmitted in event payloads.
  */
@@ -42,12 +42,14 @@ export type AnalyticsEventMap = {
     propertyId: string | number;
     locale: string;
   };
-  lead_submitted: {
+  enquiry_submitted: {
     source: string;
     hasPhone: boolean;
     propertyId?: string | number;
     agencyId?: string | number;
   };
+  /** §18: the desk's Cal.com scheduling link was followed. */
+  desk_call_scheduled: { locale?: string };
   whatsapp_clicked: {
     propertyId?: string | number;
     agencyId?: string | number;

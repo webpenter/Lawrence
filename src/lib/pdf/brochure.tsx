@@ -111,19 +111,18 @@ const styles = StyleSheet.create({
   },
   rowLabel: { color: tokens.color.graphite },
   rowValue: { color: tokens.color.ink },
-  nautical: {
+  provenance: {
     backgroundColor: tokens.color.obsidian,
     padding: 10,
     marginTop: 10,
   },
-  nauticalTitle: {
+  provenanceTitle: {
     fontFamily: 'Times-Roman',
     fontSize: pt(tokens.size.sm),
     color: tokens.color.vellum,
     marginBottom: 6,
   },
-  nauticalLabel: { color: tokens.color.patinaSoft },
-  nauticalValue: { color: tokens.color.vellum },
+  provenanceText: { color: tokens.color.vellum, lineHeight: 1.5 },
   gallery: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 14 },
   galleryCell: {
     width: '32%',
@@ -158,48 +157,60 @@ export interface BrochureProps {
   property: Property;
   labels: BrochureLabels;
   priceLabel: string;
+  /** §3.2 provenance narrative as plain text, or null when absent. */
+  provenance?: string | null;
   /** Absolute image URLs: [cover, ...gallery(≤6)]. Empty → placeholder blocks. */
   imageUrls: string[];
   mapUrl?: string | null;
 }
 
-function Row({ label, value, dark = false }: { label: string; value: string; dark?: boolean }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <View style={[styles.row, dark ? { borderBottomColor: tokens.color.patina } : {}]}>
-      <Text style={dark ? styles.nauticalLabel : styles.rowLabel}>{label}</Text>
-      <Text style={dark ? styles.nauticalValue : styles.rowValue}>{value}</Text>
+    <View style={styles.row}>
+      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={styles.rowValue}>{value}</Text>
     </View>
   );
 }
 
-export function BrochureDocument({ property, labels, priceLabel, imageUrls, mapUrl }: BrochureProps) {
+export function BrochureDocument({
+  property,
+  labels,
+  priceLabel,
+  provenance,
+  imageUrls,
+  mapUrl,
+}: BrochureProps) {
   const [cover, ...gallery] = imageUrls;
   const locality = [property.location?.locality, property.location?.region, property.location?.country]
     .filter(Boolean)
     .join(' · ');
 
-  const waterfront = property.waterfront;
-  const water: Array<[string, string]> = [];
-  if (waterfront?.waterAccess) {
-    if (waterfront.waterBodyType)
-      water.push([labels.labelWaterBody, humanizeEnum(waterfront.waterBodyType)]);
-    if (waterfront.waterFrontageM != null)
-      water.push([labels.labelFrontage, `${waterfront.waterFrontageM} m`]);
-  }
-
-  const nautical: Array<[string, string]> = [];
-  if (waterfront?.mooringType && waterfront.mooringType !== 'none')
-    nautical.push([labels.labelMooring, humanizeEnum(waterfront.mooringType)]);
-  if (waterfront?.maxBoatLoaM != null)
-    nautical.push([labels.labelMaxBoatLength, `${waterfront.maxBoatLoaM} m`]);
-
+  // §11.3 fact table — Lawrence facts only; unset fields never render.
   const facts: Array<[string, string]> = [];
   if (property.bedrooms != null) facts.push([labels.factBedrooms, String(property.bedrooms)]);
   if (property.bathrooms != null) facts.push([labels.factBathrooms, String(property.bathrooms)]);
+  if (property.receptionRooms != null)
+    facts.push([labels.factReceptions, String(property.receptionRooms)]);
   if (property.builtAreaSqm != null) facts.push([labels.factBuiltArea, `${property.builtAreaSqm} m²`]);
-  if (property.plotAreaSqm != null) facts.push([labels.factPlotArea, `${property.plotAreaSqm} m²`]);
+  if (property.plotAreaSqm != null) {
+    const ha = property.plotAreaHa ?? Math.round((property.plotAreaSqm / 10_000) * 100) / 100;
+    facts.push([labels.factPlotArea, ha >= 0.5 ? `${property.plotAreaSqm} m² (${ha} ha)` : `${property.plotAreaSqm} m²`]);
+  }
+  if (property.terraceAreaSqm != null)
+    facts.push([labels.factTerrace, `${property.terraceAreaSqm} m²`]);
   if (property.yearBuilt != null) facts.push([labels.factYearBuilt, String(property.yearBuilt)]);
+  if (property.renovatedYear != null)
+    facts.push([labels.factRenovated, String(property.renovatedYear)]);
+  if (property.condition) facts.push([labels.factCondition, humanizeEnum(property.condition)]);
+  if (property.tenure) facts.push([labels.factTenure, humanizeEnum(property.tenure)]);
+  if (property.heritageStatus && property.heritageStatus !== 'none')
+    facts.push([labels.factHeritage, humanizeEnum(property.heritageStatus)]);
+  if (property.architect) facts.push([labels.factArchitect, property.architect]);
   if (property.reference) facts.push([labels.factReference, property.reference]);
+
+  const factsLeft = facts.slice(0, Math.ceil(facts.length / 2));
+  const factsRight = facts.slice(Math.ceil(facts.length / 2));
 
   const agency = typeof property.agency === 'object' ? property.agency : null;
 
@@ -226,22 +237,14 @@ export function BrochureDocument({ property, labels, priceLabel, imageUrls, mapU
 
         <View style={styles.columns}>
           <View style={styles.column}>
-            <Text style={styles.sectionTitle}>{labels.waterCredentialsTitle}</Text>
-            {water.map(([label, value]) => (
+            <Text style={styles.sectionTitle}>{labels.keyFactsTitle}</Text>
+            {factsLeft.map(([label, value]) => (
               <Row key={label} label={label} value={value} />
             ))}
-            {nautical.length > 0 ? (
-              <View style={styles.nautical}>
-                <Text style={styles.nauticalTitle}>{labels.nauticalTitle}</Text>
-                {nautical.map(([label, value]) => (
-                  <Row key={label} label={label} value={value} dark />
-                ))}
-              </View>
-            ) : null}
           </View>
           <View style={styles.column}>
-            <Text style={styles.sectionTitle}>{labels.keyFactsTitle}</Text>
-            {facts.map(([label, value]) => (
+            <Text style={styles.sectionTitle}> </Text>
+            {factsRight.map(([label, value]) => (
               <Row key={label} label={label} value={value} />
             ))}
             {agency ? (
@@ -253,6 +256,13 @@ export function BrochureDocument({ property, labels, priceLabel, imageUrls, mapU
             ) : null}
           </View>
         </View>
+
+        {provenance ? (
+          <View style={styles.provenance}>
+            <Text style={styles.provenanceTitle}>{labels.provenanceTitle}</Text>
+            <Text style={styles.provenanceText}>{provenance}</Text>
+          </View>
+        ) : null}
 
         <View style={styles.gallery}>
           {(gallery.length > 0 ? gallery.slice(0, 6) : Array.from({ length: 6 }, () => null)).map(

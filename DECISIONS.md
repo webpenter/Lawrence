@@ -393,3 +393,57 @@ off-market/account disallows, llms admission rule, six sitemap children, market 
 listed + noindexed), phase14 7/7; unit+int 331+1/332 with new segments-gate and Dataset
 shape tests; typecheck/lint clean; audit:exposure green; budgets home 109.2/110 ·
 collection 110.8/160 · listing 127.5/130 kB gz.
+
+## 2026-09-29 — Phase 11: enquiries, the desk, brochures, dashboards (§22 Prompt 11)
+
+**Decision — enquiries (A)**: The intake moved to its spec name `/api/enquiry` and now does the
+full §22-11A list: shared Zod schema (now with `utm` and `turnstileToken`), Turnstile through a
+single shared verifier in src/lib/security/turnstile.ts (also used by join; fails open only
+when unconfigured — rate limits still apply), honeypot + timing check, 5/IP/hour, consent
+stored with timestamp and IP, UTM captured from the landing URL by the form. Authenticated
+enquiries attach the memberId and land on the member's §8.7 activity trail
+(`action: 'enquiry'`); sample listings log but email NO ONE (previously the confirmation still
+went out). Routing follows the §2054 decision — the DESK first, then the listing agent, with
+the agency inbox as the no-agent fallback (`resolveLeadRecipients`, deduplicated) — replacing
+the inherited agent-first chain. The market pages gained the enquiry form (source
+`market_page`); the contact page gained the desk's scheduled-call path as a Cal.com LINK
+(never an embed — the CSP stays closed; §2068: no published direct number). Analytics renamed
+to the §18 names: `enquiry_submitted`, plus `desk_call_scheduled`. The reminder cron lost its
+WATERLINE subject and its dead `/admin/collections/leads` URL. The member's account page now
+lists their own enquiries with response status (§11.7); the admin queue got Desk grouping and
+status/source columns.
+
+**Decision — brochure (B)**: The endpoint is audience-aware: the viewer comes from the session
+(force-dynamic; member responses are `private, no-store`) and the §8.3 allowlist projection
+decides what the PDF can contain — "a public brochure contains no member-only field" is
+structural, and src/lib/pdf/audience.test.ts pins it with canaries. The fact table is now the
+§11.3 Lawrence set (receptions, plot in m² and ha, architect, heritage, tenure, condition,
+renovated), a provenance panel renders the §3.2 narrative, and the price line obeys §12.2 via
+`listingPrice` (exact / guide band / on request; sold shows nothing). A Payload UI field on
+the property sidebar ("Generate brochure") is the admin action. The Turnstile widget is
+lazy-loaded (next/dynamic, ssr:false) — the static import had pushed the listing first-load to
+exactly 130.0 kB.
+
+**Decision — dashboards (C)**: `getAdminDashboard` was rebuilt from ~120 sequential counts to
+SEVEN bounded queries + pure in-memory bucketing, and its panels now match §9.2: inventory by
+channel / value tier / status / market, members over time with source breakdown and the
+confirmation rate, off-market views and document downloads per listing (from MemberActivity),
+enquiries per week by source with the response-status split, a requirements board with live
+match counts against off-market inventory (via `matchRequirement`), the four §9.2 data-quality
+counters (missing images, short descriptions, missing market, expiring ≤14 days), and the
+sample-leak sentinel. The dead Waterline `getAgencyDashboardStats` duplicate was deleted.
+
+Working notes: `@payloadcms/ui` added as a direct dependency (pnpm strict node_modules);
+Upstash-backed rate limiting and the full §12.5 email-template set remain deferred (in-memory
+limiter + the three lead templates carry Phase 1 dev, consistent with the nonce store);
+`.next-audit/**` added to the eslint ignores; TURNSTILE_* and NEXT_PUBLIC_DESK_CALCOM_URL
+joined env.ts and .env.example.
+
+**Gate evidence**: int acceptance 3/3 — an authenticated enquiry returns 201 and appears in
+the queue with member, UTM and consent-IP attached plus the activity row, and BOTH dashboards
+answer warm in <1s against the sample dataset (§9.2 shape asserted); full unit+int 340/342
+tests → 339 passed +1 new suite (final count 342 incl. audience + routing suites, all green);
+e2e phase7 7/7 (enquiry posts route + the 429 on the sixth), phase10+11 15/15 (brochure %PDF-,
+localised, 404; dashboard shell noindex; a11y sweep incl. keyboard-only enquiry);
+audit:exposure green; typecheck/lint clean; budgets home 109.2/110 · collection 110.9/160 ·
+listing 127.8/130 kB gz.

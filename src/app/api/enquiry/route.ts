@@ -8,16 +8,19 @@ import {
   LeadConfirmationEmail,
   LeadToAgencyEmail,
 } from '@/lib/email/templates/lead-emails';
-import { resolveLeadRecipient } from '@/lib/leads/routing';
+import { resolveLeadRecipients } from '@/lib/leads/routing';
+import { memberFromRequest } from '@/lib/member/session';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 import { leadSchema, MIN_FILL_MS, type LeadInput } from '@/lib/schemas/lead';
+import { requestIp, turnstileOk } from '@/lib/security/turnstile';
 import type { Agency, Agent } from '@/payload-types';
 
-// §8.9 lead intake: validate (shared Zod schema), rate-limit 5/IP/hour, drop
-// bots silently (honeypot + timing check), store with consent record, route
-// agent → agency inbox → internal desk, email via Resend from our domain with
-// reply-to the enquirer. Sample listings log the lead but never email an
-// agency. Rate limiting is enforced via checkRateLimit().
+// §22-11A enquiry intake: validate (shared Zod schema), Turnstile, rate-limit
+// 5/IP/hour, drop bots silently (honeypot + timing check), store with the
+// consent record, UTM and — when authenticated — the memberId. Routing is
+// desk-first, then the listing agent (agency inbox as fallback), via Resend
+// from our domain with reply-to the enquirer. Sample listings log the enquiry
+// but never email anyone.
 
 function isBot(parsed: LeadInput): boolean {
   if (parsed.website !== undefined && parsed.website !== '') return true;
@@ -26,8 +29,8 @@ function isBot(parsed: LeadInput): boolean {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-  const limitResult = checkRateLimit(request, 'leads', { windowMs: 60 * 60 * 1000, max: 5 });
+  const ip = requestIp(request) || 'unknown';
+  const limitResult = checkRateLimit(request, 'enquiry', { windowMs: 60 * 60 * 1000, max: 5 });
   if (!limitResult.success) {
     return rateLimitResponse(limitResult);
   }
@@ -44,8 +47,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ok: true }, { status: 201 });
   }
 
+  if (!(await turnstileOk(parsed.turnstileToken, ip))) {
+    return NextResponse.json({ ok: false, error: 'verification' }, { status: 400 });
+  }
+
   try {
     const payload = await getPayloadClient();
+    const member = await memberFromRequest(request);
 
     let propertyId: number | undefined;
     let agencyId: number | undefined;
@@ -76,16 +84,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       agentId = agent?.id ?? (typeof property.agent === 'number' ? property.agent : undefined);
     }
 
-    // §8.9 routing chain: property.agent → agency inbox → internal desk.
-    const recipient = resolveLeadRecipient({
+    // Desk first, then the listing agent (agency inbox as fallback) — §2054.
+    const recipients = resolveLeadRecipients({
       agentEmail: agent?.email,
       agentReceivesLeads: agent?.receivesLeads,
       agencyEmail: agency?.email,
       internalDesk: process.env.LEAD_NOTIFY_TO,
     });
 
-    let agencyEmailed = false;
-    if (recipient && !isSample) {
+    let routed = false;
+    if (!isSample) {
       const component = LeadToAgencyEmail({
         enquirerName: parsed.name,
         enquirerEmail: parsed.email,
@@ -94,29 +102,34 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         listingTitle,
         listingUrl,
       });
-      agencyEmailed = await sendEmail({
-        to: recipient.to,
-        subject: listingTitle
-          ? `New enquiry — ${listingTitle}`
-          : `New ${parsed.source} enquiry`,
-        html: await render(component),
-        text: await render(component, { plainText: true }),
-        replyTo: parsed.email,
+      const html = await render(component);
+      const text = await render(component, { plainText: true });
+      for (const recipient of recipients) {
+        const sent = await sendEmail({
+          to: recipient.to,
+          subject: listingTitle
+            ? `New enquiry — ${listingTitle}`
+            : `New ${parsed.source} enquiry`,
+          html,
+          text,
+          replyTo: parsed.email,
+        });
+        routed = routed || sent;
+      }
+
+      const confirmation = LeadConfirmationEmail({
+        enquirerName: parsed.name,
+        enquirerEmail: parsed.email,
+        listingTitle,
+        listingUrl,
+      });
+      await sendEmail({
+        to: parsed.email,
+        subject: 'Your enquiry has been sent',
+        html: await render(confirmation),
+        text: await render(confirmation, { plainText: true }),
       });
     }
-
-    const confirmation = LeadConfirmationEmail({
-      enquirerName: parsed.name,
-      enquirerEmail: parsed.email,
-      listingTitle,
-      listingUrl,
-    });
-    await sendEmail({
-      to: parsed.email,
-      subject: 'Your enquiry has been sent',
-      html: await render(confirmation),
-      text: await render(confirmation, { plainText: true }),
-    });
 
     await payload.create({
       collection: 'enquiries',
@@ -129,10 +142,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         property: propertyId,
         agency: agencyId,
         agent: agentId,
+        member: member?.id,
         locale: parsed.locale,
         source: parsed.source,
-        // Lifecycle (§6.8): 'sent' once the agency notification went out.
-        status: agencyEmailed ? 'sent' : 'new',
+        // Lifecycle (§6.6): 'sent' once a routing notification went out.
+        status: routed ? 'sent' : 'new',
+        utm: parsed.utm && Object.keys(parsed.utm).length > 0 ? parsed.utm : undefined,
         consent: {
           consentMarketing: true,
           consentedAt: new Date().toISOString(),
@@ -141,9 +156,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
+    // §8.7: authenticated enquiries land on the member's activity trail.
+    if (member) {
+      await payload
+        .create({
+          collection: 'member-activity',
+          overrideAccess: true,
+          data: {
+            member: member.id,
+            action: 'enquiry',
+            property: propertyId,
+            at: new Date().toISOString(),
+            ip,
+          },
+        })
+        .catch(() => undefined);
+    }
+
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {
-    console.warn('[leads] intake failed:', err);
+    console.warn('[enquiry] intake failed:', err);
     return NextResponse.json({ ok: false }, { status: 503 });
   }
 }

@@ -93,7 +93,7 @@ describe('Phase 13 Prompt 18 — Security Unit Tests', () => {
       const namespace = 'test-rate-limit-' + Date.now();
       const config = { windowMs: 60000, max: 3 };
 
-      const req = new NextRequest('http://localhost:3000/api/leads', {
+      const req = new NextRequest('http://localhost:3000/api/enquiry', {
         headers: { 'x-forwarded-for': '10.0.0.1' },
       });
 

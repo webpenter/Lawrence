@@ -62,7 +62,7 @@ test.describe('Lead pages', () => {
   test('list-with-us page carries the supply copy and the form', async ({ page }) => {
     await page.goto('/en/list-with-us');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sell a property');
-    await expect(page.getByText('prefer the market not', { exact: false })).toBeVisible();
+    await expect(page.getByText('prefer the market not', { exact: false }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Request details' })).toBeVisible();
   });
 
@@ -74,7 +74,7 @@ test.describe('Lead pages', () => {
     await page.getByLabel('Email').fill('test@example.com');
     let posted = false;
     page.on('request', (req) => {
-      if (req.url().includes('/api/leads')) posted = true;
+      if (req.url().includes('/api/enquiry')) posted = true;
     });
     await page.getByRole('button', { name: 'Request details' }).click();
     await expect(
@@ -95,7 +95,7 @@ test.describe('Rate limiting (5/IP/hour)', () => {
     };
     const statuses: number[] = [];
     for (let i = 0; i < 6; i += 1) {
-      const response = await request.post('/api/leads', {
+      const response = await request.post('/api/enquiry', {
         data: payload,
         headers: { 'x-forwarded-for': '203.0.113.77' },
       });

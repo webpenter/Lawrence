@@ -224,7 +224,10 @@
     "timelineImmediate": "Sofort",
     "timeline6Months": "Innerhalb von 6 Monaten",
     "timeline12Months": "Innerhalb von 12 Monaten",
-    "timelineOpportunistic": "Opportunistisch"
+    "timelineOpportunistic": "Opportunistisch",
+    "enquiriesTitle": "Ihre Anfragen",
+    "enquiriesEmpty": "Noch keine Anfragen.",
+    "enquiryStatusLabel": "Status"
   },
   "footer": {
     "destinationsTitle": "Märkte",
@@ -269,7 +272,9 @@
     "segmentMetaTitle": "{segment} in {destination} — {count} zum Verkauf",
     "segmentMetaTitleNoCount": "{segment} in {destination}",
     "segmentKicker": "Segment",
-    "sampleNotice": "Beispiel-Marktdaten — Demonstrationsinhalt, keine Anlageberatung."
+    "sampleNotice": "Beispiel-Marktdaten — Demonstrationsinhalt, keine Anlageberatung.",
+    "enquiryTitle": "Anfrage zu diesem Markt",
+    "enquirySub": "Sagen Sie uns, was Sie suchen — der Desk antwortet innerhalb eines Werktags."
   },
   "consent": {
     "title": "Cookies bei Lawrence",
@@ -283,7 +288,10 @@
   },
   "contact": {
     "title": "Den Desk kontaktieren",
-    "sub": "Fragen zu einem Objekt, einem Markt oder einem diskreten Verkauf — der Desk antwortet innerhalb eines Werktags."
+    "sub": "Fragen zu einem Objekt, einem Markt oder einem diskreten Verkauf — der Desk antwortet innerhalb eines Werktags.",
+    "deskCallTitle": "Einen Anruf mit dem Desk vereinbaren",
+    "deskCallBody": "Lieber sprechen? Buchen Sie einen passenden Termin — der Desk nimmt vereinbarte Anrufe in sechs Sprachen entgegen.",
+    "deskCallCta": "Anruf vereinbaren"
   },
   "listWithUs": {
     "title": "Immobilie verkaufen",
@@ -312,14 +320,26 @@
     "feedTitle": "Feed-Status",
     "feedNone": "Kein Feed konfiguriert.",
     "leadsWeeklyTitle": "Anfragen pro Woche nach Quelle",
-    "waterBodyTitle": "Inserate nach Kategorie",
     "dataQualityTitle": "Datenqualität",
-    "missingFrontageCount": "{count} aktive Inserate ohne Markt",
-    "missingNauticalCount": "{count} aktive Inserate ohne belastbaren Wert",
     "editInAdmin": "Im Backoffice prüfen",
     "leaderboardTitle": "Agentur-Rangliste",
     "sampleLeakWarning": "Beispielinserate sind öffentlich aktiv, obwohl der Demo-Modus AUS ist — vor dem Start entfernen.",
-    "sampleLeakOk": "Keine Beispielinserate sind öffentlich sichtbar."
+    "sampleLeakOk": "Keine Beispielinserate sind öffentlich sichtbar.",
+    "inventoryTitle": "Bestand — Kanal, Stufe, Status und Markt",
+    "membersTitle": "Mitglieder",
+    "membersTotal": "Konten",
+    "membersConfirmed": "Bestätigt",
+    "membersConversion": "Bestätigungsquote",
+    "offMarketDemandTitle": "Off-Market-Nachfrage je Objekt",
+    "offMarketDemandEmpty": "Noch keine Off-Market-Aufrufe oder Downloads erfasst.",
+    "downloadsLabel": "Downloads",
+    "requirementsBoardTitle": "Anforderungs-Board",
+    "requirementsEmpty": "Keine aktiven Anforderungen.",
+    "matchesLabel": "Treffer",
+    "qualityMissingImages": "Aktive Angebote ohne Bilder",
+    "qualityShortDescriptions": "Aktive Angebote mit kurzen Beschreibungen",
+    "qualityMissingMarket": "Aktive Angebote ohne Markt",
+    "qualityExpiringSoon": "Angebote, die in 14 Tagen auslaufen"
   },
   "journal": {
     "title": "Das Journal",

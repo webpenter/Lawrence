@@ -224,7 +224,10 @@
     "timelineImmediate": "Immediato",
     "timeline6Months": "Entro 6 mesi",
     "timeline12Months": "Entro 12 mesi",
-    "timelineOpportunistic": "Opportunistico"
+    "timelineOpportunistic": "Opportunistico",
+    "enquiriesTitle": "Le vostre richieste",
+    "enquiriesEmpty": "Nessuna richiesta inviata.",
+    "enquiryStatusLabel": "Stato"
   },
   "footer": {
     "destinationsTitle": "Mercati",
@@ -269,7 +272,9 @@
     "segmentMetaTitle": "{segment} a {destination} — {count} in vendita",
     "segmentMetaTitleNoCount": "{segment} a {destination}",
     "segmentKicker": "Segmento",
-    "sampleNotice": "Dati di mercato campione — contenuto dimostrativo, non una guida all'investimento."
+    "sampleNotice": "Dati di mercato campione — contenuto dimostrativo, non una guida all'investimento.",
+    "enquiryTitle": "Richiedi informazioni su questo mercato",
+    "enquirySub": "Diteci cosa cercate — il desk risponde entro un giorno lavorativo."
   },
   "consent": {
     "title": "Cookie da Lawrence",
@@ -283,7 +288,10 @@
   },
   "contact": {
     "title": "Contatti il desk",
-    "sub": "Domande su una proprietà, un mercato o una vendita riservata — il desk risponde entro un giorno lavorativo."
+    "sub": "Domande su una proprietà, un mercato o una vendita riservata — il desk risponde entro un giorno lavorativo.",
+    "deskCallTitle": "Prenota una chiamata con il desk",
+    "deskCallBody": "Preferite parlarne? Prenotate un orario a vostra scelta — il desk riceve chiamate su appuntamento in sei lingue.",
+    "deskCallCta": "Prenota una chiamata"
   },
   "listWithUs": {
     "title": "Vendere un immobile",
@@ -312,14 +320,26 @@
     "feedTitle": "Stato dei feed",
     "feedNone": "Nessun feed configurato.",
     "leadsWeeklyTitle": "Richieste settimanali per origine",
-    "waterBodyTitle": "Annunci per fascia",
     "dataQualityTitle": "Qualità dei dati",
-    "missingFrontageCount": "{count} annunci attivi senza mercato",
-    "missingNauticalCount": "{count} annunci attivi senza valore applicabile",
     "editInAdmin": "Rivedi nel backoffice",
     "leaderboardTitle": "Classifica agenzie",
     "sampleLeakWarning": "Annunci dimostrativi pubblicamente attivi con la modalità demo DISATTIVATA — eliminarli prima del lancio.",
-    "sampleLeakOk": "Nessun annuncio dimostrativo è esposto pubblicamente."
+    "sampleLeakOk": "Nessun annuncio dimostrativo è esposto pubblicamente.",
+    "inventoryTitle": "Inventario — canale, fascia, stato e mercato",
+    "membersTitle": "Membri",
+    "membersTotal": "Account",
+    "membersConfirmed": "Confermati",
+    "membersConversion": "Tasso di conferma",
+    "offMarketDemandTitle": "Domanda off-market per immobile",
+    "offMarketDemandEmpty": "Nessuna visualizzazione o download off-market registrato.",
+    "downloadsLabel": "download",
+    "requirementsBoardTitle": "Board dei requisiti",
+    "requirementsEmpty": "Nessun requisito attivo.",
+    "matchesLabel": "corrispondenze",
+    "qualityMissingImages": "Annunci attivi senza immagini",
+    "qualityShortDescriptions": "Annunci attivi con descrizioni brevi",
+    "qualityMissingMarket": "Annunci attivi senza mercato",
+    "qualityExpiringSoon": "Annunci in scadenza entro 14 giorni"
   },
   "journal": {
     "title": "Il Journal",

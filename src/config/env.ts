@@ -13,6 +13,11 @@ const envSchema = z.object({
   TYPESENSE_PUBLIC_SEARCH_KEY: z.string().optional(),
   TYPESENSE_MEMBER_SEARCH_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional().default('re_dev_key'),
+  // §16 Turnstile — unset in dev/CI means verification is skipped (rate limits still apply).
+  TURNSTILE_SECRET_KEY: z.string().optional(),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
+  // §22 Prompt 11A — the desk's Cal.com scheduling link (no embed: CSP stays closed).
+  NEXT_PUBLIC_DESK_CALCOM_URL: z.string().url().optional(),
   LEAD_NOTIFY_TO: z.string().email().default('leads@lawrenceprivatecollection.com'),
   AGENCY_NOTIFY_FROM: z.string().default('noreply@lawrenceprivatecollection.com'),
   REVALIDATE_SECRET: z.string().default('dev_revalidate_secret_key'),

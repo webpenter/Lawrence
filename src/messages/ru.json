@@ -224,7 +224,10 @@
     "timelineImmediate": "Немедленно",
     "timeline6Months": "В течение 6 месяцев",
     "timeline12Months": "В течение 12 месяцев",
-    "timelineOpportunistic": "По ситуации"
+    "timelineOpportunistic": "По ситуации",
+    "enquiriesTitle": "Ваши запросы",
+    "enquiriesEmpty": "Запросов пока нет.",
+    "enquiryStatusLabel": "Статус"
   },
   "footer": {
     "destinationsTitle": "Рынки",
@@ -269,7 +272,9 @@
     "segmentMetaTitle": "{segment}: {destination} — в продаже: {count}",
     "segmentMetaTitleNoCount": "{segment}: {destination}",
     "segmentKicker": "Сегмент",
-    "sampleNotice": "Образцовые рыночные данные — демонстрационный контент, не инвестиционная рекомендация."
+    "sampleNotice": "Образцовые рыночные данные — демонстрационный контент, не инвестиционная рекомендация.",
+    "enquiryTitle": "Запрос по этому рынку",
+    "enquirySub": "Расскажите, что вы ищете — деск отвечает в течение одного рабочего дня."
   },
   "consent": {
     "title": "Cookie на Lawrence",
@@ -283,7 +288,10 @@
   },
   "contact": {
     "title": "Связаться с деском",
-    "sub": "Вопросы об объекте, рынке или конфиденциальной продаже — деск отвечает в течение одного рабочего дня."
+    "sub": "Вопросы об объекте, рынке или конфиденциальной продаже — деск отвечает в течение одного рабочего дня.",
+    "deskCallTitle": "Запланировать звонок с деском",
+    "deskCallBody": "Предпочитаете разговор? Выберите удобное время — деск принимает запланированные звонки на шести языках.",
+    "deskCallCta": "Запланировать звонок"
   },
   "listWithUs": {
     "title": "Продать объект",
@@ -312,14 +320,26 @@
     "feedTitle": "Состояние фидов",
     "feedNone": "Фиды не настроены.",
     "leadsWeeklyTitle": "Запросы за неделю по источникам",
-    "waterBodyTitle": "Лоты по категориям",
     "dataQualityTitle": "Качество данных",
-    "missingFrontageCount": "{count} активных лотов без рынка",
-    "missingNauticalCount": "{count} активных лотов без подтверждаемой стоимости",
     "editInAdmin": "Проверить в бэк-офисе",
     "leaderboardTitle": "Рейтинг агентств",
     "sampleLeakWarning": "Демонстрационные лоты публично активны при ВЫКЛЮЧЕННОМ демо-режиме — удалите их перед запуском.",
-    "sampleLeakOk": "Ни один демонстрационный лот публично не виден."
+    "sampleLeakOk": "Ни один демонстрационный лот публично не виден.",
+    "inventoryTitle": "Инвентарь — канал, уровень, статус и рынок",
+    "membersTitle": "Участники",
+    "membersTotal": "Аккаунты",
+    "membersConfirmed": "Подтверждены",
+    "membersConversion": "Доля подтверждений",
+    "offMarketDemandTitle": "Off-market-спрос по объектам",
+    "offMarketDemandEmpty": "Просмотров и загрузок off-market пока не зафиксировано.",
+    "downloadsLabel": "загрузок",
+    "requirementsBoardTitle": "Доска требований",
+    "requirementsEmpty": "Активных требований нет.",
+    "matchesLabel": "совпадений",
+    "qualityMissingImages": "Активные объекты без изображений",
+    "qualityShortDescriptions": "Активные объекты с короткими описаниями",
+    "qualityMissingMarket": "Активные объекты без рынка",
+    "qualityExpiringSoon": "Объекты с истечением в течение 14 дней"
   },
   "journal": {
     "title": "Журнал",

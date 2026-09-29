@@ -381,6 +381,15 @@ export const Property: CollectionConfig = {
       },
     },
     {
+      // §22-11B admin action: generate the brochure from the document view.
+      name: 'brochureAction',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: { Field: '@/components/admin/BrochureLinkField#BrochureLinkField' },
+      },
+    },
+    {
       name: 'channel',
       type: 'select',
       required: true,

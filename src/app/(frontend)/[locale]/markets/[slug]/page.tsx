@@ -6,6 +6,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { MarketStatsTable } from '@/components/market/MarketStatsTable';
+import { EnquiryForm } from '@/components/property/EnquiryForm';
 import { SearchResultCard } from '@/components/search/SearchResultCard';
 import { Link } from '@/i18n/navigation';
 import {
@@ -314,6 +315,31 @@ export default async function MarketPage({ params }: MarketPageProps) {
             </Link>
           </section>
         ) : null}
+
+        {/* §22-11A: the enquiry form on market pages, routed to the desk. */}
+        <section className="mx-7 my-8 max-w-xl">
+          <h2 className="mb-1 font-display text-xl text-ink">{t('enquiryTitle')}</h2>
+          <p className="mb-4 text-sm text-graphite">{t('enquirySub')}</p>
+          <EnquiryForm
+            source="market_page"
+            locale={locale}
+            labels={{
+              name: tl('formName'),
+              email: tl('formEmail'),
+              phone: tl('formPhone'),
+              message: tl('formMessage'),
+              consent: tl('enquiryConsent'),
+              submit: tl('formSubmit'),
+              sending: tl('formSending'),
+              success: tl('formSuccess'),
+              error: tl('formError'),
+              consentRequired: tl('formConsentRequired'),
+              errorSummary: tl('formErrorSummary'),
+              errorName: tl('formErrorName'),
+              errorEmail: tl('formErrorEmail'),
+            }}
+          />
+        </section>
       </main>
       <SiteFooter />
     </>

@@ -220,7 +220,10 @@
     "timelineImmediate": "Immediate",
     "timeline6Months": "Within 6 months",
     "timeline12Months": "Within 12 months",
-    "timelineOpportunistic": "Opportunistic"
+    "timelineOpportunistic": "Opportunistic",
+    "enquiriesTitle": "Your enquiries",
+    "enquiriesEmpty": "No enquiries yet.",
+    "enquiryStatusLabel": "Status"
   },
   "footer": {
     "destinationsTitle": "Markets",
@@ -265,7 +268,9 @@
     "segmentMetaTitle": "{segment} in {destination} — {count} for sale",
     "segmentMetaTitleNoCount": "{segment} in {destination}",
     "segmentKicker": "Segment",
-    "sampleNotice": "Sample market data — demonstration content, not investment guidance."
+    "sampleNotice": "Sample market data — demonstration content, not investment guidance.",
+    "enquiryTitle": "Enquire about this market",
+    "enquirySub": "Tell us what you are looking for — the desk replies within one business day."
   },
   "consent": {
     "title": "Cookies at Lawrence",
@@ -279,7 +284,10 @@
   },
   "contact": {
     "title": "Contact the desk",
-    "sub": "Questions about a property, a market, or selling with discretion — the desk replies within one business day."
+    "sub": "Questions about a property, a market, or selling with discretion — the desk replies within one business day.",
+    "deskCallTitle": "Schedule a call with the desk",
+    "deskCallBody": "Prefer to talk? Book a time that suits you — the desk takes scheduled calls in six languages.",
+    "deskCallCta": "Schedule a call"
   },
   "listWithUs": {
     "title": "Sell a property",
@@ -308,14 +316,26 @@
     "feedTitle": "Feed health",
     "feedNone": "No feed configured.",
     "leadsWeeklyTitle": "Enquiries per week by source",
-    "waterBodyTitle": "Listings by tier",
     "dataQualityTitle": "Data quality",
-    "missingFrontageCount": "{count} live listings without a market",
-    "missingNauticalCount": "{count} live listings without an enforceable value",
     "editInAdmin": "Review in the backoffice",
     "leaderboardTitle": "Agency leaderboard",
     "sampleLeakWarning": "Sample listings are publicly live while demo mode is OFF — purge them before launch.",
-    "sampleLeakOk": "No sample listings are publicly exposed."
+    "sampleLeakOk": "No sample listings are publicly exposed.",
+    "inventoryTitle": "Inventory — channel, tier, status and market",
+    "membersTitle": "Members",
+    "membersTotal": "Accounts",
+    "membersConfirmed": "Confirmed",
+    "membersConversion": "Confirmation rate",
+    "offMarketDemandTitle": "Off-market demand per listing",
+    "offMarketDemandEmpty": "No off-market views or downloads recorded yet.",
+    "downloadsLabel": "downloads",
+    "requirementsBoardTitle": "Requirements board",
+    "requirementsEmpty": "No active requirements.",
+    "matchesLabel": "matches",
+    "qualityMissingImages": "Live listings without images",
+    "qualityShortDescriptions": "Live listings with short descriptions",
+    "qualityMissingMarket": "Live listings without a market",
+    "qualityExpiringSoon": "Listings expiring within 14 days"
   },
   "journal": {
     "title": "The Journal",

@@ -1,6 +1,6 @@
 /**
- * §8.9 lead routing and SLA logic, pure and unit-tested. The route handler
- * and crons apply these decisions.
+ * §8.9/§22-11A enquiry routing and SLA logic, pure and unit-tested. The
+ * route handler and crons apply these decisions.
  */
 
 export interface RoutingCandidates {
@@ -12,21 +12,31 @@ export interface RoutingCandidates {
 
 export interface LeadRecipient {
   to: string;
-  tier: 'agent' | 'agency' | 'desk';
+  tier: 'desk' | 'agent' | 'agency';
 }
 
-/** Lead → property.agent if set (and receiving), else the agency inbox, else the internal desk. */
-export function resolveLeadRecipient(candidates: RoutingCandidates): LeadRecipient | null {
-  if (candidates.agentEmail && candidates.agentReceivesLeads !== false) {
-    return { to: candidates.agentEmail, tier: 'agent' };
-  }
-  if (candidates.agencyEmail) {
-    return { to: candidates.agencyEmail, tier: 'agency' };
-  }
+/**
+ * The decided routing (DECISIONS/§2054): the DESK first, then the listing
+ * agent — both are notified. The agency inbox stands in when the property
+ * has no receiving agent. Deduplicated, desk-first order.
+ */
+export function resolveLeadRecipients(candidates: RoutingCandidates): LeadRecipient[] {
+  const recipients: LeadRecipient[] = [];
   if (candidates.internalDesk) {
-    return { to: candidates.internalDesk, tier: 'desk' };
+    recipients.push({ to: candidates.internalDesk, tier: 'desk' });
   }
-  return null;
+  if (candidates.agentEmail && candidates.agentReceivesLeads !== false) {
+    recipients.push({ to: candidates.agentEmail, tier: 'agent' });
+  } else if (candidates.agencyEmail) {
+    recipients.push({ to: candidates.agencyEmail, tier: 'agency' });
+  }
+  const seen = new Set<string>();
+  return recipients.filter((recipient) => {
+    const key = recipient.to.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export const UNANSWERED_REMINDER_MS = 48 * 60 * 60 * 1000;
@@ -37,7 +47,7 @@ export interface ReminderCandidate {
   reminderSentAt?: string | null;
 }
 
-/** §8.9: a lead sitting in new/sent for 48 h earns the agency one reminder. */
+/** §8.9: an enquiry sitting in new/sent for 48 h earns the recipients one reminder. */
 export function needsUnansweredReminder(lead: ReminderCandidate, now: Date): boolean {
   if (!['new', 'sent'].includes(lead.status)) return false;
   if (lead.reminderSentAt) return false;

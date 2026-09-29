@@ -33,7 +33,7 @@ export const Enquiry: CollectionConfig = {
   slug: 'enquiries',
   admin: {
     useAsTitle: 'email',
-    defaultColumns: ['email', 'property', 'source', 'status', 'createdAt'],
+    defaultColumns: ['name', 'source', 'status', 'property', 'agency', 'createdAt'],
   },
   access: {
     read: readEnquiries,

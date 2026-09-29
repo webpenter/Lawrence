@@ -1,9 +1,17 @@
 'use client';
 
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import dynamic from 'next/dynamic';
 
 import { trackEvent } from '@/lib/analytics';
 import { leadSchema } from '@/lib/schemas/lead';
+
+// The Turnstile widget loads in its own chunk after hydration — it must not
+// count against the first-load JS budget of every page carrying the form.
+const Turnstile = dynamic(
+  () => import('@marsidev/react-turnstile').then((mod) => mod.Turnstile),
+  { ssr: false },
+);
 
 interface EnquiryFormLabels {
   name: string;
@@ -32,8 +40,8 @@ interface EnquiryFormProps {
 type FieldName = 'name' | 'email' | 'consent';
 
 /**
- * The listing enquiry form (§10.3, copy §11.2). Posts to /api/leads with a
- * honeypot; consent is mandatory before anything is sent. All labels arrive
+ * The enquiry form (§22-11A, copy §12). Posts to /api/enquiry with Turnstile
+ * and a honeypot; consent is mandatory before anything is sent. All labels arrive
  * translated as props — no intl runtime on the client.
  *
  * §15 form accessibility: labels are real <label>s, every failed submit
@@ -45,9 +53,20 @@ export function EnquiryForm({ propertyId, source = 'listing', locale, labels }: 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldName, string>>>({});
   const summaryRef = useRef<HTMLDivElement>(null);
   const idBase = useId();
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
   // Anti-bot timing check: stamped after hydration so SSR markup stays stable.
   const [startedAt, setStartedAt] = useState<number | undefined>(undefined);
-  useEffect(() => setStartedAt(Date.now()), []);
+  // §22-11A: UTM parameters captured from the landing URL, sent with the enquiry.
+  const [utm, setUtm] = useState<Record<string, string> | undefined>(undefined);
+  useEffect(() => {
+    setStartedAt(Date.now());
+    const params = new URLSearchParams(window.location.search);
+    const captured: Record<string, string> = {};
+    for (const [key, value] of params) {
+      if (key.startsWith('utm_') && value) captured[key] = value.slice(0, 200);
+    }
+    if (Object.keys(captured).length > 0) setUtm(captured);
+  }, []);
 
   const fieldId = (field: FieldName) => `${idBase}-${field}`;
   const errorId = (field: FieldName) => `${idBase}-${field}-error`;
@@ -87,6 +106,8 @@ export function EnquiryForm({ propertyId, source = 'listing', locale, labels }: 
       locale,
       website: data.get('website') || undefined,
       startedAt,
+      utm,
+      turnstileToken: turnstileToken || undefined,
     };
 
     // Shared-schema validation (client side of /src/lib/schemas/lead.ts);
@@ -99,14 +120,14 @@ export function EnquiryForm({ propertyId, source = 'listing', locale, labels }: 
 
     setStatus('sending');
     try {
-      const response = await fetch('/api/leads', {
+      const response = await fetch('/api/enquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsed.data),
       });
       if (!response.ok) throw new Error(String(response.status));
-      // §17: no personal data in the payload — source and shape only.
-      trackEvent('lead_submitted', {
+      // §18: no personal data in the payload — source and shape only.
+      trackEvent('enquiry_submitted', {
         source,
         hasPhone: Boolean(parsed.data.phone),
         propertyId,
@@ -234,6 +255,12 @@ export function EnquiryForm({ propertyId, source = 'listing', locale, labels }: 
         <p id={errorId('consent')} className="text-xs text-danger">
           {fieldErrors.consent}
         </p>
+      ) : null}
+      {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? (
+        <Turnstile
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+          onSuccess={setTurnstileToken}
+        />
       ) : null}
       {status === 'error' ? (
         <p role="alert" className="text-xs text-danger">
