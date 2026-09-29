@@ -6,7 +6,7 @@ import { expect, test } from '@playwright/test';
  * gated sample fallback path and the dashboard renders its signed-out shell.
  */
 
-const SAMPLE_SLUG = 'sample-wl-sample-001';
+const SAMPLE_SLUG = 'sample-lpc-sample-001';
 
 test.describe('brochure PDF route', () => {
   test('returns a PDF for a known listing', async ({ request }) => {

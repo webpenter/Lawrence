@@ -11,7 +11,7 @@ import AxeBuilder from '@axe-core/playwright';
 const ROUTES: Array<{ name: string; path: string }> = [
   { name: 'home', path: '/en' },
   { name: 'collection', path: '/en/collection?tier=trophy&beds=4' },
-  { name: 'listing', path: '/en/property/sample-wl-sample-001' },
+  { name: 'listing', path: '/en/property/sample-lpc-sample-001' },
   { name: 'markets hub', path: '/en/markets' },
   { name: 'journal', path: '/en/journal' },
   { name: 'contact', path: '/en/contact' },

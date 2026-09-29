@@ -39,9 +39,9 @@ function grammarInput(b: ListingBlueprint): DescriptionInput {
     propertyType: b.propertyType,
     locality: b.locality,
     destinationName: destination?.name ?? b.destinationSlug,
-    waterBodyName: destination?.waterBody.name ?? b.waterBodySlug,
-    primaryAccess: b.waterAccessType[0] as string,
-    beachType: b.beachType,
+    waterBodyName: destination?.waterBody?.name ?? '',
+    primaryAccess: b.waterFrontageM != null ? 'direct_shore' : '',
+    beachType: 'sand',
     bedrooms: b.bedrooms,
     bathrooms: b.bathrooms,
     builtAreaSqm: b.builtAreaSqm,
@@ -49,9 +49,10 @@ function grammarInput(b: ListingBlueprint): DescriptionInput {
     terraceAreaSqm: b.terraceAreaSqm,
     waterFrontageM: b.waterFrontageM,
     maxBoatLoaM: b.maxBoatLoaM,
-    waterDepthAtBerthM: b.waterDepthAtBerthM,
-    nearestMarinaName: b.nearestMarinaName,
-    nearestMarinaDistanceKm: b.nearestMarinaDistanceKm,
+    waterDepthAtBerthM:
+      b.maxBoatLoaM != null ? Math.round((1.8 + b.maxBoatLoaM / 12) * 10) / 10 : null,
+    nearestMarinaName: `${b.locality} Marina`,
+    nearestMarinaDistanceKm: 1 + (b.index % 5),
     approxPriceEur: b.approxPriceEur,
   };
 }
@@ -60,16 +61,25 @@ function blueprintToProperty(b: ListingBlueprint): Property {
   const destination = SAMPLE_DESTINATION_BY_SLUG.get(b.destinationSlug);
   const input = grammarInput(b);
   const en = DESCRIPTION_TEMPLATES.en!;
+  const offMarket = b.publication === 'off_market';
   return {
     id: 100_000 + b.index,
-    slug: `sample-${b.reference.toLowerCase()}`,
+    slug: offMarket ? undefined : `sample-${b.reference.toLowerCase()}`,
     reference: b.reference,
     agency: 0,
     status: b.status === 'in_market' ? 'available' : b.status,
     moderation: 'approved',
-    channel: 'public',
-    publication: 'published_openly',
-    priceDisclosure: 'exact',
+    channel: offMarket ? 'off_market' : 'public',
+    publication: b.publication,
+    priceDisclosure: offMarket
+      ? 'exact'
+      : b.publication === 'published_openly'
+        ? 'exact'
+        : b.publication === 'published_as_band'
+          ? 'band'
+          : 'on_request',
+    priceBandMinEur: b.priceBandMinEur ?? undefined,
+    priceBandMaxEur: b.priceBandMaxEur ?? undefined,
     valueTier:
       b.approxPriceEur >= 50_000_000 ? 'signature' : b.approxPriceEur >= 20_000_000 ? 'trophy' : 'prime',
     isSample: true,
@@ -89,14 +99,16 @@ function blueprintToProperty(b: ListingBlueprint): Property {
     yearBuilt: b.yearBuilt,
     condition: b.condition,
     features: b.features,
-    waterfront: {
-      waterAccess: true,
-      waterBodyType: b.waterBodyType,
-      waterFrontageM: b.waterFrontageM ?? undefined,
-      mooringType: b.mooringType ?? undefined,
-      maxBoatLoaM: b.maxBoatLoaM ?? undefined,
-      berthCount: b.berthCount ?? undefined,
-    },
+    waterfront: b.waterBodyType
+      ? {
+          waterAccess: true,
+          waterBodyType: b.waterBodyType,
+          waterFrontageM: b.waterFrontageM ?? undefined,
+          mooringType: b.mooringType ?? undefined,
+          maxBoatLoaM: b.maxBoatLoaM ?? undefined,
+          berthCount: b.berthCount ?? undefined,
+        }
+      : undefined,
     location: {
       locality: b.locality,
       region: destination?.region,
@@ -112,14 +124,17 @@ function blueprintToProperty(b: ListingBlueprint): Property {
   } as unknown as Property;
 }
 
-export const FALLBACK_PROPERTIES: Property[] = buildAllBlueprints().map(blueprintToProperty);
+// The public fallback surface never includes off-market rows (§5.3).
+export const FALLBACK_PROPERTIES: Property[] = buildAllBlueprints()
+  .filter((b) => b.publication !== 'off_market')
+  .map(blueprintToProperty);
 
 export const FALLBACK_FEATURED: Property[] = FALLBACK_PROPERTIES.filter((p) => p.featured).slice(
   0,
   6,
 );
 
-const BLUEPRINTS = buildAllBlueprints();
+const BLUEPRINTS = buildAllBlueprints().filter((b) => b.publication !== 'off_market');
 
 export const FALLBACK_DESTINATIONS = SAMPLE_DESTINATIONS.map((destination, index) => ({
   id: index + 1,
@@ -134,7 +149,10 @@ export function findFallbackProperty(slug: string): Property | null {
 }
 
 function matches(b: ListingBlueprint, filters: PropertyFilters): boolean {
-  if (filters.waterBodyTypes?.length && !filters.waterBodyTypes.includes(b.waterBodyType))
+  if (
+    filters.waterBodyTypes?.length &&
+    (b.waterBodyType == null || !filters.waterBodyTypes.includes(b.waterBodyType))
+  )
     return false;
   if (filters.propertyTypes?.length && !filters.propertyTypes.includes(b.propertyType))
     return false;
@@ -165,7 +183,7 @@ function toHit(property: Property, b: ListingBlueprint): SearchHit {
     propertyType: property.propertyType,
     valueTier: property.valueTier ?? undefined,
     priceDisclosure: property.priceDisclosure,
-    waterAccess: true,
+    waterAccess: property.waterfront?.waterAccess ?? false,
     waterBodyType: property.waterfront?.waterBodyType ?? undefined,
     waterFrontageM: property.waterfront?.waterFrontageM ?? undefined,
     features: property.features ?? [],
@@ -196,8 +214,9 @@ export function fallbackSearch(filters: PropertyFilters): SearchResult {
     }
   });
   const pageItems = sorted.slice((page - 1) * limit, page * limit);
+  const byReference = new Map(FALLBACK_PROPERTIES.map((p) => [p.reference, p]));
   return {
-    hits: pageItems.map((b) => toHit(FALLBACK_PROPERTIES[b.index] as Property, b)),
+    hits: pageItems.map((b) => toHit(byReference.get(b.reference) as Property, b)),
     total: matched.length,
     page,
     facets: {},

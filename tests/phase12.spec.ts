@@ -39,7 +39,7 @@ test.describe('signed ISR revalidation (/api/revalidate)', () => {
   test('successfully revalidates paths with valid secret', async ({ request }) => {
     const res = await request.post('/api/revalidate', {
       headers: { 'x-revalidate-secret': SECRET },
-      data: { paths: ['/property/sample-wl-sample-001', '/'] },
+      data: { paths: ['/property/sample-lpc-sample-001', '/'] },
     });
     expect(res.status()).toBe(200);
     const body = await res.json();
@@ -58,7 +58,7 @@ test.describe('image priority discipline (§12.2 rule 2)', () => {
   });
 
   test('listing detail page has at most one priority image', async ({ page }) => {
-    await page.goto('/en/property/sample-wl-sample-001');
+    await page.goto('/en/property/sample-lpc-sample-001');
     const priorityImages = page.locator('img[fetchpriority="high"], img[loading="eager"]');
     const count = await priorityImages.count();
     expect(count).toBeLessThanOrEqual(1);

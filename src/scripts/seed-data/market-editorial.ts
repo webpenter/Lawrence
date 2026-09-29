@@ -16,14 +16,14 @@ export const SEED_AS_OF = '2026-06-30';
 const COUNTRY_SOURCES: Record<string, string> = {
   IT: 'https://www.agenziaentrate.gov.it/portale/web/guest/schede/fabbricatiterreni/omi',
   FR: 'https://app.dvf.etalab.gouv.fr/',
+  MC: 'https://www.imsee.mc/',
   ES: 'https://www.ine.es/dyngs/INEbase/en/operacion.htm?c=Estadistica_C&cid=1254736176951',
   GR: 'https://www.bankofgreece.gr/en/statistics/real-estate-market',
   PT: 'https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_indicadores&indOcorrCod=0010042',
-  HR: 'https://www.dzs.hr/',
+  GB: 'https://landregistry.data.gov.uk/app/ukhpi',
+  CH: 'https://www.bfs.admin.ch/bfs/en/home/statistics/construction-housing.html',
   US: 'https://fred.stlouisfed.org/',
-  TC: 'https://fred.stlouisfed.org/',
-  NO: 'https://www.ssb.no/en/priser-og-prisindekser/boligpriser-og-boligprisindekser',
-  NL: 'https://www.cbs.nl/en-gb/figures/detail/83906ENG',
+  AE: 'https://dubailand.gov.ae/en/open-data/real-estate-data/',
 };
 
 export interface MarketStatSeed {
@@ -139,7 +139,7 @@ export function marketEditorialFor(destination: SampleDestination): MarketEditor
   };
 }
 
-/** §5.5 sample segment pages: market slug × controlled-taxonomy segment. */
+/** §5.5 sample segment pages: 30 market × segment combinations (§13.10). */
 export interface SegmentPageSeed {
   marketSlug: string;
   segment: Segment;
@@ -148,190 +148,182 @@ export interface SegmentPageSeed {
   faq: Array<{ question: string; answer: string }>;
 }
 
-export const SEGMENT_PAGE_SEEDS: SegmentPageSeed[] = [
-  {
-    marketSlug: 'cote-dazur',
-    segment: 'waterfront-estates',
-    title: "Waterfront estates on the Côte d'Azur",
-    introParagraphs: [
-      "Waterfront estates on the Côte d'Azur are the reference asset of this collection: walled " +
-        'grounds meeting the Mediterranean between Cap d’Antibes and Saint-Jean-Cap-Ferrat, priced ' +
-        'from roughly €20 million and traded as much by introduction as by listing. The figures below ' +
-        'are demonstration values from the sample dataset.',
-    ],
-    faq: [
-      {
-        question: "What distinguishes a waterfront estate on the Côte d'Azur from a villa with a sea view?",
-        answer:
-          'Direct, private access to the shoreline — a frontage, not a vantage point. Estates in this ' +
-          'segment hold ground that touches the water, which is the scarcest position on the coast.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'lake-como',
-    segment: 'waterfront-estates',
-    title: 'Waterfront estates on Lake Como',
-    introParagraphs: [
-      'The great lakefront properties of Como — Laglio, Bellagio, Menaggio — pair historic villas ' +
-        'with private darsene and gardens stepping straight into the lake. Qualifying estates start ' +
-        'around €20 million in this sample dataset, and several trade without ever being listed.',
-    ],
-    faq: [
-      {
-        question: 'Do Lake Como estates come with private boat access?',
-        answer:
-          'The most valuable do: a private darsena (boathouse) or dock is the defining feature of the ' +
-          'first rank of lakefront properties and is documented on each qualifying listing.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'lake-como',
-    segment: 'historic-estates',
-    title: 'Historic estates on Lake Como',
-    introParagraphs: [
-      'Como’s historic villas — many under heritage protection — are bought for provenance as much ' +
-        'as position: frescoed interiors, terraced gardens and names that appear in the lake’s ' +
-        'history. Heritage constraints shape what can be altered, which is precisely what preserves value.',
-    ],
-    faq: [
-      {
-        question: 'What does heritage protection mean for a buyer on Lake Como?',
-        answer:
-          'Alterations to protected elements require approvals, and in Italy the state may hold a ' +
-          'pre-emption right on protected properties. Diligence with local counsel before offer is standard.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'mallorca',
-    segment: 'waterfront-estates',
-    title: 'Waterfront estates in Mallorca',
-    introParagraphs: [
-      'Mallorca’s southwest — Port d’Andratx above all — concentrates the island’s first-line ' +
-        'estates: cliff-edge grounds with private sea access and long views to Dragonera. Qualifying ' +
-        'properties start around €20 million in this sample dataset.',
-    ],
-    faq: [
-      {
-        question: 'Where are Mallorca’s first-line estates concentrated?',
-        answer:
-          'Port d’Andratx, Deià and the Santanyí coast hold most of the island’s true waterfront at ' +
-          'this level; inland finca estates are a different, larger segment.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'greek-islands',
-    segment: 'private-islands',
-    title: 'Private islands in the Aegean',
-    introParagraphs: [
-      'The Aegean remains one of the few places where a whole island can be privately held: from ' +
-        'compact islets off Mykonos to working estates with harbours. Title, zoning and mooring ' +
-        'rights drive value more than land area, and every qualifying listing documents all three.',
-    ],
-    faq: [
-      {
-        question: 'Can foreign buyers own a Greek island outright?',
-        answer:
-          'Generally yes, with clearances in border regions and standard national-land checks. The ' +
-          'practical constraints are zoning, build entitlements and infrastructure rather than nationality.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'turks-caicos',
-    segment: 'private-islands',
-    title: 'Private islands in Turks & Caicos',
-    introParagraphs: [
-      'Turks & Caicos private islands trade on clear Crown-derived title, proximity to ' +
-        'Providenciales and buildable elevation. The handful of freehold islands that reach the ' +
-        'market do so quietly; several in this sample set are held off-market.',
-    ],
-    faq: [
-      {
-        question: 'What should a buyer verify first on a Caribbean private island?',
-        answer:
-          'Title class, elevation and insurability, and the logistics chain — power, water, and the ' +
-          'boat or air link that services the island. Each qualifying listing states these as structured data.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'cote-dazur',
-    segment: 'penthouses',
-    title: "Penthouses on the Côte d'Azur",
-    introParagraphs: [
-      'The penthouse segment on the Côte d’Azur is small and vertical: full-floor apartments above ' +
-        'the Croisette and Monaco’s borders trade on terrace area and view line rather than interior ' +
-        'volume. Qualifying penthouses start around €20 million in this sample dataset.',
-    ],
-    faq: [
-      {
-        question: 'What drives penthouse value on the Côte d’Azur?',
-        answer:
-          'Terrace square metres, protected sea view lines and building services. Interior area ' +
-          'matters less at this level than the outdoor floor and what it looks onto.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'hamptons',
-    segment: 'waterfront-estates',
-    title: 'Waterfront estates in the Hamptons',
-    introParagraphs: [
-      'The oceanfront lanes of Southampton and East Hampton hold the reference estates of the East ' +
-        'Coast: dune-front parcels measured in acres, with pond- and bay-front alternatives trading ' +
-        'at a discount to the ocean. Qualifying estates start around €20 million in this sample dataset.',
-    ],
-    faq: [
-      {
-        question: 'Ocean, pond or bay — how do Hamptons waterfronts compare?',
-        answer:
-          'Oceanfront carries the premium and the erosion diligence; pond and bay fronts trade lower ' +
-          'with calmer exposure. Each listing documents its frontage type and any coastal restrictions.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'norwegian-fjords',
-    segment: 'ski-chalets',
-    title: 'Chalets and mountain lodges in the Norwegian fjords',
-    introParagraphs: [
-      'Between Sognefjord’s arms, a small set of large timber lodges pairs ski touring terrain with ' +
-        'private shoreline — a combination almost unique to Norway. The segment is thin; qualifying ' +
-        'lodges appear rarely and several trade privately.',
-    ],
-    faq: [
-      {
-        question: 'Is foreign ownership of Norwegian fjord property restricted?',
-        answer:
-          'Norway is broadly open, but concession rules can apply to larger agricultural or shoreline ' +
-          'holdings. Local counsel confirms whether a specific property needs one before offer.',
-      },
-    ],
-  },
-  {
-    marketSlug: 'liguria',
-    segment: 'historic-estates',
-    title: 'Historic estates in Liguria & Portofino',
-    introParagraphs: [
-      'Portofino’s protected amphitheatre and the villas above Santa Margherita hold some of ' +
-        'Italy’s most tightly guarded historic property: terraced gardens, listed façades and ' +
-        'positions that cannot be rebuilt. Provenance files matter as much as floor plans here.',
-    ],
-    faq: [
-      {
-        question: 'What approvals govern works on a historic Ligurian villa?',
-        answer:
-          'Protected properties answer to the soprintendenza for alterations, and Italy may hold ' +
-          'pre-emption rights on heritage sales. The constraint is also the moat: nothing new can ' +
-          'take these positions.',
-      },
-    ],
-  },
+/** The 30 combinations, chosen where the segment genuinely fits the market. */
+const SEGMENT_COMBOS: Array<[string, Segment]> = [
+  ['saint-tropez', 'waterfront-estates'],
+  ['cap-ferrat', 'waterfront-estates'],
+  ['lake-como', 'waterfront-estates'],
+  ['porto-cervo', 'waterfront-estates'],
+  ['ibiza', 'waterfront-estates'],
+  ['mykonos', 'waterfront-estates'],
+  ['palm-beach', 'waterfront-estates'],
+  ['hamptons', 'waterfront-estates'],
+  ['lake-geneva', 'waterfront-estates'],
+  ['algarve', 'waterfront-estates'],
+  ['gstaad', 'ski-chalets'],
+  ['courchevel', 'ski-chalets'],
+  ['aspen', 'ski-chalets'],
+  ['monaco', 'penthouses'],
+  ['london', 'penthouses'],
+  ['dubai', 'penthouses'],
+  ['palm-beach', 'penthouses'],
+  ['tuscany', 'vineyard-estates'],
+  ['saint-tropez', 'vineyard-estates'],
+  ['tuscany', 'historic-estates'],
+  ['lake-como', 'historic-estates'],
+  ['london', 'historic-estates'],
+  ['lake-geneva', 'historic-estates'],
+  ['mykonos', 'private-islands'],
+  ['ibiza', 'private-islands'],
+  ['marbella', 'equestrian-estates'],
+  ['hamptons', 'equestrian-estates'],
+  ['marbella', 'golf-estates'],
+  ['algarve', 'golf-estates'],
+  ['dubai', 'new-developments'],
 ];
+
+const SEGMENT_COPY: Record<
+  Segment,
+  { label: string; intro: (name: string, locality: string) => string; faq: (name: string) => { question: string; answer: string } }
+> = {
+  'waterfront-estates': {
+    label: 'Waterfront estates',
+    intro: (name, locality) =>
+      `Waterfront estates in ${name} hold the scarcest position the market offers: private grounds ` +
+      `meeting the water around ${locality}, priced from roughly €20 million and traded as much by ` +
+      `introduction as by listing. The figures below are demonstration values from the sample dataset.`,
+    faq: (name) => ({
+      question: `What distinguishes a waterfront estate in ${name} from a home with a view?`,
+      answer:
+        'Direct, private access to the water — a frontage, not a vantage point. Estates in this ' +
+        'segment hold ground that touches the shoreline, which cannot be rebuilt or replicated.',
+    }),
+  },
+  'ski-chalets': {
+    label: 'Ski chalets',
+    intro: (name, locality) =>
+      `The great chalets of ${name} concentrate around ${locality}: ski-in positions, staffed ` +
+      `winters and inventory so thin that most sales complete privately. Qualifying chalets start ` +
+      `around €20 million in this sample dataset.`,
+    faq: (name) => ({
+      question: `What drives chalet value in ${name}?`,
+      answer:
+        'Position relative to the slope and the village, plot rights in tightly zoned resorts, and ' +
+        'the staffed infrastructure — the building itself is often the smallest part of the price.',
+    }),
+  },
+  penthouses: {
+    label: 'Penthouses',
+    intro: (name, locality) =>
+      `The penthouse segment in ${name} is small and vertical: full-floor residences above ` +
+      `${locality} trading on terrace area, view lines and building service rather than interior ` +
+      `volume. Qualifying penthouses start around €20 million in this sample dataset.`,
+    faq: (name) => ({
+      question: `What should a buyer verify first on a penthouse in ${name}?`,
+      answer:
+        'The title to the terraces and any roof rights, the service charge history, and the ' +
+        'building\u2019s consent regime for alterations — the outdoor floor is usually the value.',
+    }),
+  },
+  'vineyard-estates': {
+    label: 'Vineyard estates',
+    intro: (name, locality) =>
+      `Vineyard estates in ${name} pair a serious residence with working land around ${locality}: ` +
+      `producing vines, cellars and agricultural entitlements that shape both price and diligence. ` +
+      `Qualifying estates start around €20 million in this sample dataset.`,
+    faq: (name) => ({
+      question: `Does a vineyard estate in ${name} come with the production?`,
+      answer:
+        'Usually — vines, cellar and any appellation rights transfer with the land, and the ' +
+        'agricultural regime brings its own approvals. Diligence covers the farm as well as the house.',
+    }),
+  },
+  'historic-estates': {
+    label: 'Historic estates',
+    intro: (name, locality) =>
+      `The historic estates of ${name} — many under heritage protection around ${locality} — are ` +
+      `bought for provenance as much as position. Constraints on alteration are precisely what ` +
+      `preserve value here. Qualifying estates start around €20 million in this sample dataset.`,
+    faq: (name) => ({
+      question: `What does heritage protection mean for a buyer in ${name}?`,
+      answer:
+        'Alterations to protected elements need approvals, and some jurisdictions carry pre-emption ' +
+        'rights on heritage sales. The constraint is also the moat: nothing new can take these positions.',
+    }),
+  },
+  'private-islands': {
+    label: 'Private islands',
+    intro: (name, locality) =>
+      `Around ${name}, a small set of private islands trades in single ownership near ${locality}: ` +
+      `title, zoning and access drive value more than land area, and every qualifying listing ` +
+      `documents all three. Several in this sample set are held off-market.`,
+    faq: (name) => ({
+      question: `What should a buyer verify first on a private island near ${name}?`,
+      answer:
+        'Title class and build entitlements, then the logistics chain — power, water, and the boat ' +
+        'or air link that services the island. Each qualifying listing states these as structured data.',
+    }),
+  },
+  'equestrian-estates': {
+    label: 'Equestrian estates',
+    intro: (name, locality) =>
+      `Equestrian estates in ${name} combine a principal residence with working horse ` +
+      `infrastructure around ${locality}: stabling, schooling arenas and paddock land with the ` +
+      `water and access rights to run them. Qualifying estates start around €20 million in this ` +
+      `sample dataset.`,
+    faq: (name) => ({
+      question: `What matters most in an equestrian estate in ${name}?`,
+      answer:
+        'Usable flat land with drainage and water rights, permitted stabling capacity, and hacking ' +
+        'access — the equestrian value sits in the land and permissions, not the tack room.',
+    }),
+  },
+  'new-developments': {
+    label: 'New developments',
+    intro: (name, locality) =>
+      `The new-development segment in ${name} concentrates around ${locality}: branded residences ` +
+      `and single-title new builds delivered turnkey, with developer covenants in place of ` +
+      `provenance. Qualifying homes start around €20 million in this sample dataset.`,
+    faq: (name) => ({
+      question: `How does buying new in ${name} differ from a resale?`,
+      answer:
+        'Payment follows construction milestones, the developer\u2019s covenant and completion ' +
+        'guarantee carry the risk, and specification choices close early — diligence shifts from the ' +
+        'building\u2019s history to the developer\u2019s.',
+    }),
+  },
+  'golf-estates': {
+    label: 'Golf estates',
+    intro: (name, locality) =>
+      `Golf estates in ${name} front the fairways around ${locality}: gated ground on or beside ` +
+      `championship courses, where membership rights and frontage to play decide the premium. ` +
+      `Qualifying estates start around €20 million in this sample dataset.`,
+    faq: (name) => ({
+      question: `Do golf estates in ${name} include club membership?`,
+      answer:
+        'Sometimes — where membership attaches to the title it transfers with the sale; elsewhere it ' +
+        'is a separate application. The listing states which regime applies.',
+    }),
+  },
+};
+
+import { SAMPLE_DESTINATION_BY_SLUG } from '@/lib/sample/markets';
+
+export const SEGMENT_PAGE_SEEDS: SegmentPageSeed[] = SEGMENT_COMBOS.map(
+  ([marketSlug, segment]) => {
+    const destination = SAMPLE_DESTINATION_BY_SLUG.get(marketSlug);
+    const name = destination?.name ?? marketSlug;
+    const locality = destination?.localities[0] ?? name;
+    const copy = SEGMENT_COPY[segment];
+    return {
+      marketSlug,
+      segment,
+      title: `${copy.label} in ${name}`,
+      introParagraphs: [copy.intro(name, locality)],
+      faq: [copy.faq(name)],
+    };
+  },
+);
 
 /** §15.4 — the three launch reports, summaries written from the sample baselines. */
 export interface ReportSeed {
@@ -346,14 +338,14 @@ export interface ReportSeed {
 export const REPORT_SEEDS: ReportSeed[] = [
   {
     slug: 'prime-entry-price-comparison-2026',
-    title: 'Where €20M buys entry: prime-entry prices compared across 14 markets',
+    title: 'Where €20M buys entry: prime-entry prices compared across 18 markets',
     publicationDate: '2026-06-15',
-    marketSlugs: ['cote-dazur', 'lake-como', 'mallorca', 'hamptons'],
+    marketSlugs: ['cap-ferrat', 'lake-como', 'monaco', 'hamptons'],
     metaDescription:
-      'Sample-data comparison of prime-entry prices across 14 markets: where €20M clears the bar, where it does not, and how entry points moved year on year.',
+      'Sample-data comparison of prime-entry prices across 18 markets: where €20M clears the bar, where it does not, and how entry points moved year on year.',
     summaryParagraphs: [
       'This report compares the entry price of the prime segment — the level at which a property ' +
-        'qualifies for this collection — across the fourteen sample markets we cover. All figures are ' +
+        'qualifies for this collection — across the eighteen sample markets we cover. All figures are ' +
         'demonstration values derived from the sample dataset baselines, shown with the public source ' +
         'each real figure would cite, as of June 2026.',
       'The headline: entry is converging at the top. In the sample set, prime entry clusters between ' +
@@ -361,9 +353,9 @@ export const REPORT_SEEDS: ReportSeed[] = [
         'of the band and the Adriatic markets at the bottom. The spread inside each market is wider ' +
         'than the spread between markets: position — first line, protected view, private water access — ' +
         'moves price more than geography does.',
-      'Per-square-metre medians tell the sharper story. The sample baselines run from roughly €4,500 ' +
-        'in the fjords to €15,000 on the Côte d’Azur, a 3.3× spread that has narrowed year on year as ' +
-        'secondary markets appreciated faster than the established ones. Days-on-market at this level ' +
+      'Per-square-metre medians tell the sharper story. The sample baselines run from roughly €8,000 ' +
+        'in Tuscany and Dubai to €55,000 in Monaco, a near-sevenfold spread that has narrowed year on ' +
+        'year as resort markets appreciated faster than the city states. Days-on-market at this level ' +
         'sit between four and seven months everywhere: thin markets clear slowly by design, and speed ' +
         'of sale says little about quality.',
       'What the published numbers cannot show is the private layer. A meaningful share of transactions ' +
@@ -376,7 +368,7 @@ export const REPORT_SEEDS: ReportSeed[] = [
     slug: 'purchase-structures-four-jurisdictions-2026',
     title: 'Purchase structures and total acquisition costs in four jurisdictions',
     publicationDate: '2026-05-20',
-    marketSlugs: ['liguria', 'cote-dazur', 'mallorca', 'hamptons'],
+    marketSlugs: ['tuscany', 'saint-tropez', 'marbella', 'hamptons'],
     metaDescription:
       'How trophy purchases are structured in Italy, France, Spain and the US — vehicles, transfer costs and timelines, compared side by side. Sample-data edition.',
     summaryParagraphs: [
@@ -404,9 +396,9 @@ export const REPORT_SEEDS: ReportSeed[] = [
     slug: 'published-vs-off-market-share-2026',
     title: 'The visible market: published versus off-market share by market',
     publicationDate: '2026-04-10',
-    marketSlugs: ['cote-dazur', 'lake-como', 'greek-islands', 'turks-caicos'],
+    marketSlugs: ['cap-ferrat', 'lake-como', 'mykonos', 'gstaad'],
     metaDescription:
-      'How much of the trophy market is publicly visible? Sample-data estimates of published versus off-market share across 14 markets, and why the private layer exists.',
+      'How much of the trophy market is publicly visible? Sample-data estimates of published versus off-market share across 18 markets, and why the private layer exists.',
     summaryParagraphs: [
       'Not all inventory at this level is visible. This report estimates, market by market, how much ' +
         'of the trading stock is publicly listed and how much moves privately — the off-market layer ' +
@@ -414,9 +406,9 @@ export const REPORT_SEEDS: ReportSeed[] = [
         'dataset; the methodology section explains how real shares would be derived from transaction ' +
         'and listing counts.',
       'In the sample set, the off-market share rises with price and with heritage: the markets with ' +
-        'the strictest planning regimes and the oldest housing stock — Portofino, Como, the Côte ' +
-        'd’Azur capes — show the largest private layer, because discretion is worth most where supply ' +
-        'cannot be rebuilt. Newer resort markets publish a larger share of their inventory.',
+        'the strictest planning regimes and the oldest housing stock — Cap Ferrat, Como, Gstaad — ' +
+        'show the largest private layer, because discretion is worth most where supply cannot be ' +
+        'rebuilt. Newer resort markets publish a larger share of their inventory.',
       'Why sellers stay private is consistent everywhere: pricing discovery without a public ' +
         'time-stamp, security, and the option to withdraw invisibly. Why buyers register is equally ' +
         'consistent: the private layer is where the positions that never list actually change hands.',

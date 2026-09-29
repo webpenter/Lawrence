@@ -14,8 +14,8 @@ import { SAMPLE_AGENCIES, SAMPLE_AGENTS } from '@/lib/sample/agencies';
 import { SAMPLE_DESTINATIONS, SAMPLE_DESTINATION_BY_SLUG } from '@/lib/sample/markets';
 import { buildAllBlueprints, type ListingBlueprint } from '@/lib/sample/economics';
 import { sourceGallery, type SourcedPhoto } from '@/lib/sample/unsplash';
-import { ARTICLE_PARAGRAPHS, DEMO_ARTICLE } from '@/lib/sample/fallback-content';
 import { purgeSamples } from '@/scripts/purge-samples';
+import { SAMPLE_ARTICLES } from '@/scripts/seed-data/articles';
 import type { DestinationQueryKey } from '@/scripts/image-queries';
 import {
   marketEditorialFor,
@@ -35,20 +35,12 @@ import {
 
 const LOCALES = ['en', 'it', 'fr', 'de', 'es', 'ru'] as const;
 
-const ARTICLE_STUBS = [
-  'Buying through a structure: SCI, LLC or personal title',
-  'Heritage protection and pre-emption rights in Italy, explained',
-  'What provenance is actually worth at the top of the market',
-  'Total acquisition costs: the schedule to demand in writing',
-  'Why trophy sales complete slowly — and why that is fine',
-  'Buying a private island: the eight questions to ask first',
-] as const;
-
 function parseFlags(argv: string[]): { count: number; destination?: string; wipe: boolean } {
-  const flags = { count: 60, destination: undefined as string | undefined, wipe: false };
+  const flags = { count: 45, destination: undefined as string | undefined, wipe: false };
   for (const arg of argv) {
     if (arg === '--wipe') flags.wipe = true;
-    else if (arg.startsWith('--count=')) flags.count = Number(arg.slice(8)) || 60;
+    else if (arg.startsWith('--count=')) flags.count = Number(arg.slice(8)) || 45;
+    else if (arg.startsWith('--market=')) flags.destination = arg.slice(9);
     else if (arg.startsWith('--destination=')) flags.destination = arg.slice(14);
   }
   return flags;
@@ -234,31 +226,18 @@ async function seedEditorialStubs(
     });
   }
 
-  // The §13.12 demo article, published as sample content (noindex, out of
-  // sitemaps) — the same copy the DB-error fallback serves.
-  await upsertBySlug(payload, 'articles', DEMO_ARTICLE.slug, {
-    title: DEMO_ARTICLE.title,
-    excerpt: DEMO_ARTICLE.excerpt,
-    body: textToLexical(...ARTICLE_PARAGRAPHS),
-    publishedAt: '2026-01-05T09:00:00.000Z',
-    isSample: true,
-    _status: 'published',
-  });
-
-  // 6 journal-article stubs from the §13.7 backlog: titles reserved as drafts,
-  // bodies pending the sourced editorial pass (§13.7 rule 1).
-  for (let i = 0; i < ARTICLE_STUBS.length; i += 1) {
-    await upsertBySlug(
-      payload,
-      'articles',
-      `sample-article-${String(i + 1).padStart(2, '0')}`,
-      {
-        title: ARTICLE_STUBS[i],
-        _status: 'draft',
-        excerpt: 'PLACEHOLDER — pending the §13.7 sourced editorial pass.',
-      },
-      true,
-    );
+  // §13.10: eight sample journal articles from the §13.7 backlog, published
+  // as demonstration content (isSample: SAMPLE notice, noindex, no sitemap).
+  for (let i = 0; i < SAMPLE_ARTICLES.length; i += 1) {
+    const article = SAMPLE_ARTICLES[i]!;
+    await upsertBySlug(payload, 'articles', article.slug, {
+      title: article.title,
+      excerpt: article.excerpt,
+      body: textToLexical(...article.paragraphs),
+      publishedAt: new Date(Date.UTC(2026, 0, 5 + i * 9, 9)).toISOString(),
+      isSample: true,
+      _status: 'published',
+    });
   }
 }
 
@@ -269,9 +248,9 @@ function descriptionInput(blueprint: ListingBlueprint): DescriptionInput {
     propertyType: blueprint.propertyType,
     locality: blueprint.locality,
     destinationName: destination?.name ?? blueprint.destinationSlug,
-    waterBodyName: destination?.waterBody.name ?? blueprint.waterBodySlug,
-    primaryAccess: blueprint.waterAccessType[0] as string,
-    beachType: blueprint.beachType,
+    waterBodyName: destination?.waterBody?.name ?? '',
+    primaryAccess: blueprint.waterFrontageM != null ? 'direct_shore' : '',
+    beachType: 'sand',
     bedrooms: blueprint.bedrooms,
     bathrooms: blueprint.bathrooms,
     builtAreaSqm: blueprint.builtAreaSqm,
@@ -279,23 +258,15 @@ function descriptionInput(blueprint: ListingBlueprint): DescriptionInput {
     terraceAreaSqm: blueprint.terraceAreaSqm,
     waterFrontageM: blueprint.waterFrontageM,
     maxBoatLoaM: blueprint.maxBoatLoaM,
-    waterDepthAtBerthM: blueprint.waterDepthAtBerthM,
-    nearestMarinaName: blueprint.nearestMarinaName,
-    nearestMarinaDistanceKm: blueprint.nearestMarinaDistanceKm,
+    waterDepthAtBerthM:
+      blueprint.maxBoatLoaM != null
+        ? Math.round((1.8 + blueprint.maxBoatLoaM / 12) * 10) / 10
+        : null,
+    nearestMarinaName: `${blueprint.locality} Marina`,
+    nearestMarinaDistanceKm: 1 + (blueprint.index % 5),
     approxPriceEur: blueprint.approxPriceEur,
   };
 }
-
-// Interim vocabulary bridge until the Prompt 12 Lawrence generator lands:
-// the inherited blueprints use the sister portal's enums.
-const LAWRENCE_PROPERTY_TYPE: Record<string, string> = {
-  farmhouse: 'estate',
-  lighthouse: 'villa',
-  boathouse: 'villa',
-  land_plot: 'development_site',
-  marina_residence: 'apartment',
-  development_project: 'development_site',
-};
 
 const LAWRENCE_FEATURE: Record<string, string | null> = {
   infinity_pool: 'pool',
@@ -366,90 +337,152 @@ async function attachGallery(
   return mediaIds;
 }
 
-/** §13.10: 8 test members — six confirmed, two pending confirmation. */
-async function seedMembers(payload: Payload): Promise<number> {
-  let count = 0;
+/**
+ * §13.10: 8 test members across the states — active, pending and suspended,
+ * with and without requirements. Credentials are dev-only (§13.12: sample
+ * members never receive real email — the addresses cannot deliver).
+ */
+const MEMBER_STATES: Array<{ status: 'active' | 'pending' | 'suspended'; verified: boolean }> = [
+  { status: 'active', verified: true },
+  { status: 'active', verified: true },
+  { status: 'active', verified: true },
+  { status: 'active', verified: true },
+  { status: 'active', verified: true },
+  { status: 'active', verified: true },
+  { status: 'pending', verified: false },
+  { status: 'suspended', verified: true },
+];
+
+async function seedMembers(payload: Payload): Promise<Map<number, number>> {
+  const memberIds = new Map<number, number>();
   for (let index = 1; index <= 8; index += 1) {
     const email = `member${String(index).padStart(2, '0')}@sample.lawrence`;
+    const state = MEMBER_STATES[index - 1]!;
     const existing = await payload.find({
       collection: 'members',
       where: { email: { equals: email } },
       limit: 1,
       overrideAccess: true,
     });
-    if (existing.docs[0]) continue;
-    await payload.create({
+    if (existing.docs[0]) {
+      memberIds.set(index, existing.docs[0].id);
+      continue;
+    }
+    const created = await payload.create({
       collection: 'members',
       overrideAccess: true,
       data: {
         email,
         password: 'sample-member-password',
         name: `Sample Member ${index}`,
-        status: 'active',
+        status: state.status,
         marketingConsent: index % 2 === 0,
-        _verified: index <= 6,
+        _verified: state.verified,
       },
     });
-    count += 1;
+    memberIds.set(index, created.id);
   }
-  return count;
+  return memberIds;
 }
 
-/** Three discreet sample listings so the member area has inventory (§13.10). */
-async function seedOffMarket(
+/**
+ * §13.10: 12 saved listings, active requirements for three members, and a
+ * populated MemberActivity trail so the dashboards are not empty. Idempotent:
+ * existing rows are counted, not duplicated.
+ */
+async function seedMemberEngagement(
   payload: Payload,
-  agencyIds: Map<string, number>,
+  memberIds: Map<number, number>,
   marketIds: Map<string, number>,
-): Promise<number> {
-  const agencyId = [...agencyIds.values()][0];
-  const marketId = [...marketIds.values()][0];
-  if (!agencyId) return 0;
-  let count = 0;
-  for (let index = 1; index <= 3; index += 1) {
-    const reference = `WL-OFFMKT-${String(index).padStart(3, '0')}`;
+  propertyIds: Map<string, number>,
+): Promise<void> {
+  const properties = [...propertyIds.entries()];
+  const offMarket = buildAllBlueprints()
+    .filter((b) => b.publication === 'off_market')
+    .map((b) => propertyIds.get(b.reference))
+    .filter((id): id is number => id != null);
+
+  // Requirements: members 1–3 (member 4+ demonstrates "without requirements").
+  const requirementSeeds = [
+    { member: 1, min: 20, max: 45, markets: ['saint-tropez', 'cap-ferrat'], types: ['villa', 'estate'] },
+    { member: 2, min: 30, max: 90, markets: ['lake-como', 'tuscany'], types: ['palazzo', 'estate'] },
+    { member: 3, min: 20, max: 60, markets: ['gstaad', 'courchevel', 'aspen'], types: ['chalet'] },
+  ];
+  for (const seed of requirementSeeds) {
+    const memberId = memberIds.get(seed.member);
+    if (memberId == null) continue;
     const existing = await payload.find({
-      collection: 'properties',
-      where: { reference: { equals: reference } },
+      collection: 'requirements',
+      where: { and: [{ member: { equals: memberId } }, { status: { equals: 'active' } }] },
       limit: 1,
+      depth: 0,
       overrideAccess: true,
     });
     if (existing.docs[0]) continue;
     await payload.create({
-      collection: 'properties',
+      collection: 'requirements',
       overrideAccess: true,
       data: {
-        title: `Sample off-market residence ${index}`,
-        reference,
-        agency: agencyId,
-        isSample: true,
-        propertyType: 'villa',
-        priceType: 'fixed',
-        currency: 'EUR',
-        priceAmount: 24_000_000 + index * 3_000_000,
-        publication: 'off_market',
-        channel: 'off_market',
-        priceDisclosure: 'exact',
-        status: 'available',
-        moderation: 'approved',
-        sourceType: 'manual',
-        bedrooms: 6 + index,
-        bathrooms: 5,
-        builtAreaSqm: 900 + index * 120,
-        features: ['pool', 'helipad', 'staff_quarters'],
-        location: {
-          locality: 'Portofino',
-          region: 'Liguria',
-          country: 'IT',
-          market: marketId,
-          coordinates: [9.209 + index * 0.01, 44.303],
-          coordinatePrecision: 'approximate_500m',
-        },
-        _status: 'published',
-      },
+        member: memberId,
+        status: 'active',
+        budgetMinEur: seed.min * 1_000_000,
+        budgetMaxEur: seed.max * 1_000_000,
+        markets: seed.markets
+          .map((slug) => marketIds.get(slug))
+          .filter((id): id is number => id != null),
+        propertyTypes: seed.types,
+        notifyByEmail: seed.member !== 3,
+      } as never,
     });
-    count += 1;
   }
-  return count;
+
+  // 12 saved listings across members 1–4 (§13.10).
+  for (let i = 0; i < 12; i += 1) {
+    const memberId = memberIds.get((i % 4) + 1);
+    const entry = properties[(i * 3) % Math.max(properties.length, 1)];
+    if (memberId == null || entry == null) continue;
+    const [, propertyId] = entry;
+    const existing = await payload.find({
+      collection: 'saved-listings',
+      where: { and: [{ member: { equals: memberId } }, { property: { equals: propertyId } }] },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    if (existing.docs[0]) continue;
+    await payload.create({
+      collection: 'saved-listings',
+      overrideAccess: true,
+      data: { member: memberId, property: propertyId, savedAt: new Date(Date.UTC(2026, 8, 1 + i)).toISOString() } as never,
+    });
+  }
+
+  // Activity trail: off-market views and document downloads feed the §9.2
+  // demand panel. One deterministic pass; skipped entirely when present.
+  const activityProbe = await payload.find({
+    collection: 'member-activity',
+    where: { action: { equals: 'off_market_view' } },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  });
+  if (!activityProbe.docs[0] && offMarket.length > 0) {
+    for (let i = 0; i < 24; i += 1) {
+      const memberId = memberIds.get((i % 6) + 1);
+      const propertyId = offMarket[i % offMarket.length];
+      if (memberId == null || propertyId == null) continue;
+      await payload.create({
+        collection: 'member-activity',
+        overrideAccess: true,
+        data: {
+          member: memberId,
+          property: propertyId,
+          action: i % 4 === 3 ? 'document_download' : 'off_market_view',
+          at: new Date(Date.UTC(2026, 8, 1 + (i % 26), 8 + (i % 10))).toISOString(),
+        } as never,
+      });
+    }
+  }
 }
 
 async function main(): Promise<void> {
@@ -464,17 +497,24 @@ async function main(): Promise<void> {
   const { marketIds } = await seedReferenceData(payload);
   const { agencyIds, agentIdsByAgency } = await seedAgencies(payload);
   await seedEditorialStubs(payload, marketIds);
-  const membersSeeded = await seedMembers(payload);
-  const offMarketSeeded = await seedOffMarket(payload, agencyIds, marketIds);
+  const memberIds = await seedMembers(payload);
 
-  let blueprints = buildAllBlueprints(60);
+  let blueprints = buildAllBlueprints();
   if (flags.destination) {
     blueprints = blueprints.filter((b) => b.destinationSlug === flags.destination);
   }
   blueprints = blueprints.slice(0, flags.count);
+  // §2.2: the prime cap is 10% of published inventory, so the four prime
+  // exceptions must publish LAST — once the other 41 listings exist, the cap
+  // admits exactly four.
+  blueprints = [
+    ...blueprints.filter((b) => !b.primeException),
+    ...blueprints.filter((b) => b.primeException),
+  ];
 
   const usedImageIds = new Set<string>();
   const usedImageHashes = new Set<string>();
+  const propertyIds = new Map<string, number>();
   let created = 0;
   let updated = 0;
 
@@ -488,10 +528,23 @@ async function main(): Promise<void> {
 
     const input = descriptionInput(blueprint);
     const titleEn = composeTitle(input, DESCRIPTION_TEMPLATES.en!);
+    const offMarket = blueprint.publication === 'off_market';
+
+    // §8.4: the publication decision routes channel + price disclosure.
+    const priceDisclosure = offMarket
+      ? 'exact'
+      : blueprint.publication === 'published_openly'
+        ? 'exact'
+        : blueprint.publication === 'published_as_band'
+          ? 'band'
+          : 'on_request';
+    const eurToLocal: Record<string, number> = { EUR: 1, USD: 1.08, GBP: 0.85, CHF: 0.94, AED: 3.97 };
+    const rate = eurToLocal[blueprint.currency] ?? 1;
 
     const baseData: Record<string, unknown> = {
       title: titleEn,
-      slug: `sample-${blueprint.reference.toLowerCase()}`,
+      // Off-market listings have no public slug, by design (§8.6).
+      slug: offMarket ? undefined : `sample-${blueprint.reference.toLowerCase()}`,
       reference: blueprint.reference,
       agency: agencyId,
       agent: agentId,
@@ -499,36 +552,66 @@ async function main(): Promise<void> {
       featured: blueprint.featured,
       status: blueprint.status === 'in_market' ? 'available' : blueprint.status,
       moderation: 'approved',
-      channel: 'public',
-      publication: 'published_openly',
-      priceDisclosure: 'exact',
+      channel: offMarket ? 'off_market' : 'public',
+      publication: blueprint.publication,
+      priceDisclosure,
       sourceType: 'manual',
-      propertyType: LAWRENCE_PROPERTY_TYPE[blueprint.propertyType] ?? blueprint.propertyType,
-      priceType: 'fixed',
-      // Interim scaling until the Prompt 12 Lawrence generator lands: the
-      // inherited demo economics sit below the €20M admission floor.
-      priceAmount: Math.round(
-        blueprint.priceAmount * Math.max(4, Math.ceil(22_000_000 / blueprint.approxPriceEur)),
-      ),
+      propertyType: blueprint.propertyType,
+      priceType:
+        priceDisclosure === 'band'
+          ? 'price_band'
+          : priceDisclosure === 'on_request'
+            ? 'on_request'
+            : 'fixed',
+      priceAmount: blueprint.priceAmount,
+      priceBandMin:
+        blueprint.priceBandMinEur != null
+          ? Math.round(blueprint.priceBandMinEur * rate)
+          : undefined,
+      priceBandMax:
+        blueprint.priceBandMaxEur != null
+          ? Math.round(blueprint.priceBandMaxEur * rate)
+          : undefined,
+      // §2.2: the four prime exceptions are the explicit admin tier choice.
+      valueTier: blueprint.primeException ? 'prime' : undefined,
       currency: blueprint.currency,
-      tenure: blueprint.tenure === 'freehold' || blueprint.tenure === 'leasehold' ? blueprint.tenure : 'freehold',
+      tenure: ['freehold', 'leasehold', 'concession'].includes(blueprint.tenure)
+        ? blueprint.tenure
+        : 'freehold',
       bedrooms: blueprint.bedrooms,
       bathrooms: blueprint.bathrooms,
+      receptionRooms: blueprint.receptionRooms,
       builtAreaSqm: blueprint.builtAreaSqm,
       plotAreaSqm: blueprint.plotAreaSqm || undefined,
+      plotAreaHa:
+        blueprint.plotAreaSqm >= 10_000
+          ? Math.round(blueprint.plotAreaSqm / 100) / 100
+          : undefined,
       terraceAreaSqm: blueprint.terraceAreaSqm,
       yearBuilt: blueprint.yearBuilt,
+      renovatedYear: blueprint.renovatedYear ?? undefined,
       condition: blueprint.condition,
+      architect: blueprint.architect ?? undefined,
+      heritageStatus: blueprint.heritageStatus,
       features: mapFeatures(blueprint.features),
-      waterfront: {
-        waterAccess: true,
-        waterBodyType: blueprint.waterBodyType === 'marina_basin' ? 'sea' : blueprint.waterBodyType,
-        waterFrontageM: blueprint.waterFrontageM ?? undefined,
-        mooringType:
-          blueprint.mooringType === 'dry_dock' ? 'boat_lift' : (blueprint.mooringType ?? undefined),
-        maxBoatLoaM: blueprint.maxBoatLoaM ?? undefined,
-        berthCount: blueprint.berthCount ?? undefined,
-      },
+      waterfront: blueprint.waterBodyType
+        ? {
+            waterAccess: true,
+            waterBodyType: blueprint.waterBodyType,
+            waterFrontageM: blueprint.waterFrontageM ?? undefined,
+            mooringType: blueprint.mooringType ?? undefined,
+            maxBoatLoaM: blueprint.maxBoatLoaM ?? undefined,
+            berthCount: blueprint.berthCount ?? undefined,
+          }
+        : undefined,
+      provenance:
+        blueprint.architect || blueprint.heritageStatus !== 'none'
+          ? textToLexical(
+              `${blueprint.architect ? `Designed by ${blueprint.architect} and completed` : 'Completed'} in ${blueprint.yearBuilt}, ` +
+                `the house has been held by a small number of families since${blueprint.heritageStatus !== 'none' ? ' and stands under heritage protection' : ''}. ` +
+                'Sample provenance text — demonstration data.',
+            )
+          : undefined,
       description: textToLexical(composeDescription(input, DESCRIPTION_TEMPLATES.en!)),
       location: {
         locality: blueprint.locality,
@@ -537,7 +620,7 @@ async function main(): Promise<void> {
         coordinates: blueprint.coordinates,
         coordinatePrecision:
           blueprint.coordinatePrecision === 'hidden' ? 'locality_only' : blueprint.coordinatePrecision,
-        destination: marketIds.get(blueprint.destinationSlug),
+        market: marketIds.get(blueprint.destinationSlug),
       },
       _status: 'published',
     };
@@ -567,6 +650,8 @@ async function main(): Promise<void> {
       ).id;
       created += 1;
     }
+
+    propertyIds.set(blueprint.reference, propertyId);
 
     // Localised title + description for the other five locales (§13.8).
     for (const locale of LOCALES.slice(1)) {
@@ -615,15 +700,20 @@ async function main(): Promise<void> {
     console.log(`  ✓ ${blueprint.reference} ${titleEn}`);
   }
 
+  await seedMemberEngagement(payload, memberIds, marketIds, propertyIds);
+
+  const offMarketCount = blueprints.filter((b) => b.publication === 'off_market').length;
   console.log(
-    `\nSeed complete: ${created} created, ${updated} updated across ${blueprints.length} listings; ` +
-      `${membersSeeded} members, ${offMarketSeeded} off-market samples; ` +
-      `${SAMPLE_AGENCIES.length} agencies, ${SAMPLE_AGENTS.length} agents, ${SEGMENT_PAGE_SEEDS.length} segment pages, ${REPORT_SEEDS.length} reports, ${ARTICLE_STUBS.length} article stubs.`,
+    `\nSeed complete: ${created} created, ${updated} updated across ${blueprints.length} listings ` +
+      `(${blueprints.length - offMarketCount} public / ${offMarketCount} off-market); ` +
+      `${memberIds.size} members; ${SAMPLE_AGENCIES.length} agencies, ${SAMPLE_AGENTS.length} agents, ` +
+      `${SEGMENT_PAGE_SEEDS.length} segment pages, ${REPORT_SEEDS.length} reports, ${SAMPLE_ARTICLES.length} articles.`,
   );
   process.exit(0);
 }
 
 main().catch((err) => {
   console.error('Seed failed:', err);
+  console.error('detail:', JSON.stringify((err as { data?: unknown }).data ?? {}, null, 2));
   process.exit(1);
 });

@@ -9,16 +9,16 @@ import type { DescriptionInput } from './types';
 const LOCALES = ['en', 'it', 'fr', 'de', 'es', 'ru'] as const;
 
 function inputFor(index: number): DescriptionInput {
-  const b = buildAllBlueprints(60)[index]!;
+  const b = buildAllBlueprints()[index]!;
   const destination = SAMPLE_DESTINATION_BY_SLUG.get(b.destinationSlug)!;
   return {
     index: b.index,
     propertyType: b.propertyType,
     locality: b.locality,
     destinationName: destination.name,
-    waterBodyName: destination.waterBody.name,
-    primaryAccess: b.waterAccessType[0] as string,
-    beachType: b.beachType,
+    waterBodyName: destination.waterBody?.name ?? '',
+    primaryAccess: b.waterFrontageM != null ? 'direct_shore' : '',
+    beachType: 'sand',
     bedrooms: b.bedrooms,
     bathrooms: b.bathrooms,
     builtAreaSqm: b.builtAreaSqm,
@@ -26,9 +26,10 @@ function inputFor(index: number): DescriptionInput {
     terraceAreaSqm: b.terraceAreaSqm,
     waterFrontageM: b.waterFrontageM,
     maxBoatLoaM: b.maxBoatLoaM,
-    waterDepthAtBerthM: b.waterDepthAtBerthM,
-    nearestMarinaName: b.nearestMarinaName,
-    nearestMarinaDistanceKm: b.nearestMarinaDistanceKm,
+    waterDepthAtBerthM:
+      b.maxBoatLoaM != null ? Math.round((1.8 + b.maxBoatLoaM / 12) * 10) / 10 : null,
+    nearestMarinaName: `${b.locality} Marina`,
+    nearestMarinaDistanceKm: 1 + (b.index % 5),
     approxPriceEur: b.approxPriceEur,
   };
 }
@@ -51,7 +52,7 @@ describe('§13.8 description grammar', () => {
   it('every locale renders every listing with no unfilled placeholders and review-grade length', () => {
     for (const locale of LOCALES) {
       const templates = DESCRIPTION_TEMPLATES[locale]!;
-      for (let index = 0; index < 60; index += 1) {
+      for (let index = 0; index < 45; index += 1) {
         const input = inputFor(index);
         const text = composeDescription(input, templates);
         expect(text, `${locale} #${index}`).not.toMatch(/\{\w+\}/);
@@ -64,7 +65,7 @@ describe('§13.8 description grammar', () => {
   });
 
   it('EN descriptions clear the §8.6 300-character pre-check', () => {
-    for (let index = 0; index < 60; index += 1) {
+    for (let index = 0; index < 45; index += 1) {
       expect(
         composeDescription(inputFor(index), DESCRIPTION_TEMPLATES.en!).length,
         `#${index}`,

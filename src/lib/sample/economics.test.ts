@@ -1,166 +1,97 @@
 import { describe, expect, it } from 'vitest';
 
+import { buildAllBlueprints, buildBlueprint, SAMPLE_COUNT } from './economics';
+import { SAMPLE_DESTINATIONS, SAMPLE_DESTINATION_BY_SLUG } from './markets';
 
-import { SAMPLE_DESTINATION_BY_SLUG } from './markets';
-import { buildAllBlueprints, buildBlueprint } from './economics';
+describe('§13.10 Lawrence blueprint engine', () => {
+  const all = buildAllBlueprints();
 
-const blueprints = buildAllBlueprints(60);
-
-function countBy<T>(items: T[], key: (item: T) => string | null): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const item of items) {
-    const k = key(item);
-    if (k == null) continue;
-    counts.set(k, (counts.get(k) ?? 0) + 1);
-  }
-  return counts;
-}
-
-describe('blueprint determinism (§13.10 "deterministic seed")', () => {
-  it('two runs produce byte-identical blueprints', () => {
-    expect(JSON.stringify(buildAllBlueprints(60))).toBe(JSON.stringify(buildAllBlueprints(60)));
+  it('is deterministic — two runs yield byte-identical blueprints', () => {
+    expect(JSON.stringify(buildAllBlueprints())).toBe(JSON.stringify(buildAllBlueprints()));
+    expect(buildBlueprint(7)).toEqual(buildBlueprint(7));
   });
 
-  it('references are unique and stable', () => {
-    const refs = blueprints.map((b) => b.reference);
-    expect(new Set(refs).size).toBe(60);
-    expect(refs[0]).toBe('WL-SAMPLE-001');
-    expect(refs[59]).toBe('WL-SAMPLE-060');
+  it('produces 45 listings: 30 public and 15 off-market', () => {
+    expect(SAMPLE_COUNT).toBe(45);
+    expect(all).toHaveLength(45);
+    const offMarket = all.filter((b) => b.publication === 'off_market');
+    expect(offMarket).toHaveLength(15);
   });
-});
 
-describe('sample geodata stays plausible (§13.12)', () => {
-  it('coordinates stay inside their destination shoreline box', () => {
-    for (const b of blueprints) {
-      const destination = SAMPLE_DESTINATION_BY_SLUG.get(b.destinationSlug);
-      const [west, south, east, north] = destination!.bbox;
-      const [lng, lat] = b.coordinates;
-      expect(lng, b.reference).toBeGreaterThanOrEqual(west);
-      expect(lng, b.reference).toBeLessThanOrEqual(east);
-      expect(lat, b.reference).toBeGreaterThanOrEqual(south);
-      expect(lat, b.reference).toBeLessThanOrEqual(north);
-    }
-  });
-});
-
-describe('filter coverage (§13.10 "every filter returns at least three results")', () => {
-  it('covers the search-UI water bodies ≥3 each', () => {
-    const counts = countBy(blueprints, (b) => b.waterBodyType);
-    for (const water of ['sea', 'ocean', 'lake', 'river', 'canal', 'lagoon', 'fjord', 'marina_basin']) {
-      expect(counts.get(water) ?? 0, water).toBeGreaterThanOrEqual(3);
+  it('covers all eighteen §15.4 markets', () => {
+    const covered = new Set(all.map((b) => b.destinationSlug));
+    expect(covered.size).toBe(18);
+    for (const destination of SAMPLE_DESTINATIONS) {
+      expect(covered.has(destination.slug), destination.slug).toBe(true);
     }
   });
 
-  it('covers every water access type ≥3', () => {
-    const counts = new Map<string, number>();
-    for (const b of blueprints) {
-      for (const access of b.waterAccessType) {
-        counts.set(access, (counts.get(access) ?? 0) + 1);
+  it('runs €10M–€180M with EXACTLY four prime exceptions and ~20% signature', () => {
+    for (const b of all) {
+      expect(b.approxPriceEur).toBeGreaterThanOrEqual(10_000_000);
+      expect(b.approxPriceEur).toBeLessThanOrEqual(180_000_000);
+    }
+    const primes = all.filter((b) => b.primeException);
+    expect(primes).toHaveLength(4);
+    for (const prime of primes) {
+      expect(prime.approxPriceEur).toBeLessThan(20_000_000);
+      // The valve admits to the PUBLIC collection — never off-market-only.
+      expect(prime.publication).not.toBe('off_market');
+    }
+    const signature = all.filter((b) => b.approxPriceEur >= 50_000_000);
+    expect(signature.length).toBeGreaterThanOrEqual(7);
+    expect(signature.length).toBeLessThanOrEqual(11);
+    const nonPrime = all.filter((b) => !b.primeException);
+    for (const b of nonPrime) {
+      expect(b.approxPriceEur, b.reference).toBeGreaterThanOrEqual(20_000_000);
+    }
+  });
+
+  it('represents every §12.2 price disclosure mode among public listings', () => {
+    const publications = new Set(all.map((b) => b.publication));
+    expect(publications.has('published_openly')).toBe(true);
+    expect(publications.has('published_as_band')).toBe(true);
+    expect(publications.has('published_without_price')).toBe(true);
+    for (const b of all.filter((entry) => entry.publication === 'published_as_band')) {
+      expect(b.priceBandMinEur).not.toBeNull();
+      expect(b.priceBandMaxEur).not.toBeNull();
+      expect(b.priceBandMaxEur!).toBeGreaterThan(b.priceBandMinEur!);
+    }
+  });
+
+  it('keeps off-market coordinates imprecise (§8.3)', () => {
+    for (const b of all.filter((entry) => entry.publication === 'off_market')) {
+      expect(['approximate_500m', 'hidden']).toContain(b.coordinatePrecision);
+    }
+  });
+
+  it('places coordinates inside each market bounding box', () => {
+    for (const b of all) {
+      const destination = SAMPLE_DESTINATION_BY_SLUG.get(b.destinationSlug)!;
+      const [west, south, east, north] = destination.bbox;
+      expect(b.coordinates[0]).toBeGreaterThanOrEqual(west);
+      expect(b.coordinates[0]).toBeLessThanOrEqual(east);
+      expect(b.coordinates[1]).toBeGreaterThanOrEqual(south);
+      expect(b.coordinates[1]).toBeLessThanOrEqual(north);
+    }
+  });
+
+  it('generates waterfront blocks only where the market has water', () => {
+    for (const b of all) {
+      const destination = SAMPLE_DESTINATION_BY_SLUG.get(b.destinationSlug)!;
+      if (destination.waterBody == null) {
+        expect(b.waterBodyType, b.reference).toBeNull();
+        expect(b.waterFrontageM, b.reference).toBeNull();
+      }
+      if (b.maxBoatLoaM != null) {
+        expect(b.waterFrontageM, b.reference).not.toBeNull();
       }
     }
-    for (const access of [
-      'private_beach',
-      'shared_beach',
-      'direct_shore',
-      'private_dock',
-      'private_mooring',
-      'marina_berth_included',
-      'boathouse',
-      'slipway',
-      'seawall_quay',
-      'rock_platform',
-      'riparian_access',
-      'whole_island',
-    ]) {
-      expect(counts.get(access) ?? 0, access).toBeGreaterThanOrEqual(3);
-    }
   });
 
-  it('covers the headline property types ≥3', () => {
-    const counts = countBy(blueprints, (b) => b.propertyType);
-    for (const type of [
-      'villa',
-      'estate',
-      'apartment',
-      'penthouse',
-      'townhouse',
-      'chalet',
-      'farmhouse',
-      'boathouse',
-      'private_island',
-      'marina_residence',
-    ]) {
-      expect(counts.get(type) ?? 0, type).toBeGreaterThanOrEqual(3);
-    }
-  });
-
-  it('covers beach types, orientations, tenures and privacy states ≥3', () => {
-    const beaches = countBy(blueprints, (b) => b.beachType);
-    for (const beach of ['sand', 'pebble', 'rock', 'mixed']) {
-      expect(beaches.get(beach) ?? 0, beach).toBeGreaterThanOrEqual(3);
-    }
-    const orientations = countBy(blueprints, (b) => b.orientation);
-    for (const o of ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']) {
-      expect(orientations.get(o) ?? 0, o).toBeGreaterThanOrEqual(3);
-    }
-    const tenures = countBy(blueprints, (b) => b.tenure);
-    for (const tenure of ['freehold', 'leasehold', 'concession', 'fractional', 'share_transfer']) {
-      expect(tenures.get(tenure) ?? 0, tenure).toBeGreaterThanOrEqual(3);
-    }
-    expect(blueprints.filter((b) => b.coordinatePrecision === 'approximate_500m').length)
-      .toBeGreaterThanOrEqual(3);
-    expect(blueprints.filter((b) => b.status === 'under_offer').length).toBeGreaterThanOrEqual(3);
-  });
-
-  it('boat-length buckets 8/18/28/40 each fit ≥3 berths, plus bridge/open-sea variety', () => {
-    const withBerth = blueprints.filter((b) => b.maxBoatLoaM != null);
-    for (const bucket of [8, 18, 28, 40]) {
-      const fits = withBerth.filter((b) => (b.maxBoatLoaM as number) >= bucket);
-      expect(fits.length, `boatLoa=${bucket}`).toBeGreaterThanOrEqual(3);
-    }
-    expect(blueprints.filter((b) => b.navigableToOpenSea).length).toBeGreaterThanOrEqual(3);
-    expect(blueprints.filter((b) => !b.fixedBridgesToOpenSea).length).toBeGreaterThanOrEqual(3);
-    expect(blueprints.filter((b) => b.fixedBridgesToOpenSea).length).toBeGreaterThanOrEqual(3);
-  });
-
-  it('keeps ≥3 missing-frontage listings to exercise the card fallback and warning', () => {
-    expect(blueprints.filter((b) => b.waterFrontageM == null).length).toBeGreaterThanOrEqual(3);
-  });
-});
-
-describe('internally consistent economics (§13.10)', () => {
-  it('every price is positive, rounded and destination-plausible', () => {
-    for (const b of blueprints) {
-      expect(b.approxPriceEur).toBeGreaterThan(300_000);
-      expect(b.approxPriceEur).toBeLessThan(60_000_000);
-      expect(b.approxPriceEur % 50_000).toBe(0);
-      expect(b.priceAmount % 50_000).toBe(0);
-    }
-  });
-
-  it('frontage commands a premium, all else equal', () => {
-    // Same index basis, frontage nulled: recompute price factor directly.
-    const withFrontage = buildBlueprint(0);
-    expect(withFrontage.waterFrontageM).not.toBeNull();
-    // Structural check: the premium multiplier grows with frontage.
-    const richFrontage = blueprints.filter((b) => (b.waterFrontageM ?? 0) > 60);
-    const noFrontage = blueprints.filter(
-      (b) => b.waterFrontageM == null && b.destinationSlug === richFrontage[0]?.destinationSlug,
-    );
-    if (richFrontage[0] && noFrontage[0]) {
-      const perSqmRich = richFrontage[0].approxPriceEur / richFrontage[0].builtAreaSqm;
-      const perSqmNone = noFrontage[0].approxPriceEur / noFrontage[0].builtAreaSqm;
-      expect(perSqmRich).toBeGreaterThan(perSqmNone * 0.9);
-    }
-  });
-
-  it('berthed listings have coherent nautical numbers', () => {
-    for (const b of blueprints) {
-      if (b.maxBoatLoaM == null) continue;
-      expect(b.waterDepthAtBerthM).toBeGreaterThan(1);
-      expect(b.maxBoatBeamM).toBeGreaterThan(1);
-      expect(b.maxBoatBeamM as number).toBeLessThan(b.maxBoatLoaM);
-      expect(b.mooringType).not.toBeNull();
-    }
+  it('references are stable Lawrence keys', () => {
+    expect(all[0]!.reference).toBe('LPC-SAMPLE-001');
+    expect(all[44]!.reference).toBe('LPC-SAMPLE-045');
+    expect(new Set(all.map((b) => b.reference)).size).toBe(45);
   });
 });

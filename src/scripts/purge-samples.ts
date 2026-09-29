@@ -6,10 +6,10 @@ import { getPayloadClient } from '@/lib/db';
 import { SAMPLE_AGENCY_SLUG_PREFIX } from '@/lib/sample/agencies';
 
 /**
- * §13.12/§13.10 `pnpm sample:purge`: removes every sample record and its
- * media, leaving zero sample rows and zero orphan media. Real reference data
- * (destinations, water bodies) and the Prompt-10 landing-page drafts survive —
- * they are content scaffolding, not sample adverts (see DECISIONS.md).
+ * §13.12/§13.10 `pnpm sample:purge`: removes every sample record, member,
+ * media asset and activity row — listings, markets, segment pages, reports,
+ * articles, agencies, agents, requirements, saved listings and enquiries —
+ * leaving zero sample rows and zero orphan media.
  */
 export async function purgeSamples(payload: Payload): Promise<Record<string, number>> {
   const counts: Record<string, number> = {};
@@ -50,6 +50,46 @@ export async function purgeSamples(payload: Payload): Promise<Record<string, num
     counts.leads = (counts.leads ?? 0) + agencyLeads.docs.length;
   }
 
+  // Sample members and everything hanging off them (§13.12).
+  const sampleMembers = await payload.find({
+    collection: 'members',
+    where: { email: { like: '%@sample.lawrence' } },
+    limit: 100,
+    depth: 0,
+    overrideAccess: true,
+  });
+  const memberIds = sampleMembers.docs.map((member) => member.id);
+  if (memberIds.length > 0) {
+    counts.savedListings = (
+      await payload.delete({
+        collection: 'saved-listings',
+        where: { member: { in: memberIds } },
+        overrideAccess: true,
+      })
+    ).docs.length;
+    counts.requirements = (
+      await payload.delete({
+        collection: 'requirements',
+        where: { member: { in: memberIds } },
+        overrideAccess: true,
+      })
+    ).docs.length;
+    counts.activity = (
+      await payload.delete({
+        collection: 'member-activity',
+        where: { member: { in: memberIds } },
+        overrideAccess: true,
+      })
+    ).docs.length;
+    counts.members = (
+      await payload.delete({
+        collection: 'members',
+        where: { id: { in: memberIds } },
+        overrideAccess: true,
+      })
+    ).docs.length;
+  }
+
   const properties = await payload.delete({
     collection: 'properties',
     where: { isSample: { equals: true } },
@@ -82,12 +122,35 @@ export async function purgeSamples(payload: Payload): Promise<Record<string, num
     counts.agencies = agencies.docs.length;
   }
 
-  const articles = await payload.delete({
-    collection: 'articles',
-    where: { slug: { like: 'sample-article-%' } },
-    overrideAccess: true,
-  });
-  counts.articles = articles.docs.length;
+  // Sample editorial content: articles, reports, segment pages, markets.
+  counts.articles = (
+    await payload.delete({
+      collection: 'articles',
+      where: { or: [{ isSample: { equals: true } }, { slug: { like: 'sample-%' } }] },
+      overrideAccess: true,
+    })
+  ).docs.length;
+  counts.reports = (
+    await payload.delete({
+      collection: 'reports',
+      where: { isSample: { equals: true } },
+      overrideAccess: true,
+    })
+  ).docs.length;
+  counts.segmentPages = (
+    await payload.delete({
+      collection: 'segment-pages',
+      where: { isSample: { equals: true } },
+      overrideAccess: true,
+    })
+  ).docs.length;
+  counts.markets = (
+    await payload.delete({
+      collection: 'markets',
+      where: { isSample: { equals: true } },
+      overrideAccess: true,
+    })
+  ).docs.length;
 
   return counts;
 }

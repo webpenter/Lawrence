@@ -26,7 +26,7 @@ test.describe('keyboard-only browse (§15 acceptance)', () => {
 
 test.describe('keyboard-only enquiry (§15 acceptance)', () => {
   test('a keyboard user completes and submits the enquiry form', async ({ page }) => {
-    await page.goto('/en/property/sample-wl-sample-001');
+    await page.goto('/en/property/sample-lpc-sample-001');
 
     // Seed keyboard position at the first form field, then keyboard only.
     const name = page.locator('form input[name="name"]');
