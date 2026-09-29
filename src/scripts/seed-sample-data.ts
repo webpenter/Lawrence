@@ -714,6 +714,5 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   console.error('Seed failed:', err);
-  console.error('detail:', JSON.stringify((err as { data?: unknown }).data ?? {}, null, 2));
   process.exit(1);
 });

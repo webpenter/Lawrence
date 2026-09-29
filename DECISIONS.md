@@ -447,3 +447,49 @@ e2e phase7 7/7 (enquiry posts route + the 429 on the sixth), phase10+11 15/15 (b
 localised, 404; dashboard shell noindex; a11y sweep incl. keyboard-only enquiry);
 audit:exposure green; typecheck/lint clean; budgets home 109.2/110 · collection 110.9/160 ·
 listing 127.8/130 kB gz.
+
+## 2026-09-29 — Phase 12: the §13.10 Lawrence sample generator
+
+**Decision**: The generator now produces the §13.10 Lawrence dataset instead of the inherited
+waterfront one. `src/lib/sample/markets.ts` carries the eighteen §15.4 markets (Saint-Tropez →
+the Algarve) with real-geodata bounding boxes, localities, currencies and €/m² baselines —
+`waterBody` is now OPTIONAL, so inland markets (Tuscany, London, Gstaad, Courchevel, Aspen)
+generate no waterfront block at all. `economics.ts` builds 45 blueprints — 30 public and 15
+off-market (every third listing) — with the §2.2 value distribution: €10M–€180M, trophy
+dominant, ~9 signature (≥€50M), and EXACTLY four prime exceptions at fixed indices, priced
+first and areas derived so the arithmetic stays internally consistent. Every §12.2 disclosure
+mode is represented (the §8.4 publication cycles openly / as-band / without-price across the
+public rows, bands rounded to €1M), off-market rows have no slug and never-exact coordinates,
+references are `LPC-SAMPLE-###`, and the fixed seed makes two runs byte-identical.
+
+Also per §13.10: 8 fictional agencies / 16 agents covering all eighteen markets; 8 members
+across the states (six active-confirmed, one pending, one suspended) with requirements for
+three, 12 saved listings and a seeded activity trail (off-market views + document downloads,
+feeding the §9.2 demand panel); 30 segment pages generated from per-segment templates over
+the market registry; 8 published sample journal articles (the §13.7 backlog written out,
+statistics-free per §13.9); the three reports retargeted to the new markets. The six
+description-template locales were rewritten to Lawrence trophy copy — openings/titles for the
+full Lawrence type set with no water assumptions, water and nautical sentences kept but
+strictly conditional on real frontage/berth data. `sample:purge` now removes EVERYTHING
+§13.12 lists: listings, media, agencies, agents, enquiries, members and their saved
+listings/requirements/activity, and the sample markets, segment pages, reports and articles.
+
+Working notes:
+- **The §2.2 prime cap bit its own seeder**: publishing the four prime exceptions
+  mid-sequence trips the 10%-of-published check while inventory is still small. The seeder
+  now publishes the primes LAST — with 41 listings live the cap admits exactly four, and
+  idempotent re-runs stay legal. A nice accidental proof that the valve enforcement works.
+- Fixed a latent bug: the old seeder wrote `location.destination` (a field that does not
+  exist) instead of `location.market`, so public sample listings had no market relation.
+- Slug scheme moved to `sample-lpc-sample-###`; test fixtures updated across six spec files.
+- economics.test.ts rewritten to the Lawrence invariants (45/30+15/four primes/~20%
+  signature/€10–180M bounds/bbox containment/waterfront-only-where-water/determinism).
+
+**Gate evidence**: generator idempotent — first run `45 created, 0 updated`, second run
+`0 created, 45 updated`; `sample:purge` → "zero sample records remain" (18 markets, 30
+segment pages, 3 reports, 8 articles, members and engagement all removed) → reseed clean;
+reindex shows the split working (30 public / 15 member listings); no sample content indexable
+— audit:seo 0/0 with samples absent from every sitemap, sample pages noindexed (asserted in
+phase10/11 e2e); unit 294 + int 42 green; e2e phase5 5/5, member 7/7 (1 timing flake passed
+on retry), phase7 7/7, phase9 9/9, phase10 6/6, phase11 9/9; audit:exposure green over the
+15-listing off-market layer; typecheck/lint clean.
